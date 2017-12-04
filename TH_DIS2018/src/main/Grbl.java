@@ -1,6 +1,5 @@
 package main;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import processing.core.PApplet;
@@ -31,5 +30,9 @@ public class Grbl {
 	public void init() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void reserve(String strBfr) {
+		System.out.println("THREAD: " + strBfr);
 	}
 }

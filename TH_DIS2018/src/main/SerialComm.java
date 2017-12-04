@@ -31,10 +31,10 @@ public class SerialComm {
 	public StringBuffer	prtTxtBfr				= null;
 
 	public void printSerialList() {
-		prtTxtBfr.append("<SRL> PortList...").append('\n');
+		prtTxtBfr.append("<SRL>").append('\t').append("PortList...").append('\n');
 		for (int i = 0; i < Serial.list().length; i++) {
 			String portName_ = Serial.list()[i];
-			prtTxtBfr.append('\t').append("[").append(i).append("]: ").append(portName_).append('\n');
+			prtTxtBfr.append('\t').append("[").append(i).append("] ").append(portName_).append('\n');
 		}
 		System.out.print(prtTxtBfr);
 		prtTxtBfr.setLength(0);
@@ -48,7 +48,7 @@ public class SerialComm {
 					srlPort.stop();
 				srlPort = new Serial(p5, portName_, baudRate, parity, dataBits, stopBits);
 				connectTrialTimeUsec = System.nanoTime();
-				prtTxtBfr.append("<SRL> Try to connect with ").append(portName_);
+				prtTxtBfr.append("<SRL>").append('\t').append("Try to connect with ").append(portName_);
 				System.out.println(prtTxtBfr);
 				prtTxtBfr.setLength(0);
 			}
@@ -82,7 +82,7 @@ public class SerialComm {
 		boolean wasConnected_ = isConnected;
 		isConnected = false;
 		if (wasConnected_ != isConnected) {
-			prtTxtBfr.append("<SRL> Disconnected");
+			prtTxtBfr.append("<SRL>").append('\t').append("Disconnected");
 			System.out.println(prtTxtBfr);
 			prtTxtBfr.setLength(0);
 		}
@@ -120,8 +120,9 @@ public class SerialComm {
 						boolean wasConnected_ = isConnected;
 						isConnected = true;
 						if (wasConnected_ != isConnected) {
-							prtTxtBfr.append("<SRL> Connected with ").append(srlPort.port.getPortName()).append('\n');
-							prtTxtBfr.append("<GRBL> ").append(msg_);
+							prtTxtBfr.append("<SRL>").append('\t').append("Connected with ")
+									.append(srlPort.port.getPortName()).append('\n');
+							prtTxtBfr.append("<GRBL>").append('\t').append(msg_);
 							System.out.println(prtTxtBfr);
 							prtTxtBfr.setLength(0);
 						}
@@ -129,7 +130,7 @@ public class SerialComm {
 					}
 				} else {
 					grbl.read(msg_);
-					prtTxtBfr.append("<GRBL> ").append(msg_);
+					prtTxtBfr.append("<GRBL>").append('\t').append(msg_);
 					System.out.println(prtTxtBfr);
 					prtTxtBfr.setLength(0);
 				}
