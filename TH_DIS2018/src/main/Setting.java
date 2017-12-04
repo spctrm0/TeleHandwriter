@@ -15,9 +15,9 @@ public class Setting {
 
 	static int		feedRateDefault		= 120; // 60000 / 500
 
-	static float	myCalibX			= 960;
+	static float	myCalibX			= 0;
 	static float	myCalibY			= 0;
-	static float	targetCalibX		= 960;
+	static float	targetCalibX		= 0;
 	static float	targetCalibY		= 0;
 
 	static int		myTabletWidth		= 224;

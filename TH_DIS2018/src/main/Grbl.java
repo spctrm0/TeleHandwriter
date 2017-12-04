@@ -11,6 +11,7 @@ public class Grbl {
 	// settings
 	public final int	bfrSizeMx	= 128;
 
+	// parameters
 	public int			bfrSize		= 0;
 
 	// objects
@@ -33,7 +34,7 @@ public class Grbl {
 		}
 	}
 
-	public void a() {
+	public void streaming() {
 		while (bfrSize <= bfrSizeMx && revervedMsg.size() > 0) {
 			if (bfrSize + revervedMsg.get(0).length() <= bfrSizeMx) {
 				bfrSize += revervedMsg.get(0).length();
@@ -47,7 +48,9 @@ public class Grbl {
 	}
 
 	public void init() {
-
+		bfrSize = 0;
+		grblBuffer.clear();
+		revervedMsg.clear();
 	}
 
 	public void reserve(String strBfr) {

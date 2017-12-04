@@ -6,12 +6,12 @@ import processing.serial.Serial;
 
 public class TH_DIS2018 extends PApplet {
 	KeyInput	keyInput;
-	TabletInput	tabletInput;
-	OscComm		oscComm;
-	Strokes		strokes;
-	Interpreter	interpreter;
-	SerialComm	serialComm;
-	Grbl		grbl;
+	TabletInput	tabletInput;	//
+	OscComm		oscComm;		//
+	Drawing		drawing;		//
+	Interpreter	interpreter;	//
+	SerialComm	serialComm;		//
+	Grbl		grbl;			//
 
 	public void settings() {
 		fullScreen(1);
@@ -21,14 +21,14 @@ public class TH_DIS2018 extends PApplet {
 		keyInput = new KeyInput(this);
 		tabletInput = new TabletInput(this);
 		oscComm = new OscComm(this);
-		strokes = new Strokes();
+		drawing = new Drawing();
 		interpreter = new Interpreter();
 		serialComm = new SerialComm(this);
 		grbl = new Grbl();
 
 		tabletInput.setOscComm(oscComm);
-		oscComm.setStrokes(strokes);
-		interpreter.setStrokes(strokes);
+		oscComm.setDrawing(drawing);
+		interpreter.setDrawing(drawing);
 		interpreter.setGrbl(grbl);
 		serialComm.setGrbl(grbl);
 		grbl.setSerialComm(serialComm);
@@ -50,8 +50,8 @@ public class TH_DIS2018 extends PApplet {
 
 		noFill();
 		stroke(255);
-		for (int i = 0; i < strokes.strokes.size(); i++) {
-			Points stroke_ = strokes.strokes.get(i);
+		for (int i = 0; i < drawing.curves.size(); i++) {
+			Curve stroke_ = drawing.curves.get(i);
 			for (int j = 0; j < stroke_.points.size() - 1; j++) {
 				Point a_ = stroke_.points.get(j);
 				Point b_ = stroke_.points.get(j + 1);
@@ -73,36 +73,42 @@ public class TH_DIS2018 extends PApplet {
 
 	public void InterpreterThread() {
 		while (true) {
-			interpreter.pre();
+			interpreter.interpreting();
 		}
 	}
 
 	public void SerialCommThread() {
 		while (!serialComm.isConnected) {
-			serialComm.pre();
+			serialComm.connecting();
 		}
 	}
 
 	public void GrblThread() {
 		while (true) {
-			grbl.a();
+			grbl.streaming();
 		}
 	}
 
 	public void keyPressed() {
 		if (key == '~') {
-			oscComm.tryConnect();
-		} else if (key == 'c' || key == 'C') {
+			oscComm.handshake();
+		} else if (key == 'c' || key == 'C') // toggle calibration
+		{
 			tabletInput.toggleCalibrationMode();
-		} else if (key == 'i' || key == 'I') {
+		} else if (key == 'i' || key == 'I') // toggle writable
+		{
 			tabletInput.toggleWritable();
-		} else if (key == 'h' || key == 'H') {
+		} else if (key == 'h' || key == 'H') // set home
+		{
 			grbl.reserve("G92X0Y0\r");
-		} else if (key == 'q' || key == 'Q') {
+		} else if (key == 'q' || key == 'Q') // servo off
+		{
 			grbl.reserve("M3S0\r");
-		} else if (key == 'a' || key == 'A') {
+		} else if (key == 'a' || key == 'A') // servo up
+		{
 			grbl.reserve("M3S" + Setting.servoHover + "\r");
-		} else if (key == 'z' || key == 'Z') {
+		} else if (key == 'z' || key == 'Z') // servo down
+		{
 			grbl.reserve("M3S" + Setting.servoZero + "\r");
 		}
 	}

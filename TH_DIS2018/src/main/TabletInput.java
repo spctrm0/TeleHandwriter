@@ -32,17 +32,16 @@ public class TabletInput {
 					Setting.myScreenWidth = p5.width;
 					Setting.myScreenHeight = p5.height;
 				} else if (_mEvt.getAction() == MouseEvent.RELEASE) {
-					oscComm.sendCalibration(Setting.myCalibX, Setting.myCalibY, Setting.myTabletWidth,
+					oscComm.sendCalibrationMsg(Setting.myCalibX, Setting.myCalibY, Setting.myTabletWidth,
 							Setting.myTabletHeight, Setting.myScreenWidth, Setting.myScreenHeight);
 					isCalibrationMode = false;
 				}
 			} else {
 				if (isWritable) {
 					if (_mEvt.getAction() == MouseEvent.PRESS || _mEvt.getAction() == MouseEvent.DRAG
-							|| _mEvt.getAction() == MouseEvent.RELEASE) {
-						oscComm.sendPenInput(_mEvt.getAction(), tablet.getPenX(), tablet.getPenY(),
+							|| _mEvt.getAction() == MouseEvent.RELEASE)
+						oscComm.sendTabletInputMsg(_mEvt.getAction(), tablet.getPenX(), tablet.getPenY(),
 								tablet.getPressure(), tablet.getTiltX(), tablet.getTiltY(), _mEvt.getMillis());
-					}
 				}
 			}
 		}

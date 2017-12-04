@@ -8,13 +8,13 @@ import processing.core.PApplet;
 public class OscComm {
 	// references
 	public PApplet		p5					= null;
-	public Strokes		strokes				= null;
+	public Drawing		drawing				= null;
 
 	// settings
 	public final String	addrPtrnRequest		= "request";
 	public final String	addrPtrnReply		= "reply";
 	public final String	addrPtrnDisconnect	= "disconnect";
-	public final String	addrPtrnPenInput	= "penInput";
+	public final String	addrPtrnTabletInput	= "tabletInput";
 	public final String	addrPtrnCalibration	= "calibration";
 
 	// parameters
@@ -29,7 +29,7 @@ public class OscComm {
 	// buffers
 	public StringBuffer	prtTxtBfr			= null;
 
-	public void sendHandshake(String _addrPattern) {
+	public void sendConnectionMsg(String _addrPattern) {
 		msg.clear();
 		msg.setAddrPattern(_addrPattern);
 		msg.add(oscPort.ip()).add(Setting.myPort);
@@ -39,11 +39,11 @@ public class OscComm {
 	public void toggleConnect(boolean _isConnected) {
 		if (isConnected != _isConnected) {
 			isConnected = _isConnected;
-			if (isConnected) {
+			if (isConnected)
 				prtTxtBfr.append("<OSC>").append('\t').append("Connected with ").append(Setting.targetIp).append(":")
 						.append(Setting.targetPort);
-			} else {
-				sendHandshake(addrPtrnDisconnect);
+			else {
+				sendConnectionMsg(addrPtrnDisconnect);
 				prtTxtBfr.append("<OSC>").append('\t').append("Disconnected");
 			}
 			System.out.println(prtTxtBfr);
@@ -90,13 +90,13 @@ public class OscComm {
 		setTargetAddr();
 	}
 
-	public void setStrokes(Strokes _strokes) {
-		strokes = _strokes;
+	public void setDrawing(Drawing _drawing) {
+		drawing = _drawing;
 	}
 
-	public void tryConnect() {
+	public void handshake() {
 		toggleConnect(false);
-		sendHandshake(addrPtrnRequest);
+		sendConnectionMsg(addrPtrnRequest);
 		prtTxtBfr.append("<OSC>").append('\t').append("Try to connect with ").append(Setting.targetIp).append(":")
 				.append(Setting.targetPort);
 		System.out.println(prtTxtBfr);
@@ -109,7 +109,7 @@ public class OscComm {
 					.append(_oscMsg.get(0).stringValue()).append(":").append(_oscMsg.get(1).intValue());
 			System.out.println(prtTxtBfr);
 			prtTxtBfr.setLength(0);
-			sendHandshake(addrPtrnReply);
+			sendConnectionMsg(addrPtrnReply);
 			toggleConnect(true);
 		} else if (_oscMsg.addrPattern().equals(addrPtrnReply)) {
 			if (_oscMsg.get(0).stringValue().equals(Setting.targetIp)
@@ -134,28 +134,42 @@ public class OscComm {
 			Setting.targetTabletHeight = _oscMsg.get(3).intValue();
 			Setting.targetScreentWidth = _oscMsg.get(4).intValue();
 			Setting.targetScreenHeight = _oscMsg.get(5).intValue();
-		} else if (_oscMsg.addrPattern().equals(addrPtrnPenInput)) {
+		} else if (_oscMsg.addrPattern().equals(addrPtrnTabletInput)) {
 			switch (_oscMsg.get(0).intValue()) {
 			case 1: // Press
-				strokes.addStroke(_oscMsg.get(1).floatValue(), _oscMsg.get(2).floatValue(), _oscMsg.get(3).floatValue(),
+				drawing.addStroke(_oscMsg.get(1).floatValue(), _oscMsg.get(2).floatValue(), _oscMsg.get(3).floatValue(),
 						_oscMsg.get(4).floatValue(), _oscMsg.get(5).floatValue(),
 						Long.parseLong(_oscMsg.get(6).stringValue()));
 				break;
 			case 4: // Drag
-				strokes.addPoint(_oscMsg.get(1).floatValue(), _oscMsg.get(2).floatValue(), _oscMsg.get(3).floatValue(),
+				drawing.addPoint(_oscMsg.get(1).floatValue(), _oscMsg.get(2).floatValue(), _oscMsg.get(3).floatValue(),
 						_oscMsg.get(4).floatValue(), _oscMsg.get(5).floatValue(),
-						Long.parseLong(_oscMsg.get(6).stringValue()));
+						Long.parseLong(_oscMsg.get(6).stringValue()), false);
 				break;
 			case 2: // Release
-				strokes.addLastPoint(_oscMsg.get(1).floatValue(), _oscMsg.get(2).floatValue(),
-						_oscMsg.get(3).floatValue(), _oscMsg.get(4).floatValue(), _oscMsg.get(5).floatValue(),
-						Long.parseLong(_oscMsg.get(6).stringValue()));
+				drawing.addPoint(_oscMsg.get(1).floatValue(), _oscMsg.get(2).floatValue(), _oscMsg.get(3).floatValue(),
+						_oscMsg.get(4).floatValue(), _oscMsg.get(5).floatValue(),
+						Long.parseLong(_oscMsg.get(6).stringValue()), true);
 				break;
 			}
 		}
 	}
 
-	public void sendCalibration(float _penX, float _penY, int _tabletWidth, int _tabletHeight, int _screenWidth,
+	public void sendTabletInputMsg(int _action, float _penX, float _penY, float _pressure, float _tiltX, float _tiltY,
+			long _millis) {
+		msg.clear();
+		msg.setAddrPattern(addrPtrnTabletInput);
+		msg.add(_action);
+		msg.add(_penX);
+		msg.add(_penY);
+		msg.add(_pressure);
+		msg.add(_tiltX);
+		msg.add(_tiltY);
+		msg.add(Long.toString(_millis));
+		oscPort.send(msg, targetAddr);
+	}
+
+	public void sendCalibrationMsg(float _penX, float _penY, int _tabletWidth, int _tabletHeight, int _screenWidth,
 			int _screenHeight) {
 		msg.clear();
 		msg.setAddrPattern(addrPtrnCalibration);
@@ -165,20 +179,6 @@ public class OscComm {
 		msg.add(_tabletHeight);
 		msg.add(_screenWidth);
 		msg.add(_screenHeight);
-		oscPort.send(msg, targetAddr);
-	}
-
-	public void sendPenInput(int _action, float _penX, float _penY, float _pressure, float _tiltX, float _tiltY,
-			long _millis) {
-		msg.clear();
-		msg.setAddrPattern(addrPtrnPenInput);
-		msg.add(_action);
-		msg.add(_penX);
-		msg.add(_penY);
-		msg.add(_pressure);
-		msg.add(_tiltX);
-		msg.add(_tiltY);
-		msg.add(Long.toString(_millis));
 		oscPort.send(msg, targetAddr);
 	}
 }
