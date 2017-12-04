@@ -31,11 +31,13 @@ public class TH_DIS2018 extends PApplet {
 		interpreter.setStrokes(strokes);
 		interpreter.setGrbl(grbl);
 		serialComm.setGrbl(grbl);
+		grbl.setSerialComm(serialComm);
 
 		textAlign(CENTER);
 
 		thread("InterpreterThread");
 		thread("SerialCommThread");
+		thread("GrblThread");
 	}
 
 	public void draw() {
@@ -81,6 +83,12 @@ public class TH_DIS2018 extends PApplet {
 		}
 	}
 
+	public void GrblThread() {
+		while (true) {
+			grbl.a();
+		}
+	}
+
 	public void keyPressed() {
 		if (key == '~') {
 			oscComm.tryConnect();
@@ -88,6 +96,14 @@ public class TH_DIS2018 extends PApplet {
 			tabletInput.toggleCalibrationMode();
 		} else if (key == 'i' || key == 'I') {
 			tabletInput.toggleWritable();
+		} else if (key == 'h' || key == 'H') {
+			grbl.reserve("G92X0Y0\r");
+		} else if (key == 'q' || key == 'Q') {
+			grbl.reserve("M3S0\r");
+		} else if (key == 'a' || key == 'A') {
+			grbl.reserve("M3S" + Setting.servoHover + "\r");
+		} else if (key == 'z' || key == 'Z') {
+			grbl.reserve("M3S" + Setting.servoZero + "\r");
 		}
 	}
 

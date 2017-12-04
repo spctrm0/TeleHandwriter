@@ -61,7 +61,7 @@ public class Interpreter {
 				grbl.reserve(strBfr.toString());
 				strBfr.setLength(0);
 
-				strBfr.append("M3").append("S").append(Setting.servoZero);
+				strBfr.append("M3").append("S").append(Setting.servoZero).append('\r');
 				grbl.reserve(strBfr.toString());
 				strBfr.setLength(0);
 			} else {
@@ -71,7 +71,7 @@ public class Interpreter {
 				grbl.reserve(strBfr.toString());
 				strBfr.setLength(0);
 				if (b_.isTail) {
-					strBfr.append("M3").append("S").append(Setting.servoHover);
+					strBfr.append("M3").append("S").append(Setting.servoHover).append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
 				}

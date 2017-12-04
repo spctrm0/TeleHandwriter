@@ -10,8 +10,8 @@ public class Setting {
 	static boolean	isXInverted			= true;
 	static boolean	isYInverted			= false;
 
-	static int		servoHover			= 255;
-	static int		servoZero			= 127;
+	static int		servoHover			= 96;
+	static int		servoZero			= 63;
 
 	static int		feedRateDefault		= 120; // 60000 / 500
 
