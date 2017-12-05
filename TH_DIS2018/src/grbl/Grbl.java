@@ -11,6 +11,9 @@ public class Grbl {
 
 	public int			bfrSize		= 0;
 
+	public boolean		isIdle		= true;
+	public boolean		modeSeeking	= false;;
+
 	public List<String>	receivedMsg	= null;
 	public List<String>	grblBfr		= null;
 	public List<String>	revervedMsg	= null;
@@ -35,15 +38,53 @@ public class Grbl {
 
 	public void streaming() {
 		while (bfrSize <= bfrSizeMx && revervedMsg.size() > 0) {
-			if (bfrSize + revervedMsg.get(0).length() <= bfrSizeMx) {
-				bfrSize += revervedMsg.get(0).length();
-				grblBfr.add(revervedMsg.get(0).toString());
-				serialComm.write(revervedMsg.get(0));
-				revervedMsg.remove(0);
+			if (isIdle) {
+				if (bfrSize + revervedMsg.get(0).length() <= bfrSizeMx) {
+					bfrSize += revervedMsg.get(0).length();
+					grblBfr.add(revervedMsg.get(0).toString());
+					if (isMotionCmd(revervedMsg.get(0)))
+						isIdle = false;
+					serialComm.write(revervedMsg.get(0));
+					revervedMsg.remove(0);
+				} else
+					break;
 			} else {
-				break;
+				if (isServoCmd(revervedMsg.get(0))) {
+					if (bfrSize + 2 <= bfrSizeMx) {
+						bfrSize += 2;
+						grblBfr.add("?\r");
+						serialComm.write("?\r");
+					} else
+						break;
+				} else {
+					if (bfrSize + revervedMsg.get(0).length() <= bfrSizeMx) {
+						bfrSize += revervedMsg.get(0).length();
+						grblBfr.add(revervedMsg.get(0).toString());
+						serialComm.write(revervedMsg.get(0));
+						revervedMsg.remove(0);
+					} else
+						break;
+				}
 			}
 		}
+	}
+
+	public boolean isMotionCmd(String _cmd) {
+		if (_cmd.length() >= 2)
+			return _cmd.substring(0, 2).equals("G1");
+		return false;
+	}
+
+	public boolean isServoCmd(String _cmd) {
+		if (_cmd.length() >= 2)
+			return _cmd.substring(0, 2).equals("M3");
+		return false;
+	}
+
+	public boolean isStatusReportCmd(String _cmd) {
+		if (_cmd.length() >= 2)
+			return _cmd.equals("?\r");
+		return false;
 	}
 
 	public void init() {
@@ -54,16 +95,25 @@ public class Grbl {
 
 	public void read(String _msg) {
 		if (_msg.equals("ok") || _msg.contains("error:")) {
+			if (isStatusReportCmd(grblBfr.get(0))) {
+				for (String receivedMsg_ : receivedMsg) {
+					if (receivedMsg_.contains("Idle")) {
+						isIdle = true;
+						break;
+					}
+				}
+				// prtTxtBfr.append("<MSG>").append('\t').append("Received
+				// msg...").append('\n');
+				// for (int i = 0; i < receivedMsg.size(); i++) {
+				// String receivedMsg_ = receivedMsg.get(i);
+				// prtTxtBfr.append('\t').append(receivedMsg_).append('\n');
+				// }
+				// System.out.println(prtTxtBfr);
+				// prtTxtBfr.setLength(0);
+				// receivedMsg.clear();
+			}
 			bfrSize -= grblBfr.get(0).length();
 			grblBfr.remove(0);
-			prtTxtBfr.append("<MSG>").append('\t').append("Received msg...").append('\n');
-			for (int i = 0; i < receivedMsg.size(); i++) {
-				String receivedMsg_ = receivedMsg.get(i);
-				prtTxtBfr.append('\t').append(receivedMsg_);
-			}
-			System.out.println(prtTxtBfr);
-			prtTxtBfr.setLength(0);
-			receivedMsg.clear();
 		} else {
 			receivedMsg.add(_msg);
 		}

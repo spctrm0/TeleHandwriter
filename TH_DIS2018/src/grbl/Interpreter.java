@@ -72,7 +72,8 @@ public class Interpreter {
 				strBfr.setLength(0);
 			}
 
-			strBfr.append("X").append(String.format("%.3f", Setting.isXInverted ? -bX_ : bX_))//
+			strBfr.append("G1")//
+					.append("X").append(String.format("%.3f", Setting.isXInverted ? -bX_ : bX_))//
 					.append("Y").append(String.format("%.3f", Setting.isYInverted ? -bY_ : bY_))//
 					.append("F").append(String.format("%.3f", f_))//
 					.append('\r');

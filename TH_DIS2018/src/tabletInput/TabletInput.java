@@ -9,7 +9,6 @@ import processing.core.PApplet;
 import processing.event.MouseEvent;
 
 public class TabletInput {
-	// references
 	public PApplet					p5				= null;
 	public Tablet					tablet;
 

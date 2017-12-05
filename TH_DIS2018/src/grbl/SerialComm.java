@@ -9,7 +9,7 @@ import processing.serial.Serial;
 public class SerialComm {
 	public PApplet		p5						= null;
 	public Grbl			grbl					= null;
-	
+
 	public final int	connectIntervalMsec		= 2000;
 	public final int	baudRate				= 250000;
 	public final char	parity					= 'n';
@@ -125,9 +125,9 @@ public class SerialComm {
 					}
 				} else {
 					grbl.read(msg_);
-					prtTxtBfr.append("<GRBL>").append('\t').append(msg_);
-					System.out.println(prtTxtBfr);
-					prtTxtBfr.setLength(0);
+					// prtTxtBfr.append("<GRBL>").append('\t').append(msg_);
+					// System.out.println(prtTxtBfr);
+					// prtTxtBfr.setLength(0);
 				}
 			}
 			charToStrBfr.setLength(0);
