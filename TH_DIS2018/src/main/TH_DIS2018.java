@@ -1,17 +1,26 @@
 package main;
 
+import drawing.Stroke;
+import grbl.Grbl;
+import grbl.Interpreter;
+import grbl.SerialComm;
+import drawing.Drawing;
+import drawing.Point;
+import oscComm.OscComm;
 import oscP5.OscMessage;
 import processing.core.PApplet;
 import processing.serial.Serial;
+import tabletInput.TabletInput;
 
 public class TH_DIS2018 extends PApplet {
 	KeyInput	keyInput;
+
 	TabletInput	tabletInput;	//
 	OscComm		oscComm;		//
 	Drawing		drawing;		//
 	Interpreter	interpreter;	//
-	SerialComm	serialComm;		//
 	Grbl		grbl;			//
+	SerialComm	serialComm;		//
 
 	public void settings() {
 		fullScreen(1);
@@ -19,22 +28,25 @@ public class TH_DIS2018 extends PApplet {
 
 	public void setup() {
 		keyInput = new KeyInput(this);
+
 		tabletInput = new TabletInput(this);
 		oscComm = new OscComm(this);
 		drawing = new Drawing();
 		interpreter = new Interpreter();
-		serialComm = new SerialComm(this);
 		grbl = new Grbl();
+		serialComm = new SerialComm(this);
 
-		tabletInput.setOscComm(oscComm);
+		oscComm.setTabletInput(tabletInput);
 		oscComm.setDrawing(drawing);
+
 		interpreter.setDrawing(drawing);
 		interpreter.setGrbl(grbl);
+
 		serialComm.setGrbl(grbl);
+
 		grbl.setSerialComm(serialComm);
 
-		textAlign(CENTER);
-
+		thread("OscCommThread");
 		thread("InterpreterThread");
 		thread("SerialCommThread");
 		thread("GrblThread");
@@ -42,24 +54,27 @@ public class TH_DIS2018 extends PApplet {
 
 	public void draw() {
 		background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255,
-				(!tabletInput.isCalibrationMode && tabletInput.isWritable) ? 0 : 255);
-
-		noStroke();
-		fill(255);
-		text(keyInput.charToStrBfr.toString(), width / 2.0f, height / 2.0f);
+				(!tabletInput.modeCalibration && tabletInput.modeWritable) ? 0 : 255);
 
 		noFill();
 		stroke(255);
-		for (int i = 0; i < drawing.curves.size(); i++) {
-			Curve stroke_ = drawing.curves.get(i);
+		for (int i = 0; i < drawing.strokes.size(); i++) {
+			Stroke stroke_ = drawing.strokes.get(i);
 			for (int j = 0; j < stroke_.points.size() - 1; j++) {
 				Point a_ = stroke_.points.get(j);
 				Point b_ = stroke_.points.get(j + 1);
 				line(a_.penX, a_.penY, b_.penX, b_.penY);
 			}
 		}
-		// System.out.println(strokes.strokes.size() + ", " +
-		// strokes.strokes.get(strokes.strokes.size() - 1).points.size());
+	}
+
+	public void exit() {
+		println("a");
+		super.exit();
+	}
+
+	public void oscEvent(OscMessage _oscMsg) {
+		oscComm.receive(_oscMsg);
 	}
 
 	public void serialEvent(Serial _serialEvt) {
@@ -67,40 +82,44 @@ public class TH_DIS2018 extends PApplet {
 		serialComm.read(replyChar_);
 	}
 
-	public void oscEvent(OscMessage _oscMsg) {
-		oscComm.receive(_oscMsg);
+	public void OscCommThread() {
+		while (true) {
+			oscComm.thread();
+		}
 	}
 
 	public void InterpreterThread() {
 		while (true) {
-			interpreter.interpreting();
-		}
-	}
-
-	public void SerialCommThread() {
-		while (!serialComm.isConnected) {
-			serialComm.connecting();
+			interpreter.thread();
 		}
 	}
 
 	public void GrblThread() {
 		while (true) {
-			grbl.streaming();
+			grbl.thread();
+		}
+	}
+
+	public void SerialCommThread() {
+		while (!serialComm.isConnected) {
+			serialComm.thread();
 		}
 	}
 
 	public void keyPressed() {
 		if (key == '~') {
-			oscComm.handshake();
+			oscComm.tryToConnect();
 		} else if (key == 'c' || key == 'C') // toggle calibration
 		{
-			tabletInput.toggleCalibrationMode();
+			tabletInput.toggleCalibration();
 		} else if (key == 'i' || key == 'I') // toggle writable
 		{
 			tabletInput.toggleWritable();
 		} else if (key == 'h' || key == 'H') // set home
 		{
 			grbl.reserve("G92X0Y0\r");
+			grbl.reserve("G90\r");
+			grbl.reserve("G93\r");
 		} else if (key == 'q' || key == 'Q') // servo off
 		{
 			grbl.reserve("M3S0\r");
