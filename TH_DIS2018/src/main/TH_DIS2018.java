@@ -4,15 +4,21 @@ import drawing.Stroke;
 import grbl.Grbl;
 import grbl.Interpreter;
 import grbl.SerialComm;
+
+import java.util.Calendar;
+
 import drawing.Drawing;
 import drawing.Point;
 import oscComm.OscComm;
 import oscP5.OscMessage;
 import processing.core.PApplet;
+import processing.data.Table;
 import processing.serial.Serial;
 import tabletInput.TabletInput;
 
 public class TH_DIS2018 extends PApplet {
+	Table		table;
+
 	KeyInput	keyInput;
 
 	TabletInput	tabletInput;	//
@@ -27,6 +33,15 @@ public class TH_DIS2018 extends PApplet {
 	}
 
 	public void setup() {
+		table = new Table();
+		table.addColumn("strokeIdx");
+		table.addColumn("penX");
+		table.addColumn("penY");
+		table.addColumn("pressure");
+		table.addColumn("tiltX");
+		table.addColumn("tiltY");
+		table.addColumn("millis");
+
 		keyInput = new KeyInput(this);
 
 		tabletInput = new TabletInput(this);
@@ -41,6 +56,7 @@ public class TH_DIS2018 extends PApplet {
 
 		interpreter.setDrawing(drawing);
 		interpreter.setGrbl(grbl);
+		interpreter.setTable(table);
 
 		serialComm.setGrbl(grbl);
 
@@ -69,7 +85,7 @@ public class TH_DIS2018 extends PApplet {
 	}
 
 	public void exit() {
-		println("a");
+		saveTable(table, "tabletInputLogs\\" + timestamp() + ".csv");
 		super.exit();
 	}
 
@@ -138,5 +154,10 @@ public class TH_DIS2018 extends PApplet {
 			PApplet.main(concat(appletArgs, passedArgs));
 		else
 			PApplet.main(appletArgs);
+	}
+
+	String timestamp() {
+		Calendar now = Calendar.getInstance();
+		return String.format("%1$ty%1$tm%1$td_%1$tH%1$tM%1$tS", now);
 	}
 }

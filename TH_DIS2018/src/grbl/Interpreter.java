@@ -2,12 +2,15 @@ package grbl;
 
 import drawing.Stroke;
 import main.Setting;
+import processing.data.Table;
+import processing.data.TableRow;
 import drawing.Drawing;
 import drawing.Point;
 
 public class Interpreter {
 	Drawing			drawing	= null;
 	Grbl			grbl	= null;
+	Table			table	= null;
 
 	StringBuffer	strBfr	= null;
 
@@ -17,6 +20,10 @@ public class Interpreter {
 
 	public void setGrbl(Grbl _grbl) {
 		grbl = _grbl;
+	}
+
+	public void setTable(Table _table) {
+		table = _table;
 	}
 
 	public Interpreter() {
@@ -78,10 +85,28 @@ public class Interpreter {
 				strBfr.setLength(0);
 			}
 
+			logTable(a_.strokeIdx, a_.penX, a_.penY, a_.pressure, a_.tiltX, a_.tiltY, a_.millis);
+
 			_stroke.removeFirst();
 		}
 		while (_stroke.getSize() > 0) {
+			logTable(_stroke.getFirst().strokeIdx, _stroke.getFirst().penX, _stroke.getFirst().penY,
+					_stroke.getFirst().pressure, _stroke.getFirst().tiltX, _stroke.getFirst().tiltY,
+					_stroke.getFirst().millis);
+
 			_stroke.removeFirst();
 		}
+	}
+
+	public void logTable(int _strokeIdx, float _penX, float _penY, float _pressure, float _tiltX, float _tiltY,
+			long _millis) {
+		TableRow newRow_ = table.addRow();
+		newRow_.setInt("strokeIdx", _strokeIdx);
+		newRow_.setFloat("penX", _penX);
+		newRow_.setFloat("penY", _penY);
+		newRow_.setFloat("pressure", _pressure);
+		newRow_.setFloat("tiltX", _tiltX);
+		newRow_.setFloat("tiltY", _tiltY);
+		newRow_.setString("millis", String.valueOf(_millis));
 	}
 }

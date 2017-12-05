@@ -47,7 +47,6 @@ public class OscComm {
 
 		openPort();
 		setTargetAddr();
-		tryToConnect();
 	}
 
 	public void thread() {
