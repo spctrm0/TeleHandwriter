@@ -28,6 +28,8 @@ public class TH_DIS2018 extends PApplet {
 	Grbl		grbl;			//
 	SerialComm	serialComm;		//
 
+	int			acc	= 60000;
+
 	public void settings() {
 		fullScreen(1);
 	}
@@ -145,6 +147,16 @@ public class TH_DIS2018 extends PApplet {
 		} else if (key == 'z' || key == 'Z') // servo down
 		{
 			grbl.reserve("M3S" + Setting.servoZero + "\r");
+		} else if (keyCode == UP) {
+			acc += 50;
+			System.out.println(acc);
+			grbl.reserve("$120=" + acc + "\r");
+			grbl.reserve("$121=" + acc + "\r");
+		} else if (keyCode == DOWN) {
+			acc -= 50;
+			System.out.println(acc);
+			grbl.reserve("$120=" + acc + "\r");
+			grbl.reserve("$121=" + acc + "\r");
 		}
 	}
 
