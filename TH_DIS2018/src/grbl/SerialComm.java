@@ -10,7 +10,7 @@ public class SerialComm {
 	public PApplet		p5						= null;
 	public Grbl			grbl					= null;
 
-	public final int	connectIntervalMsec		= 2000;
+	public final int	connectIntervalMsec		= 3000;
 	public final int	baudRate				= 250000;
 	public final char	parity					= 'n';
 	public final int	dataBits				= 8;
@@ -41,27 +41,26 @@ public class SerialComm {
 		printSerialList();
 	}
 
-	public void thread() {
-		connecting(connectIntervalMsec);
+	public void dispose() {
+		if (srlPort != null)
+			disconnect();
 	}
 
-	public void connect(int _portIdx) {
-		if (!isConnected) {
-			if (Serial.list().length > 0 && _portIdx < Serial.list().length) {
-				String portName_ = Serial.list()[_portIdx];
-				if (srlPort != null)
-					srlPort.stop();
-				srlPort = new Serial(p5, portName_, baudRate, parity, dataBits, stopBits);
-				connectTrialTimeUsec = System.nanoTime();
-				prtTxtBfr.append("<SRL>").append('\t').append("Try to connect with ").append(portName_);
-				System.out.println(prtTxtBfr);
-				prtTxtBfr.setLength(0);
-			}
+	public void disconnect() {
+		srlPort.stop();
+		srlPort = null;
+		boolean wasConnected_ = isConnected;
+		isConnected = false;
+		if (wasConnected_ != isConnected) {
+			prtTxtBfr.append("<SRL>").append('\t').append("Disconnected");
+			System.out.println(prtTxtBfr.toString());
+			prtTxtBfr.setLength(0);
 		}
 	}
 
-	public long getWaitingTimeMsec() {
-		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - connectTrialTimeUsec);
+	public void thread() {
+		if (!isConnected)
+			connecting(connectIntervalMsec);
 	}
 
 	public void connecting(int _tryIntervalMsec) {
@@ -77,20 +76,22 @@ public class SerialComm {
 		}
 	}
 
-	public void dispose() {
-		if (srlPort != null)
-			disconnect();
+	public long getWaitingTimeMsec() {
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - connectTrialTimeUsec);
 	}
 
-	public void disconnect() {
-		srlPort.stop();
-		srlPort = null;
-		boolean wasConnected_ = isConnected;
-		isConnected = false;
-		if (wasConnected_ != isConnected) {
-			prtTxtBfr.append("<SRL>").append('\t').append("Disconnected");
-			System.out.println(prtTxtBfr);
-			prtTxtBfr.setLength(0);
+	public void connect(int _portIdx) {
+		if (!isConnected) {
+			if (Serial.list().length > 0 && _portIdx < Serial.list().length) {
+				String portName_ = Serial.list()[_portIdx];
+				if (srlPort != null)
+					srlPort.stop();
+				srlPort = new Serial(p5, portName_, baudRate, parity, dataBits, stopBits);
+				connectTrialTimeUsec = System.nanoTime();
+				prtTxtBfr.append("<SRL>").append('\t').append("Try to connect with ").append(portName_);
+				System.out.println(prtTxtBfr.toString());
+				prtTxtBfr.setLength(0);
+			}
 		}
 	}
 
@@ -100,7 +101,7 @@ public class SerialComm {
 			String portName_ = Serial.list()[i];
 			prtTxtBfr.append('\t').append("[").append(i).append("] ").append(portName_).append('\n');
 		}
-		System.out.print(prtTxtBfr);
+		System.out.print(prtTxtBfr.toString());
 		prtTxtBfr.setLength(0);
 	}
 
@@ -118,17 +119,13 @@ public class SerialComm {
 							prtTxtBfr.append("<SRL>").append('\t').append("Connected with ")
 									.append(srlPort.port.getPortName()).append('\n');
 							prtTxtBfr.append("<GRBL>").append('\t').append(msg_);
-							System.out.println(prtTxtBfr);
+							System.out.println(prtTxtBfr.toString());
 							prtTxtBfr.setLength(0);
 						}
 						grbl.init();
 					}
-				} else {
+				} else 
 					grbl.read(msg_);
-					// prtTxtBfr.append("<GRBL>").append('\t').append(msg_);
-					// System.out.println(prtTxtBfr);
-					// prtTxtBfr.setLength(0);
-				}
 			}
 			charToStrBfr.setLength(0);
 		}

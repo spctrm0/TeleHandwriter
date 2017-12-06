@@ -66,8 +66,8 @@ public class TH_DIS2018 extends PApplet {
 
 		thread("OscCommThread");
 		thread("InterpreterThread");
-		thread("SerialCommThread");
 		thread("GrblThread");
+		thread("SerialCommThread");
 	}
 
 	public void draw() {
@@ -119,9 +119,8 @@ public class TH_DIS2018 extends PApplet {
 	}
 
 	public void SerialCommThread() {
-		while (!serialComm.isConnected) {
+		while (!serialComm.isConnected)
 			serialComm.thread();
-		}
 	}
 
 	public void keyPressed() {
@@ -138,17 +137,28 @@ public class TH_DIS2018 extends PApplet {
 			grbl.reserve("G92X0Y0\r");
 			grbl.reserve("G90\r");
 			grbl.reserve("G93\r");
-		} else if (key == 'q' || key == 'Q') // servo off
+		} else if (key == '?') // set home
+		{
+			grbl.reserve("$$\r");
+		} else if (key == 'x' || key == 'X') // servo off
 		{
 			grbl.reserve("M3S0\r");
-		} else if (key == 'a' || key == 'A') // servo up
+		} else if (key == 'w' || key == 'W') // servo up
 		{
 			grbl.reserve("M3S" + Setting.servoHover + "\r");
-		} else if (key == 'z' || key == 'Z') // servo down
+		} else if (key == 's' || key == 'S') // servo down
 		{
 			grbl.reserve("M3S" + Setting.servoZero + "\r");
 		} else if (keyCode == UP) {
 			acc += 50;
+			System.out.println(acc);
+			grbl.reserve("$120=" + acc + "\r");
+			grbl.reserve("$121=" + acc + "\r");
+		}
+
+		else if (keyCode == UP) {
+			acc += 50;
+			acc = 120000;
 			System.out.println(acc);
 			grbl.reserve("$120=" + acc + "\r");
 			grbl.reserve("$121=" + acc + "\r");

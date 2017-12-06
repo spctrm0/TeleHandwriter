@@ -12,7 +12,6 @@ public class Grbl {
 	public int			bfrSize		= 0;
 
 	public boolean		isIdle		= true;
-	public boolean		modeSeeking	= false;;
 
 	public List<String>	receivedMsg	= null;
 	public List<String>	grblBfr		= null;
@@ -37,7 +36,7 @@ public class Grbl {
 	}
 
 	public void streaming() {
-		while (bfrSize <= bfrSizeMx && revervedMsg.size() > 0) {
+		if (bfrSize <= bfrSizeMx && revervedMsg.size() > 0) {
 			if (isIdle) {
 				if (bfrSize + revervedMsg.get(0).length() <= bfrSizeMx) {
 					bfrSize += revervedMsg.get(0).length();
@@ -46,24 +45,21 @@ public class Grbl {
 						isIdle = false;
 					serialComm.write(revervedMsg.get(0));
 					revervedMsg.remove(0);
-				} else
-					break;
+				}
 			} else {
 				if (isServoCmd(revervedMsg.get(0))) {
 					if (bfrSize + 2 <= bfrSizeMx) {
 						bfrSize += 2;
 						grblBfr.add("?\r");
 						serialComm.write("?\r");
-					} else
-						break;
+					}
 				} else {
 					if (bfrSize + revervedMsg.get(0).length() <= bfrSizeMx) {
 						bfrSize += revervedMsg.get(0).length();
 						grblBfr.add(revervedMsg.get(0).toString());
 						serialComm.write(revervedMsg.get(0));
 						revervedMsg.remove(0);
-					} else
-						break;
+					}
 				}
 			}
 		}
@@ -102,21 +98,17 @@ public class Grbl {
 						break;
 					}
 				}
-				// prtTxtBfr.append("<MSG>").append('\t').append("Received
-				// msg...").append('\n');
-				// for (int i = 0; i < receivedMsg.size(); i++) {
-				// String receivedMsg_ = receivedMsg.get(i);
-				// prtTxtBfr.append('\t').append(receivedMsg_).append('\n');
-				// }
-				// System.out.println(prtTxtBfr);
-				// prtTxtBfr.setLength(0);
-				// receivedMsg.clear();
 			}
+//			prtTxtBfr.append("<MSG>").append('\t').append("Received msg...").append('\n');
+//			for (String receivedMsg_ : receivedMsg)
+//				prtTxtBfr.append('\t').append(receivedMsg_).append('\n');
+//			System.out.println(prtTxtBfr);
+//			prtTxtBfr.setLength(0);
+//			receivedMsg.clear();
 			bfrSize -= grblBfr.get(0).length();
 			grblBfr.remove(0);
-		} else {
+		} else
 			receivedMsg.add(_msg);
-		}
 	}
 
 	public void reserve(String strBfr) {
