@@ -99,12 +99,12 @@ public class Grbl {
 					}
 				}
 			}
-//			prtTxtBfr.append("<MSG>").append('\t').append("Received msg...").append('\n');
-//			for (String receivedMsg_ : receivedMsg)
-//				prtTxtBfr.append('\t').append(receivedMsg_).append('\n');
-//			System.out.println(prtTxtBfr);
-//			prtTxtBfr.setLength(0);
-//			receivedMsg.clear();
+			prtTxtBfr.append("<MSG>").append('\t').append("Received msg...").append('\n');
+			for (String receivedMsg_ : receivedMsg)
+				prtTxtBfr.append('\t').append(receivedMsg_).append('\n');
+			System.out.println(prtTxtBfr);
+			prtTxtBfr.setLength(0);
+			receivedMsg.clear();
 			bfrSize -= grblBfr.get(0).length();
 			grblBfr.remove(0);
 		} else
