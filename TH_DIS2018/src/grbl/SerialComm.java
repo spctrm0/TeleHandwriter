@@ -33,12 +33,46 @@ public class SerialComm {
 	public SerialComm(PApplet _p5) {
 		p5 = _p5;
 
+		p5.registerMethod("pre", this);
 		p5.registerMethod("dispose", this);
 
 		charToStrBfr = new StringBuffer();
 		prtTxtBfr = new StringBuffer();
 
 		printSerialList();
+	}
+
+	public void pre() {
+		if (!isConnected)
+			connecting(connectIntervalMsec);
+	}
+
+	public void connecting(int _tryIntervalMsec) {
+		if (getWaitingTimeMsec() >= _tryIntervalMsec) {
+			if (Serial.list().length > 0) {
+				portIdx++;
+				if (portIdx >= Serial.list().length)
+					portIdx = 0;
+				connect(portIdx);
+			}
+		}
+	}
+
+	public long getWaitingTimeMsec() {
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - connectTrialTimeUsec);
+	}
+
+	public void connect(int _portIdx) {
+		if (Serial.list().length > 0 && _portIdx < Serial.list().length) {
+			String portName_ = Serial.list()[_portIdx];
+			if (srlPort != null)
+				srlPort.stop();
+			srlPort = new Serial(p5, portName_, baudRate, parity, dataBits, stopBits);
+			connectTrialTimeUsec = System.nanoTime();
+			prtTxtBfr.append("<SRL>").append('\t').append("Try to connect with ").append(portName_);
+			System.out.println(prtTxtBfr.toString());
+			prtTxtBfr.setLength(0);
+		}
 	}
 
 	public void dispose() {
@@ -55,43 +89,6 @@ public class SerialComm {
 			prtTxtBfr.append("<SRL>").append('\t').append("Disconnected");
 			System.out.println(prtTxtBfr.toString());
 			prtTxtBfr.setLength(0);
-		}
-	}
-
-	public void thread() {
-		if (!isConnected)
-			connecting(connectIntervalMsec);
-	}
-
-	public void connecting(int _tryIntervalMsec) {
-		if (!isConnected) {
-			if (getWaitingTimeMsec() >= _tryIntervalMsec) {
-				if (Serial.list().length > 0) {
-					portIdx++;
-					if (portIdx >= Serial.list().length)
-						portIdx = 0;
-					connect(portIdx);
-				}
-			}
-		}
-	}
-
-	public long getWaitingTimeMsec() {
-		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - connectTrialTimeUsec);
-	}
-
-	public void connect(int _portIdx) {
-		if (!isConnected) {
-			if (Serial.list().length > 0 && _portIdx < Serial.list().length) {
-				String portName_ = Serial.list()[_portIdx];
-				if (srlPort != null)
-					srlPort.stop();
-				srlPort = new Serial(p5, portName_, baudRate, parity, dataBits, stopBits);
-				connectTrialTimeUsec = System.nanoTime();
-				prtTxtBfr.append("<SRL>").append('\t').append("Try to connect with ").append(portName_);
-				System.out.println(prtTxtBfr.toString());
-				prtTxtBfr.setLength(0);
-			}
 		}
 	}
 
@@ -124,7 +121,7 @@ public class SerialComm {
 						}
 						grbl.init();
 					}
-				} else 
+				} else
 					grbl.read(msg_);
 			}
 			charToStrBfr.setLength(0);

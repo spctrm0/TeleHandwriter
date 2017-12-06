@@ -21,14 +21,14 @@ public class TH_DIS2018 extends PApplet {
 
 	KeyInput	keyInput;
 
-	TabletInput	tabletInput;	//
-	OscComm		oscComm;		//
-	Drawing		drawing;		//
-	Interpreter	interpreter;	//
-	Grbl		grbl;			//
-	SerialComm	serialComm;		//
+	TabletInput	tabletInput;
+	OscComm		oscComm;
+	Drawing		drawing;
+	Interpreter	interpreter;
+	Grbl		grbl;
+	SerialComm	serialComm;
 
-	int			acc	= 60000;
+	int			acc	= 30000;
 
 	public void settings() {
 		fullScreen(1);
@@ -50,7 +50,7 @@ public class TH_DIS2018 extends PApplet {
 		oscComm = new OscComm(this);
 		drawing = new Drawing();
 		interpreter = new Interpreter();
-		grbl = new Grbl();
+		grbl = new Grbl(this);
 		serialComm = new SerialComm(this);
 
 		oscComm.setTabletInput(tabletInput);
@@ -66,8 +66,6 @@ public class TH_DIS2018 extends PApplet {
 
 		thread("OscCommThread");
 		thread("InterpreterThread");
-		thread("GrblThread");
-		thread("SerialCommThread");
 	}
 
 	public void draw() {
@@ -112,17 +110,6 @@ public class TH_DIS2018 extends PApplet {
 		}
 	}
 
-	public void GrblThread() {
-		while (true) {
-			grbl.thread();
-		}
-	}
-
-	public void SerialCommThread() {
-		while (!serialComm.isConnected)
-			serialComm.thread();
-	}
-
 	public void keyPressed() {
 		if (key == '~') {
 			oscComm.tryToConnect();
@@ -140,6 +127,13 @@ public class TH_DIS2018 extends PApplet {
 		} else if (key == '?') // set home
 		{
 			grbl.reserve("$$\r");
+		} else if (key == 'b' || key == 'B') // set home
+		{
+			System.out.print(grbl.bfrSize);
+			System.out.print(", ");
+			System.out.print(grbl.reservedMsg.size());
+			System.out.print(", ");
+			System.out.println(grbl.grblBfr.size());
 		} else if (key == 'x' || key == 'X') // servo off
 		{
 			grbl.reserve("M3S0\r");
@@ -149,24 +143,19 @@ public class TH_DIS2018 extends PApplet {
 		} else if (key == 's' || key == 'S') // servo down
 		{
 			grbl.reserve("M3S" + Setting.servoZero + "\r");
+		} else if (key == '\'') {
+			acc = 4000;
+			System.out.println(acc);
 		} else if (keyCode == UP) {
 			acc += 50;
 			System.out.println(acc);
-			grbl.reserve("$120=" + acc + "\r");
-			grbl.reserve("$121=" + acc + "\r");
-		}
-
-		else if (keyCode == UP) {
-			acc += 50;
-			acc = 120000;
-			System.out.println(acc);
-			grbl.reserve("$120=" + acc + "\r");
-			grbl.reserve("$121=" + acc + "\r");
 		} else if (keyCode == DOWN) {
 			acc -= 50;
 			System.out.println(acc);
-			grbl.reserve("$120=" + acc + "\r");
-			grbl.reserve("$121=" + acc + "\r");
+		} else if (key == '[') {
+			grbl.reserve("$120="+acc+"\r");
+		} else if (key == ']') {
+			grbl.reserve("$121="+acc+"\r");
 		}
 	}
 

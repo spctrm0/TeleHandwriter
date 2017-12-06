@@ -35,13 +35,12 @@ public class Interpreter {
 	}
 
 	public void interpreting() {
-		while (drawing.getSize() > 0) {
+		if (drawing.getSize() > 0) {
 			Stroke stroke_ = drawing.getFirst();
 			if (stroke_.isCompleted) {
 				interpret(stroke_);
 				drawing.removeFirst();
-			} else
-				break;
+			}
 		}
 	}
 
