@@ -7,8 +7,8 @@ public class Setting {
 	public static int		targetPort			= 6666;
 	public static String	targetIp			= "192.168.0.2";
 
-	public static boolean	isXInverted			= true;
-	public static boolean	isYInverted			= false;
+	public static boolean	isXInverted			= false;
+	public static boolean	isYInverted			= true;
 
 	public static int		servoHover			= 96;
 	public static int		servoZero			= 63;
