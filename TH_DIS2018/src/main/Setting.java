@@ -13,7 +13,7 @@ public class Setting {
 	public static int		servoHover			= 96;
 	public static int		servoZero			= 63;
 
-	public static int		feedRateDefault		= 600000;
+	public static int		feedRateDefault		= 30000;
 
 	public static float		myCalibX			= 0;
 	public static float		myCalibY			= 0;

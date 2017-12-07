@@ -28,7 +28,7 @@ public class TH_DIS2018 extends PApplet {
 	Grbl		grbl;
 	SerialComm	serialComm;
 
-	int			acc	= 30000;
+	int			acc	= 6000;
 
 	public void settings() {
 		fullScreen(1);
@@ -153,9 +153,9 @@ public class TH_DIS2018 extends PApplet {
 			acc -= 50;
 			System.out.println(acc);
 		} else if (key == '[') {
-			grbl.reserve("$120="+acc+"\r");
+			grbl.reserve("$120=" + acc + "\r");
 		} else if (key == ']') {
-			grbl.reserve("$121="+acc+"\r");
+			grbl.reserve("$121=" + acc + "\r");
 		}
 	}
 
