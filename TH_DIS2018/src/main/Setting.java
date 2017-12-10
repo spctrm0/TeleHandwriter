@@ -3,15 +3,19 @@ package main;
 public class Setting {
 	public static String	connectionChkTxt	= "Grbl 1.1f ['$' for help]";
 
-	public static int		myPort				= 8888;
-	public static int		targetPort			= 8888;
+//	public static int		myPort				= 8765;
+//	public static int		targetPort			= 5432;
+//	public static String	targetIp			= "192.168.0.5";
+	
+	public static int		myPort				= 8765;
+	public static int		targetPort			= 8765;
 	public static String	targetIp			= "192.168.0.8";
 
 	public static boolean	isXInverted			= true;
 	public static boolean	isYInverted			= false;
 
-	public static int		servoHover			= 127;
-	public static int		servoZero			= 63;
+	public static int		servoHover			= 255;
+	public static int		servoZero			= 1;
 
 	public static int		feedRateDefault		= 30000;
 
