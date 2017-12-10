@@ -9,18 +9,18 @@ import main.Setting;
 import processing.core.PApplet;
 
 public class Grbl {
-	public PApplet		p5			= null;
-	public SerialComm	serialComm	= null;
+	public PApplet p5 = null;
+	public SerialComm serialComm = null;
 
-	public final int	bfrSizeMx	= 128;
+	public final int bfrSizeMx = 128;
 
-	public int			bfrSize		= 0;
+	public int bfrSize = 0;
 
-	public List<String>	receivedMsg	= null;
-	public List<String>	grblBfr		= null;
-	public List<String>	reservedMsg	= null;
+	public List<String> receivedMsg = null;
+	public List<String> grblBfr = null;
+	public List<String> reservedMsg = null;
 
-	public StringBuffer	prtTxtBfr	= null;
+	public StringBuffer prtTxtBfr = null;
 
 	public void setSerialComm(SerialComm _serialComm) {
 		serialComm = _serialComm;
@@ -48,6 +48,7 @@ public class Grbl {
 				grblBfr.add(reservedMsg.get(0).toString());
 				serialComm.write(reservedMsg.get(0));
 				reservedMsg.remove(0);
+				System.out.println("b");
 			} else
 				break;
 		}

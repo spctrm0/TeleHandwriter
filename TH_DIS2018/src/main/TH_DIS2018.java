@@ -20,9 +20,9 @@ public class TH_DIS2018 extends PApplet {
 	Table		table;
 
 	KeyInput	keyInput;
-
-	TabletInput	tabletInput;
+	
 	OscComm		oscComm;
+	TabletInput	tabletInput;
 	Drawing		drawing;
 	Interpreter	interpreter;
 	Grbl		grbl;
@@ -31,7 +31,7 @@ public class TH_DIS2018 extends PApplet {
 	int			acc	= 6000;
 
 	public void settings() {
-		fullScreen();
+		size(1280,720);
 	}
 
 	public void setup() {
@@ -46,15 +46,16 @@ public class TH_DIS2018 extends PApplet {
 
 		keyInput = new KeyInput(this);
 
-		tabletInput = new TabletInput(this);
 		oscComm = new OscComm(this);
+		tabletInput = new TabletInput(this);
 		drawing = new Drawing();
-		interpreter = new Interpreter();
+		interpreter = new Interpreter(this);
 		grbl = new Grbl(this);
 		serialComm = new SerialComm(this);
 
-		oscComm.setTabletInput(tabletInput);
 		oscComm.setDrawing(drawing);
+		
+		tabletInput.setOscComm(oscComm);
 
 		interpreter.setDrawing(drawing);
 		interpreter.setGrbl(grbl);
@@ -63,9 +64,6 @@ public class TH_DIS2018 extends PApplet {
 		serialComm.setGrbl(grbl);
 
 		grbl.setSerialComm(serialComm);
-
-		thread("OscCommThread");
-		thread("InterpreterThread");
 	}
 
 	public void draw() {
@@ -82,6 +80,7 @@ public class TH_DIS2018 extends PApplet {
 				line(a_.penX, a_.penY, b_.penX, b_.penY);
 			}
 		}
+		println("a");
 	}
 
 	public void exit() {
@@ -96,18 +95,6 @@ public class TH_DIS2018 extends PApplet {
 	public void serialEvent(Serial _serialEvt) {
 		char replyChar_ = _serialEvt.readChar();
 		serialComm.read(replyChar_);
-	}
-
-	public void OscCommThread() {
-		while (true) {
-			oscComm.thread();
-		}
-	}
-
-	public void InterpreterThread() {
-		while (true) {
-			interpreter.thread();
-		}
 	}
 
 	public void keyPressed() {

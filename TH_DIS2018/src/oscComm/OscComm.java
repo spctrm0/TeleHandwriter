@@ -11,7 +11,6 @@ import tabletInput.TabletInputData;
 
 public class OscComm {
 	public PApplet		p5					= null;
-	public TabletInput	tabletInput			= null;
 	public Drawing		drawing				= null;
 
 	public final String	addrPtrnRequest		= "request";
@@ -29,9 +28,6 @@ public class OscComm {
 
 	public StringBuffer	prtTxtBfr			= null;
 
-	public void setTabletInput(TabletInput _tabletInput) {
-		tabletInput = _tabletInput;
-	}
 
 	public void setDrawing(Drawing _drawing) {
 		drawing = _drawing;
@@ -47,24 +43,6 @@ public class OscComm {
 
 		openPort();
 		setTargetAddr();
-	}
-
-	public void thread() {
-		streaming();
-	}
-
-	public void streaming() {
-		TabletInputData tabletInputData_ = tabletInput.getData();
-		if (tabletInputData_ != null) {
-			if (tabletInputData_.strokeIdx == -1)
-				sendCalibrationMsg(tabletInputData_.penX, tabletInputData_.penY, Setting.myTabletWidth,
-						Setting.myTabletHeight, Setting.myScreenWidth, Setting.myScreenHeight);
-			else
-				sendTabletInputMsg(tabletInputData_.strokeIdx, tabletInputData_.penX, tabletInputData_.penY,
-						tabletInputData_.pressure, tabletInputData_.tiltX, tabletInputData_.tiltY,
-						tabletInputData_.millis, tabletInputData_.isHead ? 1 : 0, tabletInputData_.isTail ? 1 : 0);
-			tabletInput.removeData();
-		}
 	}
 
 	public void tryToConnect() {
