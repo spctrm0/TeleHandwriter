@@ -17,18 +17,18 @@ import processing.serial.Serial;
 import tabletInput.TabletInput;
 
 public class TH_DIS2018 extends PApplet {
-	Table		table;
+	Table table;
 
-	KeyInput	keyInput;
+	KeyInput keyInput;
 
 	TabletInput	tabletInput;
-	OscComm		oscComm;
-	Drawing		drawing;
+	OscComm			oscComm;
+	Drawing			drawing;
 	Interpreter	interpreter;
-	Grbl		grbl;
+	Grbl				grbl;
 	SerialComm	serialComm;
 
-	int			acc	= 6000;
+	int acc = 6000;
 
 	public void settings() {
 		fullScreen();
@@ -85,6 +85,7 @@ public class TH_DIS2018 extends PApplet {
 	}
 
 	public void exit() {
+		grbl.reserve("M3S0\r");
 		saveTable(table, "tabletInputLogs\\" + timestamp() + ".csv");
 		super.exit();
 	}
@@ -113,58 +114,68 @@ public class TH_DIS2018 extends PApplet {
 	public void keyPressed() {
 		if (key == '~') {
 			oscComm.tryToConnect();
-		} else if (key == 'c' || key == 'C') // toggle calibration
+		}
+		else if (key == 'c' || key == 'C') // toggle calibration
 		{
 			tabletInput.toggleCalibration();
-		} else if (key == 'i' || key == 'I') // toggle writable
+		}
+		else if (key == 'i' || key == 'I') // toggle writable
 		{
 			tabletInput.toggleWritable();
-		} else if (key == 'h' || key == 'H') // set home
+		}
+		else if (key == 'h' || key == 'H') // set home
 		{
 			grbl.reserve("G92X0Y0\r");
 			grbl.reserve("G90\r");
-			grbl.reserve("G93\r");
-		} else if (key == '?') // set home
+		}
+		else if (key == '?') // set home
 		{
 			grbl.reserve("$$\r");
-		} else if (key == 'b' || key == 'B') // set home
+		}
+		else if (key == 'b' || key == 'B') // set home
 		{
 			System.out.print(grbl.bfrSize);
 			System.out.print(", ");
 			System.out.print(grbl.reservedMsg.size());
 			System.out.print(", ");
 			System.out.println(grbl.grblBfr.size());
-		} else if (key == 'x' || key == 'X') // servo off
+		}
+		else if (key == 'x' || key == 'X') // servo off
 		{
 			grbl.reserve("M3S0\r");
-		} else if (key == 'w' || key == 'W') // servo up
+		}
+		else if (key == 'w' || key == 'W') // servo up
 		{
 			grbl.reserve("M3S" + Setting.servoHover + "\r");
-		} else if (key == 's' || key == 'S') // servo down
+		}
+		else if (key == 's' || key == 'S') // servo down
 		{
 			grbl.reserve("M3S" + Setting.servoZero + "\r");
-		} else if (key == '\'') {
+		}
+		else if (key == '\'') {
 			acc = 4000;
 			System.out.println(acc);
-		} else if (keyCode == UP) {
+		}
+		else if (keyCode == UP) {
 			acc += 50;
 			System.out.println(acc);
-		} else if (keyCode == DOWN) {
+		}
+		else if (keyCode == DOWN) {
 			acc -= 50;
 			System.out.println(acc);
-		} else if (key == '[') {
+		}
+		else if (key == '[') {
 			grbl.reserve("$120=" + acc + "\r");
-		} else if (key == ']') {
+		}
+		else if (key == ']') {
 			grbl.reserve("$121=" + acc + "\r");
 		}
 	}
 
 	static public void main(String[] passedArgs) {
 		String[] appletArgs = new String[] { main.TH_DIS2018.class.getName() };
-		if (passedArgs != null)
-			PApplet.main(concat(appletArgs, passedArgs));
-		else
-			PApplet.main(appletArgs);
+		if (passedArgs != null) PApplet.main(concat(appletArgs, passedArgs));
+		else PApplet.main(appletArgs);
 	}
 
 	String timestamp() {

@@ -8,11 +8,11 @@ import drawing.Drawing;
 import drawing.Point;
 
 public class Interpreter {
-	Drawing			drawing	= null;
-	Grbl			grbl	= null;
-	Table			table	= null;
+	Drawing	drawing	= null;
+	Grbl		grbl		= null;
+	Table		table		= null;
 
-	StringBuffer	strBfr	= null;
+	StringBuffer strBfr = null;
 
 	public void setDrawing(Drawing _drawing) {
 		drawing = _drawing;
@@ -52,19 +52,20 @@ public class Interpreter {
 			float aY_ = Setting.targetTabletHeight * ((a_.penY) / Setting.targetScreenHeight);
 			float bX_ = Setting.targetTabletWidth * ((b_.penX - Setting.targetCalibX) / Setting.targetScreentWidth);
 			float bY_ = Setting.targetTabletHeight * ((b_.penY) / Setting.targetScreenHeight);
-			float f_ = Setting.feedRateDefault;
+			float f_ = Setting.feedrateStrokeToStoke;
 			long duration_ = b_.millis - a_.millis;
-			if (duration_ != 0)
-				f_ = (float) (60000 / (double) duration_);
+			if (duration_ != 0) f_ = (float) (60000 / (double) duration_);
 
 			if (a_.isHead) {
+				grbl.reserve("G94\r");
 				strBfr.append("G1")//
 						.append("X").append(String.format("%.3f", Setting.isXInverted ? -aX_ : aX_))//
 						.append("Y").append(String.format("%.3f", Setting.isYInverted ? -aY_ : aY_))//
-						.append("F").append(Setting.feedRateDefault)//
+						.append("F").append(Setting.feedrateStrokeToStoke)//
 						.append('\r');
 				grbl.reserve(strBfr.toString());
 				strBfr.setLength(0);
+				grbl.reserve("G93\r");
 
 				strBfr.append("M3").append("S").append(Setting.servoZero).append('\r');
 				grbl.reserve(strBfr.toString());
@@ -91,8 +92,7 @@ public class Interpreter {
 		}
 		while (_stroke.getSize() > 0) {
 			logTable(_stroke.getFirst().strokeIdx, _stroke.getFirst().penX, _stroke.getFirst().penY,
-					_stroke.getFirst().pressure, _stroke.getFirst().tiltX, _stroke.getFirst().tiltY,
-					_stroke.getFirst().millis);
+					_stroke.getFirst().pressure, _stroke.getFirst().tiltX, _stroke.getFirst().tiltY, _stroke.getFirst().millis);
 
 			_stroke.removeFirst();
 		}
