@@ -1,26 +1,22 @@
 package grbl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import main.Setting;
 import processing.core.PApplet;
 
 public class Grbl {
-	public PApplet		p5			= null;
+	public PApplet		p5					= null;
 	public SerialComm	serialComm	= null;
 
-	public final int	bfrSizeMx	= 128;
+	public final int bfrSizeMx = 128;
 
-	public int			bfrSize		= 0;
+	public int bfrSize = 0;
 
-	public List<String>	receivedMsg	= null;
-	public List<String>	grblBfr		= null;
-	public List<String>	reservedMsg	= null;
+	public ArrayList<String>	receivedMsg	= null;
+	public ArrayList<String>	grblBfr			= null;
+	public ArrayList<String>	reservedMsg	= null;
 
-	public StringBuffer	prtTxtBfr	= null;
+	public StringBuffer prtTxtBfr = null;
 
 	public void setSerialComm(SerialComm _serialComm) {
 		serialComm = _serialComm;
@@ -30,9 +26,9 @@ public class Grbl {
 		p5 = _p5;
 		p5.registerMethod("pre", this);
 
-		receivedMsg = Collections.synchronizedList(new ArrayList<String>());
-		grblBfr = Collections.synchronizedList(new ArrayList<String>());
-		reservedMsg = Collections.synchronizedList(new ArrayList<String>());
+		receivedMsg = new ArrayList<String>();
+		grblBfr = new ArrayList<String>();
+		reservedMsg = new ArrayList<String>();
 
 		prtTxtBfr = new StringBuffer();
 	}
@@ -48,7 +44,8 @@ public class Grbl {
 				grblBfr.add(reservedMsg.get(0).toString());
 				serialComm.write(reservedMsg.get(0));
 				reservedMsg.remove(0);
-			} else
+			}
+			else
 				break;
 		}
 	}
@@ -64,7 +61,8 @@ public class Grbl {
 			receivedMsg.clear();
 			bfrSize -= grblBfr.get(0).length();
 			grblBfr.remove(0);
-		} else
+		}
+		else
 			receivedMsg.add(_msg);
 	}
 
@@ -84,7 +82,7 @@ public class Grbl {
 		return false;
 	}
 
-	public boolean isServoUp(String _cmd) {
+	public boolean isServoUpCmd(String _cmd) {
 		String[] split_ = _cmd.split("S");
 		String trimmed_ = split_[1].substring(0, split_[1].length() - 1);
 		int val_ = Integer.parseInt(trimmed_);

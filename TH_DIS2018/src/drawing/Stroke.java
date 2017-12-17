@@ -1,16 +1,14 @@
 package drawing;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Stroke {
-	public List<Point>	points		= null;
+	public ArrayList<Point>	points		= null;
 
 	public boolean		isCompleted	= false;
 
 	public Stroke(int _strokeIdx, float _penX, float _penY, float _pressure, float _tiltX, float _tiltY, long _millis) {
-		points = Collections.synchronizedList(new ArrayList<Point>());
+		points = new ArrayList<Point>();
 		points.add(new Point(_strokeIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis, true, false));
 	}
 

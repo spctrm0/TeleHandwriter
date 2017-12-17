@@ -1,14 +1,12 @@
 package drawing;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Drawing {
-	public List<Stroke> strokes;
+	public ArrayList<Stroke> strokes;
 
 	public Drawing() {
-		strokes = Collections.synchronizedList(new ArrayList<Stroke>());
+		strokes = new ArrayList<Stroke>();
 	}
 
 	public void addStroke(int _strokeIdx, float _penX, float _penY, float _pressure, float _tiltX, float _tiltY,
@@ -20,7 +18,7 @@ public class Drawing {
 			long _millis, boolean _isTail) {
 		getLast().addPoint(_strokeIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis, _isTail);
 	}
-	
+
 	public int getSize() {
 		return strokes.size();
 	}

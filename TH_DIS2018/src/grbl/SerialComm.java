@@ -7,24 +7,24 @@ import processing.core.PApplet;
 import processing.serial.Serial;
 
 public class SerialComm {
-	public PApplet		p5						= null;
-	public Grbl			grbl					= null;
+	public PApplet	p5		= null;
+	public Grbl			grbl	= null;
 
-	public final int	connectIntervalMsec		= 3000;
-	public final int	baudRate				= 250000;
-	public final char	parity					= 'n';
-	public final int	dataBits				= 8;
-	public final float	stopBits				= 1.0f;
-	public final char	delimeter				= '\r';
+	public final int		connectIntervalMsec	= 3000;
+	public final int		baudRate						= 250000;
+	public final char		parity							= 'n';
+	public final int		dataBits						= 8;
+	public final float	stopBits						= 1.0f;
+	public final char		delimeter						= '\r';
 
 	public long			connectTrialTimeUsec	= 0;
-	public int			portIdx					= 0;
-	public boolean		isConnected				= false;
+	public int			portIdx								= 0;
+	public boolean	isConnected						= false;
 
-	public Serial		srlPort					= null;
+	public Serial srlPort = null;
 
-	public StringBuffer	charToStrBfr			= null;
-	public StringBuffer	prtTxtBfr				= null;
+	public StringBuffer	charToStrBfr	= null;
+	public StringBuffer	prtTxtBfr			= null;
 
 	public void setGrbl(Grbl _grbl) {
 		grbl = _grbl;
@@ -113,15 +113,16 @@ public class SerialComm {
 						boolean wasConnected_ = isConnected;
 						isConnected = true;
 						if (wasConnected_ != isConnected) {
-							prtTxtBfr.append("<SRL>").append('\t').append("Connected with ")
-									.append(srlPort.port.getPortName()).append('\n');
+							prtTxtBfr.append("<SRL>").append('\t').append("Connected with ").append(srlPort.port.getPortName())
+									.append('\n');
 							prtTxtBfr.append("<GRBL>").append('\t').append(msg_);
 							System.out.println(prtTxtBfr.toString());
 							prtTxtBfr.setLength(0);
 						}
 						grbl.init();
 					}
-				} else
+				}
+				else
 					grbl.read(msg_);
 			}
 			charToStrBfr.setLength(0);
