@@ -3,26 +3,21 @@ package drawing;
 import java.util.ArrayList;
 
 public class Stroke {
-	private ArrayList<Point>	points			= null;
-	private long							lastMillis;
-	private boolean						isCompleted	= false;
+	private ArrayList<Point> points = null;
+
+	private boolean isCompleted = false;
 
 	public Stroke(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY, float _pressure,
 			float _tiltX, float _tiltY, long _millis, int _kind) {
 		points = new ArrayList<Point>();
-		lastMillis = _millis;
 		points
 				.add(new Point(_totalPointIdx, _strokeIdx, _pointIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis, _kind));
 	}
 
 	public void addPoint(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY, float _pressure,
 			float _tiltX, float _tiltY, long _millis, int _kind) {
-		if (_millis - lastMillis == 0)
-			getLastPoint().set(_totalPointIdx, _strokeIdx, _pointIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis,
-					_kind);
-		else if (_millis - lastMillis > 0)
-			points.add(
-					new Point(_totalPointIdx, _strokeIdx, _pointIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis, _kind));
+		points
+				.add(new Point(_totalPointIdx, _strokeIdx, _pointIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis, _kind));
 		if (_kind == 2)
 			isCompleted = true;
 	}

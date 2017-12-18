@@ -43,31 +43,11 @@ public class Interpreter {
 	}
 
 	public void interpreting() {
-//		boolean isDone_ = false;
-//
-//		while (!isDone_) {
-//			Stroke stroke_ = drawing.getFirstStroke();
-//			if (stroke_.getPointsNum() >= 2) {
-//				while (stroke_.getPointsNum() >= 2) {
-//					Point a_ = stroke_.getFirstPoint();
-//					Point b_ = stroke_.getSecondPoint();
-//					float aX_ = Setting.targetTabletWidth * ((a_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
-//					float aY_ = Setting.targetTabletHeight * ((a_.getPenY()) / Setting.targetScreenHeight);
-//					float bX_ = Setting.targetTabletWidth * ((b_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
-//					float bY_ = Setting.targetTabletHeight * ((b_.getPenY()) / Setting.targetScreenHeight);
-//					float f_ = Setting.feedrateStrokeToStoke;
-//					long duration_ = b_.getMillis() - a_.getMillis();
-//					if (duration_ != 0)
-//						f_ = (float) (60000 / (double) duration_);
-//				}
-//			}
-//			else
-//				isDone_ = true;
-//		}
-
-		while (drawing.getStrokesNum() > 0) {
+		boolean isDone_ = false;
+		while (!isDone_) {
 			Stroke stroke_ = drawing.getFirstStroke();
-			if (stroke_.isCompleted()) {
+			if (stroke_.getPointsNum() >= 2) {
+				float lastF_ = 60000 / 500.0f;
 				while (stroke_.getPointsNum() >= 2) {
 					Point a_ = stroke_.getFirstPoint();
 					Point b_ = stroke_.getSecondPoint();
@@ -75,30 +55,27 @@ public class Interpreter {
 					float aY_ = Setting.targetTabletHeight * ((a_.getPenY()) / Setting.targetScreenHeight);
 					float bX_ = Setting.targetTabletWidth * ((b_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
 					float bY_ = Setting.targetTabletHeight * ((b_.getPenY()) / Setting.targetScreenHeight);
-					float f_ = Setting.feedrateStrokeToStoke;
+					float f_ = lastF_;
 					long duration_ = b_.getMillis() - a_.getMillis();
 					if (duration_ != 0)
 						f_ = (float) (60000 / (double) duration_);
-
+					// Head
 					if (a_.getKind() == 0) {
 						interpretCnt++;
 						grbl.reserve("G94\r");
 						strBfr.append("G1")//
 								.append("X").append(String.format("%.3f", Setting.isXInverted ? -aX_ : aX_))//
 								.append("Y").append(String.format("%.3f", Setting.isYInverted ? -aY_ : aY_))//
-								.append("F").append(Setting.feedrateStrokeToStoke)//
+								.append("F").append(String.format("%.3f", Setting.feedrateStrokeToStoke))//
 								.append('\r');
 						grbl.reserve(strBfr.toString());
 						strBfr.setLength(0);
 						grbl.reserve("G93\r");
-
 						strBfr.append("M3").append("S").append(Setting.servoZero).append('\r');
 						grbl.reserve(strBfr.toString());
 						strBfr.setLength(0);
-
-						System.out.println("interpretH" + interpretCnt);
 					}
-
+					// Head, Body, Tail
 					strBfr.append("G1")//
 							.append("X").append(String.format("%.3f", Setting.isXInverted ? -bX_ : bX_))//
 							.append("Y").append(String.format("%.3f", Setting.isYInverted ? -bY_ : bY_))//
@@ -106,30 +83,25 @@ public class Interpreter {
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
-
 					logTable(a_.getStrokeIdx(), a_.getPenX(), a_.getPenY(), a_.getPressure(), a_.getTiltX(), a_.getTiltY(),
-							a_.getMillis());
-					stroke_.removeFirstPoint();
-
+							a_.getMillis()); // logging first point on table
+					stroke_.removeFirstPoint(); // remove first point
+					// Tail
 					if (b_.getKind() == 2) {
 						strBfr.append("M3").append("S").append(Setting.servoHover).append('\r');
 						grbl.reserve(strBfr.toString());
 						strBfr.setLength(0);
-
 						logTable(b_.getStrokeIdx(), b_.getPenX(), b_.getPenY(), b_.getPressure(), b_.getTiltX(), b_.getTiltY(),
-								b_.getMillis());
-						stroke_.removeFirstPoint();
-
-						drawing.removeFirstStroke();
-
-						System.out.println("interpretT" + interpretCnt);
-						break;
+								b_.getMillis()); // logging second (last) point on table
+						stroke_.removeFirstPoint(); // remove second (last) point
+						drawing.removeFirstStroke(); // remove first stroke which just has
+																					// been empty
 					}
+					lastF_ = f_;
 				}
 			}
-			else {
-				break;
-			}
+			else
+				isDone_ = true;
 		}
 	}
 

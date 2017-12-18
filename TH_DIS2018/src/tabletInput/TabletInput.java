@@ -11,6 +11,7 @@ public class TabletInput {
 	private Tablet	tablet;
 
 	private boolean	isWritable		= false;
+	private long		lastMillis		= -1;
 	private int			totalPointIdx	= -1;
 	private int			strokeIdx			= -1;
 	private int			pointIdx			= -1;
@@ -40,9 +41,11 @@ public class TabletInput {
 						kind_ = 2;
 					totalPointIdx++;
 					pointIdx++;
-					oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, tablet.getPenX(), tablet.getPenY(),
-							tablet.getPressure(), tablet.getTiltX(), tablet.getTiltY(), _mEvt.getMillis(), kind_);
+					if (_mEvt.getMillis() - lastMillis != 0 || kind_ != 1)
+						oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, tablet.getPenX(), tablet.getPenY(),
+								tablet.getPressure(), tablet.getTiltX(), tablet.getTiltY(), _mEvt.getMillis(), kind_);
 				}
+				lastMillis = _mEvt.getMillis();
 			}
 		}
 	}
