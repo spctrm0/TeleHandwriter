@@ -43,6 +43,28 @@ public class Interpreter {
 	}
 
 	public void interpreting() {
+//		boolean isDone_ = false;
+//
+//		while (!isDone_) {
+//			Stroke stroke_ = drawing.getFirstStroke();
+//			if (stroke_.getPointsNum() >= 2) {
+//				while (stroke_.getPointsNum() >= 2) {
+//					Point a_ = stroke_.getFirstPoint();
+//					Point b_ = stroke_.getSecondPoint();
+//					float aX_ = Setting.targetTabletWidth * ((a_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
+//					float aY_ = Setting.targetTabletHeight * ((a_.getPenY()) / Setting.targetScreenHeight);
+//					float bX_ = Setting.targetTabletWidth * ((b_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
+//					float bY_ = Setting.targetTabletHeight * ((b_.getPenY()) / Setting.targetScreenHeight);
+//					float f_ = Setting.feedrateStrokeToStoke;
+//					long duration_ = b_.getMillis() - a_.getMillis();
+//					if (duration_ != 0)
+//						f_ = (float) (60000 / (double) duration_);
+//				}
+//			}
+//			else
+//				isDone_ = true;
+//		}
+
 		while (drawing.getStrokesNum() > 0) {
 			Stroke stroke_ = drawing.getFirstStroke();
 			if (stroke_.isCompleted()) {

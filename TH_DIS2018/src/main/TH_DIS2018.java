@@ -20,9 +20,9 @@ public class TH_DIS2018 extends PApplet {
 	Grbl				grbl;
 	SerialComm	serialComm;
 
-	Drawing			drawing;
-	OscComm			oscComm;
-	TabletInput	tabletInput;
+	Drawing			drawing;		//
+	OscComm			oscComm;		//
+	TabletInput	tabletInput;//
 
 	Table				table;
 	Interpreter	interpreter;
