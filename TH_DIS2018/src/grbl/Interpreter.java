@@ -43,22 +43,22 @@ public class Interpreter {
 	}
 
 	public void interpreting() {
-		while (drawing.getSize() > 0) {
-			Stroke stroke_ = drawing.getFirst();
-			if (stroke_.isCompleted) {
-				while (stroke_.getSize() >= 2) {
-					Point a_ = stroke_.getFirst();
-					Point b_ = stroke_.getSecond();
-					float aX_ = Setting.targetTabletWidth * ((a_.penX - Setting.targetCalibX) / Setting.targetScreentWidth);
-					float aY_ = Setting.targetTabletHeight * ((a_.penY) / Setting.targetScreenHeight);
-					float bX_ = Setting.targetTabletWidth * ((b_.penX - Setting.targetCalibX) / Setting.targetScreentWidth);
-					float bY_ = Setting.targetTabletHeight * ((b_.penY) / Setting.targetScreenHeight);
+		while (drawing.getStrokesNum() > 0) {
+			Stroke stroke_ = drawing.getFirstStroke();
+			if (stroke_.isCompleted()) {
+				while (stroke_.getPointsNum() >= 2) {
+					Point a_ = stroke_.getFirstPoint();
+					Point b_ = stroke_.getSecondPoint();
+					float aX_ = Setting.targetTabletWidth * ((a_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
+					float aY_ = Setting.targetTabletHeight * ((a_.getPenY()) / Setting.targetScreenHeight);
+					float bX_ = Setting.targetTabletWidth * ((b_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
+					float bY_ = Setting.targetTabletHeight * ((b_.getPenY()) / Setting.targetScreenHeight);
 					float f_ = Setting.feedrateStrokeToStoke;
-					long duration_ = b_.millis - a_.millis;
+					long duration_ = b_.getMillis() - a_.getMillis();
 					if (duration_ != 0)
 						f_ = (float) (60000 / (double) duration_);
 
-					if (a_.isHead) {
+					if (a_.getKind() == 0) {
 						interpretCnt++;
 						grbl.reserve("G94\r");
 						strBfr.append("G1")//
@@ -85,18 +85,20 @@ public class Interpreter {
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
 
-					logTable(a_.strokeIdx, a_.penX, a_.penY, a_.pressure, a_.tiltX, a_.tiltY, a_.millis);
-					stroke_.removeFirst();
+					logTable(a_.getStrokeIdx(), a_.getPenX(), a_.getPenY(), a_.getPressure(), a_.getTiltX(), a_.getTiltY(),
+							a_.getMillis());
+					stroke_.removeFirstPoint();
 
-					if (b_.isTail) {
+					if (b_.getKind() == 2) {
 						strBfr.append("M3").append("S").append(Setting.servoHover).append('\r');
 						grbl.reserve(strBfr.toString());
 						strBfr.setLength(0);
 
-						logTable(b_.strokeIdx, b_.penX, b_.penY, b_.pressure, b_.tiltX, b_.tiltY, b_.millis);
-						stroke_.removeFirst();
+						logTable(b_.getStrokeIdx(), b_.getPenX(), b_.getPenY(), b_.getPressure(), b_.getTiltX(), b_.getTiltY(),
+								b_.getMillis());
+						stroke_.removeFirstPoint();
 
-						drawing.removeFirst();
+						drawing.removeFirstStroke();
 
 						System.out.println("interpretT" + interpretCnt);
 						break;

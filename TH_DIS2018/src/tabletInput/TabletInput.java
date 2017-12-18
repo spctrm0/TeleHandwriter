@@ -1,20 +1,19 @@
 package tabletInput;
 
 import codeanticode.tablet.Tablet;
-import main.Setting;
 import oscComm.OscComm;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
 public class TabletInput {
-	public PApplet	p5			= null;
-	public OscComm	oscComm	= null;
-	public Tablet		tablet;
+	private PApplet	p5			= null;
+	private OscComm	oscComm	= null;
+	private Tablet	tablet;
 
-	public boolean	modeWritable		= false;
-	public boolean	modeCalibration	= false;
-
-	public int strokeIdx = -1;
+	private boolean	isWritable		= false;
+	private int			totalPointIdx	= -1;
+	private int			strokeIdx			= -1;
+	private int			pointIdx			= -1;
 
 	public void setOscComm(OscComm _oscComm) {
 		oscComm = _oscComm;
@@ -28,43 +27,43 @@ public class TabletInput {
 
 	public void mouseEvent(MouseEvent _mEvt) {
 		if (tablet.getPenKind() == Tablet.STYLUS) {
-			if (modeCalibration) {
-				if (_mEvt.getAction() == MouseEvent.PRESS)
-					oscComm.sendCalibrationMsg(tablet.getPenX(), tablet.getPenY(), Setting.myTabletWidth, Setting.myTabletHeight,
-							Setting.myScreenWidth, Setting.myScreenHeight);
-				else if (_mEvt.getAction() == MouseEvent.RELEASE)
-					toggleCalibration();
-			}
-			else {
-				if (modeWritable) {
-					if (_mEvt.getAction() == MouseEvent.PRESS || _mEvt.getAction() == MouseEvent.DRAG
-							|| _mEvt.getAction() == MouseEvent.RELEASE) {
-						boolean isHead_ = false;
-						boolean isTail_ = false;
-						if (_mEvt.getAction() == MouseEvent.PRESS) {
-							strokeIdx++;
-							isHead_ = true;
-							System.out.println("tabletH" + strokeIdx);
-						}
-						else if (_mEvt.getAction() == MouseEvent.RELEASE) {
-							isTail_ = true;
-							System.out.println("tabletT" + strokeIdx);
-						}
-						oscComm.sendTabletInputMsg(strokeIdx, tablet.getPenX(), tablet.getPenY(), tablet.getPressure(),
-								tablet.getTiltX(), tablet.getTiltY(), _mEvt.getMillis(), isHead_ ? 1 : 0, isTail_ ? 1 : 0);
+			if (isWritable) {
+				if (_mEvt.getAction() == MouseEvent.PRESS || _mEvt.getAction() == MouseEvent.DRAG
+						|| _mEvt.getAction() == MouseEvent.RELEASE) {
+					int kind_ = 1;
+					if (_mEvt.getAction() == MouseEvent.PRESS) {
+						strokeIdx++;
+						pointIdx = -1;
+						kind_ = 0;
 					}
+					else if (_mEvt.getAction() == MouseEvent.RELEASE)
+						kind_ = 2;
+					totalPointIdx++;
+					pointIdx++;
+					oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, tablet.getPenX(), tablet.getPenY(),
+							tablet.getPressure(), tablet.getTiltX(), tablet.getTiltY(), _mEvt.getMillis(), kind_);
 				}
 			}
 		}
 	}
 
-	public boolean toggleWritable() {
-		modeWritable = !modeWritable;
-		return modeWritable;
+	public void toggleWritable() {
+		isWritable = !isWritable;
 	}
 
-	public boolean toggleCalibration() {
-		modeCalibration = !modeCalibration;
-		return modeCalibration;
+	public boolean isWritable() {
+		return isWritable;
+	}
+
+	public int getTotalPointIdx() {
+		return totalPointIdx;
+	}
+
+	public int getStrokeIdx() {
+		return strokeIdx;
+	}
+
+	public int getPointIdx() {
+		return pointIdx;
 	}
 }

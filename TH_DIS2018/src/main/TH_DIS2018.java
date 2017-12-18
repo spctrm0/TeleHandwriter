@@ -17,7 +17,6 @@ import processing.serial.Serial;
 import tabletInput.TabletInput;
 
 public class TH_DIS2018 extends PApplet {
-
 	Grbl				grbl;
 	SerialComm	serialComm;
 
@@ -64,24 +63,21 @@ public class TH_DIS2018 extends PApplet {
 	}
 
 	public void draw() {
-		background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255,
-				(!tabletInput.modeCalibration && tabletInput.modeWritable) ? 0 : 255);
-
+		background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255, (tabletInput.isWritable()) ? 0 : 255);
 		noFill();
 		stroke(255);
-		for (int i = 0; i < drawing.strokes.size(); i++) {
-			Stroke stroke_ = drawing.strokes.get(i);
-			for (int j = 0; j < stroke_.points.size() - 1; j++) {
-				Point a_ = stroke_.points.get(j);
-				Point b_ = stroke_.points.get(j + 1);
-				line(a_.penX, a_.penY, b_.penX, b_.penY);
+		for (Stroke stroke_ : drawing.getStrokes()) {
+			for (int j = 0; j < stroke_.getPointsNum() - 1; j++) {
+				Point a_ = stroke_.getPoints().get(j);
+				Point b_ = stroke_.getPoints().get(j + 1);
+				line(a_.getPenX(), a_.getPenY(), b_.getPenX(), b_.getPenY());
 			}
 		}
-//		System.out.print(grbl.bfrSize);
-//		System.out.print(", ");
-//		System.out.print(grbl.grblBfr.size());
-//		System.out.print(", ");
-//		System.out.print(grbl.reservedMsg.size());
+		// System.out.print(grbl.bfrSize);
+		// System.out.print(", ");
+		// System.out.print(grbl.grblBfr.size());
+		// System.out.print(", ");
+		// System.out.print(grbl.reservedMsg.size());
 	}
 
 	public void exit() {
@@ -102,10 +98,6 @@ public class TH_DIS2018 extends PApplet {
 	public void keyPressed() {
 		if (key == '~') {
 			oscComm.tryToConnect();
-		}
-		else if (key == 'c' || key == 'C') // toggle calibration
-		{
-			tabletInput.toggleCalibration();
 		}
 		else if (key == 'i' || key == 'I') // toggle writable
 		{
