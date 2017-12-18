@@ -23,6 +23,7 @@ public class OscComm {
 
 	public long			connectTrialTimeUsec	= 0;
 	public boolean	isConnected						= false;
+	public boolean	isRecievedSynMsg			= false;
 
 	public OscP5			oscPort			= null;
 	public NetAddress	myAddr			= null;
@@ -49,14 +50,18 @@ public class OscComm {
 	}
 
 	public void pre() {
-		if (!isConnected)
+		if (!isConnected && !isRecievedSynMsg)
 			tryConnect(connectIntervalMsec);
 	}
 
 	public void tryConnect(int _tryIntervalMsec) {
 		if (getWaitingTimeMsec() >= _tryIntervalMsec) {
 			disconnect();
-			sendSynMsg();
+			sendConnectionMsg(addrPtrnSyn);
+			prtTxtBfr.append("<OSC>").append('\t').append("Send (Syn) Msg to ").append(Setting.targetIp).append(":")
+					.append(Setting.targetPort);
+			System.out.println(prtTxtBfr);
+			prtTxtBfr.setLength(0);
 			connectTrialTimeUsec = System.nanoTime();
 		}
 	}
@@ -71,16 +76,9 @@ public class OscComm {
 			System.out.println(prtTxtBfr);
 			prtTxtBfr.setLength(0);
 			isConnected = false;
+			isRecievedSynMsg = false;
 			sendConnectionMsg(addrPtrnDisconnect);
 		}
-	}
-
-	public void sendSynMsg() {
-		sendConnectionMsg(addrPtrnSyn);
-		prtTxtBfr.append("<OSC>").append('\t').append("Send (Syn) Msg to ").append(Setting.targetIp).append(":")
-				.append(Setting.targetPort);
-		System.out.println(prtTxtBfr);
-		prtTxtBfr.setLength(0);
 	}
 
 	public void sendConnectionMsg(String _addrPattern) {
@@ -133,33 +131,36 @@ public class OscComm {
 	}
 
 	public void receive(OscMessage _oscMsg) {
-		if (_oscMsg.addrPattern().equals(addrPtrnSyn)) {
-			prtTxtBfr.append("<OSC>").append('\t').append("Got a (Syn) Msg from ").append(_oscMsg.get(0).stringValue())
-					.append(":").append(_oscMsg.get(1).intValue()).append('\n');
-			prtTxtBfr.append("<OSC>").append('\t').append("Send back (Syn + Ack) Msg to ").append(Setting.targetIp)
-					.append(":").append(Setting.targetPort);
-			System.out.println(prtTxtBfr);
-			prtTxtBfr.setLength(0);
-			sendConnectionMsg(addrPtrnSynAck);
-		}
-		else if (_oscMsg.addrPattern().equals(addrPtrnSynAck)) {
-			if (_oscMsg.get(0).stringValue().equals(Setting.targetIp) && _oscMsg.get(1).intValue() == Setting.targetPort) {
-				prtTxtBfr.append("<OSC>").append('\t').append("Got a (Syn + Ack) Msg from ")
-						.append(_oscMsg.get(0).stringValue()).append(":").append(_oscMsg.get(1).intValue());
-				prtTxtBfr.append("<OSC>").append('\t').append("Send back (Ack) Msg to ").append(Setting.targetIp).append(":")
-						.append(Setting.targetPort);
+		if (!isConnected) {
+			if (_oscMsg.addrPattern().equals(addrPtrnSyn)) {
+				isRecievedSynMsg = true;
+				prtTxtBfr.append("<OSC>").append('\t').append("Got a (Syn) Msg from ").append(_oscMsg.get(0).stringValue())
+						.append(":").append(_oscMsg.get(1).intValue()).append('\n');
+				prtTxtBfr.append("<OSC>").append('\t').append("Send back (Syn + Ack) Msg to ").append(Setting.targetIp)
+						.append(":").append(Setting.targetPort);
 				System.out.println(prtTxtBfr);
 				prtTxtBfr.setLength(0);
-				setToConnect();
+				sendConnectionMsg(addrPtrnSynAck);
 			}
-		}
-		else if (_oscMsg.addrPattern().equals(addrPtrnAck)) {
-			if (_oscMsg.get(0).stringValue().equals(Setting.targetIp) && _oscMsg.get(1).intValue() == Setting.targetPort) {
-				prtTxtBfr.append("<OSC>").append('\t').append("Got a (Ack) Msg from ").append(_oscMsg.get(0).stringValue())
-						.append(":").append(_oscMsg.get(1).intValue());
-				System.out.println(prtTxtBfr);
-				prtTxtBfr.setLength(0);
-				setToConnect();
+			else if (_oscMsg.addrPattern().equals(addrPtrnSynAck)) {
+				if (_oscMsg.get(0).stringValue().equals(Setting.targetIp) && _oscMsg.get(1).intValue() == Setting.targetPort) {
+					prtTxtBfr.append("<OSC>").append('\t').append("Got a (Syn + Ack) Msg from ")
+							.append(_oscMsg.get(0).stringValue()).append(":").append(_oscMsg.get(1).intValue()).append('\n');
+					prtTxtBfr.append("<OSC>").append('\t').append("Send back (Ack) Msg to ").append(Setting.targetIp).append(":")
+							.append(Setting.targetPort);
+					System.out.println(prtTxtBfr);
+					prtTxtBfr.setLength(0);
+					setToConnect();
+				}
+			}
+			else if (_oscMsg.addrPattern().equals(addrPtrnAck)) {
+				if (_oscMsg.get(0).stringValue().equals(Setting.targetIp) && _oscMsg.get(1).intValue() == Setting.targetPort) {
+					prtTxtBfr.append("<OSC>").append('\t').append("Got a (Ack) Msg from ").append(_oscMsg.get(0).stringValue())
+							.append(":").append(_oscMsg.get(1).intValue());
+					System.out.println(prtTxtBfr);
+					prtTxtBfr.setLength(0);
+					setToConnect();
+				}
 			}
 		}
 		else if (_oscMsg.addrPattern().equals(addrPtrnDisconnect)) {

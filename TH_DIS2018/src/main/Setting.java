@@ -1,13 +1,13 @@
 package main;
 
 public class Setting {
-	// public static int myPort = 8765;
-	// public static int targetPort = 4321;
-	// public static String targetIp = "192.168.0.4";
-
 	public static int			myPort			= 8765;
-	public static int			targetPort	= 8765;
-	public static String	targetIp		= "192.168.0.8";
+	public static int			targetPort	= 4321;
+	public static String	targetIp		= "192.168.0.4";
+
+	// public static int myPort = 8765;
+	// public static int targetPort = 8765;
+	// public static String targetIp = "192.168.0.8";
 
 	public static boolean	isXInverted	= false;
 	public static boolean	isYInverted	= true;
