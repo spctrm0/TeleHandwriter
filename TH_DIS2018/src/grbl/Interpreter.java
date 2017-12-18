@@ -43,65 +43,67 @@ public class Interpreter {
 	}
 
 	public void interpreting() {
-		boolean isDone_ = false;
-		while (!isDone_) {
+		while (drawing.getStrokesNum() > 0) {
 			Stroke stroke_ = drawing.getFirstStroke();
-			if (stroke_.getPointsNum() >= 2) {
-				float lastF_ = 60000 / 500.0f;
-				while (stroke_.getPointsNum() >= 2) {
-					Point a_ = stroke_.getFirstPoint();
-					Point b_ = stroke_.getSecondPoint();
-					float aX_ = Setting.targetTabletWidth * ((a_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
-					float aY_ = Setting.targetTabletHeight * ((a_.getPenY()) / Setting.targetScreenHeight);
-					float bX_ = Setting.targetTabletWidth * ((b_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
-					float bY_ = Setting.targetTabletHeight * ((b_.getPenY()) / Setting.targetScreenHeight);
-					float f_ = lastF_;
-					long duration_ = b_.getMillis() - a_.getMillis();
-					if (duration_ != 0)
-						f_ = (float) (60000 / (double) duration_);
-					// Head
-					if (a_.getKind() == 0) {
-						interpretCnt++;
-						grbl.reserve("G94\r");
-						strBfr.append("G1")//
-								.append("X").append(String.format("%.3f", Setting.isXInverted ? -aX_ : aX_))//
-								.append("Y").append(String.format("%.3f", Setting.isYInverted ? -aY_ : aY_))//
-								.append("F").append(String.format("%.3f", Setting.feedrateStrokeToStoke))//
-								.append('\r');
-						grbl.reserve(strBfr.toString());
-						strBfr.setLength(0);
-						grbl.reserve("G93\r");
-						strBfr.append("M3").append("S").append(Setting.servoZero).append('\r');
-						grbl.reserve(strBfr.toString());
-						strBfr.setLength(0);
-					}
-					// Head, Body, Tail
+			float lastF_ = 60000 / 500.0f;
+			while (stroke_.getPointsNum() >= 2) {
+				Point a_ = stroke_.getFirstPoint();
+				Point b_ = stroke_.getSecondPoint();
+				float aX_ = Setting.targetTabletWidth * ((a_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
+				float aY_ = Setting.targetTabletHeight * ((a_.getPenY()) / Setting.targetScreenHeight);
+				float bX_ = Setting.targetTabletWidth * ((b_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
+				float bY_ = Setting.targetTabletHeight * ((b_.getPenY()) / Setting.targetScreenHeight);
+				float f_ = lastF_;
+				long duration_ = b_.getMillis() - a_.getMillis();
+				if (duration_ != 0)
+					f_ = (float) (60000 / (double) duration_);
+				// Head
+				if (a_.getKind() == 0) {
+					interpretCnt++;
+					grbl.reserve("G94\r");
 					strBfr.append("G1")//
-							.append("X").append(String.format("%.3f", Setting.isXInverted ? -bX_ : bX_))//
-							.append("Y").append(String.format("%.3f", Setting.isYInverted ? -bY_ : bY_))//
-							.append("F").append(String.format("%.3f", f_))//
+							.append("X").append(String.format("%.3f", Setting.isXInverted ? -aX_ : aX_))//
+							.append("Y").append(String.format("%.3f", Setting.isYInverted ? -aY_ : aY_))//
+							.append("F").append(Setting.feedrateStrokeToStoke)//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
-					logTable(a_.getStrokeIdx(), a_.getPenX(), a_.getPenY(), a_.getPressure(), a_.getTiltX(), a_.getTiltY(),
-							a_.getMillis()); // logging first point on table
-					stroke_.removeFirstPoint(); // remove first point
-					// Tail
-					if (b_.getKind() == 2) {
-						strBfr.append("M3").append("S").append(Setting.servoHover).append('\r');
-						grbl.reserve(strBfr.toString());
-						strBfr.setLength(0);
-						logTable(b_.getStrokeIdx(), b_.getPenX(), b_.getPenY(), b_.getPressure(), b_.getTiltX(), b_.getTiltY(),
-								b_.getMillis()); // logging second (last) point on table
-						stroke_.removeFirstPoint(); // remove second (last) point
-						drawing.removeFirstStroke(); // remove first stroke which just has
-																					// been empty
-					}
-					lastF_ = f_;
+					grbl.reserve("G93\r");
+					strBfr.append("M3").append("S").append(Setting.servoZero).append('\r');
+					grbl.reserve(strBfr.toString());
+					strBfr.setLength(0);
 				}
+				// For all
+				strBfr.append("G1")//
+						.append("X").append(String.format("%.3f", Setting.isXInverted ? -bX_ : bX_))//
+						.append("Y").append(String.format("%.3f", Setting.isYInverted ? -bY_ : bY_))//
+						.append("F").append(String.format("%.3f", f_))//
+						.append('\r');
+				grbl.reserve(strBfr.toString());
+				strBfr.setLength(0);
+				// logging first point on table
+				logTable(a_.getStrokeIdx(), a_.getPenX(), a_.getPenY(), a_.getPressure(), a_.getTiltX(), a_.getTiltY(),
+						a_.getMillis());
+				// remove first point
+				stroke_.removeFirstPoint();
+				// Tail
+				if (b_.getKind() == 2) {
+					strBfr.append("M3").append("S").append(Setting.servoHover).append('\r');
+					grbl.reserve(strBfr.toString());
+					strBfr.setLength(0);
+					// logging second (last) point on table
+					logTable(b_.getStrokeIdx(), b_.getPenX(), b_.getPenY(), b_.getPressure(), b_.getTiltX(), b_.getTiltY(),
+							b_.getMillis());
+					// remove second (last) point
+					stroke_.removeFirstPoint();
+					// remove first stroke which just has been empty
+					drawing.removeFirstStroke();
+				}
+				// remember feedrate of this time
+				lastF_ = f_;
 			}
-			else
-				isDone_ = true;
+			if (stroke_.getPointsNum() == 1)
+				break;
 		}
 	}
 
