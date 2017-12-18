@@ -149,6 +149,7 @@ public class OscComm {
 							.append(Setting.targetPort);
 					System.out.println(prtTxtBfr);
 					prtTxtBfr.setLength(0);
+					sendConnectionMsg(addrPtrnAck);
 					setToConnect();
 				}
 			}
