@@ -30,7 +30,8 @@ public class TH_DIS2018 extends PApplet {
 	int acc = 6000;
 
 	public void settings() {
-		fullScreen();
+		// fullScreen();
+		size(500, 500);
 	}
 
 	public void setup() {
@@ -97,7 +98,7 @@ public class TH_DIS2018 extends PApplet {
 
 	public void keyPressed() {
 		if (key == '~') {
-			oscComm.tryToConnect();
+			oscComm.sendSynMsg();
 		}
 		else if (key == 'i' || key == 'I') // toggle writable
 		{
