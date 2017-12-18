@@ -8,7 +8,6 @@ import netP5.NetAddress;
 import oscP5.OscMessage;
 import oscP5.OscP5;
 import processing.core.PApplet;
-import processing.serial.Serial;
 
 public class OscComm {
 	public PApplet	p5			= null;
@@ -189,5 +188,9 @@ public class OscComm {
 			System.out.println(prtTxtBfr);
 			prtTxtBfr.setLength(0);
 		}
+	}
+
+	public void activateAutoConnect() {
+		disconnect();
 	}
 }

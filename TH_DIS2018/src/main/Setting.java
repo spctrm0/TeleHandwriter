@@ -28,11 +28,7 @@ public class Setting {
 	public static int	servoHover	= 95;
 	public static int	servoZero		= 63;
 
-	public static int feedrateStrokeToStoke = 60 * 250; // 1min
-	// *
-	// (mm
-	// /
-	// sec)
+	public static int feedrateStrokeToStoke = 60 * 250; // 1min * (mm / sec)
 
 	public static float	myCalibX			= 0;
 	public static float	myCalibY			= 0;

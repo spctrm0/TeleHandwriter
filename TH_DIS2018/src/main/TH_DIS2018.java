@@ -98,7 +98,7 @@ public class TH_DIS2018 extends PApplet {
 
 	public void keyPressed() {
 		if (key == '~') {
-			oscComm.sendSynMsg();
+			oscComm.activateAutoConnect();
 		}
 		else if (key == 'i' || key == 'I') // toggle writable
 		{
