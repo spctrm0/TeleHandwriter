@@ -30,8 +30,8 @@ public class TH_DIS2018 extends PApplet {
 	int acc = 6000;
 
 	public void settings() {
-		// fullScreen();
-		size(500, 500);
+		fullScreen();
+		// size(500, 500);
 	}
 
 	public void setup() {

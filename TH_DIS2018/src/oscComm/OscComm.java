@@ -56,7 +56,7 @@ public class OscComm {
 	public void tryConnect(int _tryIntervalMsec) {
 		if (getWaitingTimeMsec() >= _tryIntervalMsec) {
 			disconnect(Setting.targetIp, Setting.targetPort);
-			sendConnectionMsg(addrPtrnSyn, Setting.targetIp, Setting.targetPort);
+			sendConnectionMsg(addrPtrnSyn);
 			prtTxtBfr.append("<OSC>").append('\t').append("Send (Syn) Msg to ").append(Setting.targetIp).append(":")
 					.append(Setting.targetPort);
 			System.out.println(prtTxtBfr);
@@ -76,15 +76,15 @@ public class OscComm {
 			prtTxtBfr.setLength(0);
 			isConnected = false;
 			isRecievedSynMsg = false;
-			sendConnectionMsg(addrPtrnDisconnect, _ip, _port);
+			sendConnectionMsg(addrPtrnDisconnect);
 		}
 	}
 
-	public void sendConnectionMsg(String _addrPattern, String _ip, int _port) {
+	public void sendConnectionMsg(String _addrPattern) {
 		msg.clear();
 		msg.setAddrPattern(_addrPattern);
-		msg.add(_ip)//
-				.add(_port);
+		msg.add(oscPort.ip())//
+				.add(Setting.myPort);
 		oscPort.send(msg, targetAddr);
 	}
 
@@ -150,7 +150,7 @@ public class OscComm {
 								.append(port_);
 						System.out.println(prtTxtBfr);
 						prtTxtBfr.setLength(0);
-						sendConnectionMsg(addrPtrnSynAck, ip_, port_);
+						sendConnectionMsg(addrPtrnSynAck);
 					}
 					else if (_oscMsg.addrPattern().equals(addrPtrnSynAck)) {
 						prtTxtBfr.append("<OSC>").append('\t').append("Got a (Syn + Ack) Msg from ")//
@@ -164,7 +164,7 @@ public class OscComm {
 								.append(port_);
 						System.out.println(prtTxtBfr);
 						prtTxtBfr.setLength(0);
-						sendConnectionMsg(addrPtrnAck, ip_, port_);
+						sendConnectionMsg(addrPtrnAck);
 						setToConnect(ip_, port_);
 					}
 					else if (_oscMsg.addrPattern().equals(addrPtrnAck)) {
