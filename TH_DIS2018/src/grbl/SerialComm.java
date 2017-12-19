@@ -43,17 +43,18 @@ public class SerialComm {
 	}
 
 	public void pre() {
-		if (!isConnected)
-			connecting(connectIntervalMsec);
+		tryConnect(connectIntervalMsec);
 	}
 
-	public void connecting(int _tryIntervalMsec) {
-		if (getWaitingTimeMsec() >= _tryIntervalMsec) {
-			if (Serial.list().length > 0) {
-				portIdx++;
-				if (portIdx >= Serial.list().length)
-					portIdx = 0;
-				connect(portIdx);
+	public void tryConnect(int _tryIntervalMsec) {
+		if (!isConnected) {
+			if (getWaitingTimeMsec() >= _tryIntervalMsec) {
+				if (Serial.list().length > 0) {
+					portIdx++;
+					if (portIdx >= Serial.list().length)
+						portIdx = 0;
+					connect(portIdx);
+				}
 			}
 		}
 	}
@@ -83,12 +84,11 @@ public class SerialComm {
 	public void disconnect() {
 		srlPort.stop();
 		srlPort = null;
-		boolean wasConnected_ = isConnected;
-		isConnected = false;
-		if (wasConnected_ != isConnected) {
+		if (isConnected) {
 			prtTxtBfr.append("<SRL>").append('\t').append("Disconnected");
 			System.out.println(prtTxtBfr.toString());
 			prtTxtBfr.setLength(0);
+			isConnected = false;
 		}
 	}
 
@@ -131,5 +131,10 @@ public class SerialComm {
 
 	public void write(String _msg) {
 		srlPort.write(_msg);
+	}
+
+	public void activateAutoConnect() {
+		disconnect();
+		tryConnect(connectIntervalMsec);
 	}
 }

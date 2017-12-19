@@ -34,21 +34,51 @@ public class Grbl {
 	}
 
 	public void pre() {
-		streaming();
+		stream();
 	}
 
-	public void streaming() {
-		while (bfrSize <= bfrSizeMx && reservedMsg.size() > 0) {
-			if (bfrSize + reservedMsg.get(0).length() <= bfrSizeMx) {
-				bfrSize += reservedMsg.get(0).length();
-				grblBfr.add(reservedMsg.get(0).toString());
-				serialComm.write(reservedMsg.get(0));
-				reservedMsg.remove(0);
+	boolean servoCmdWaiting = false;
+
+	public void stream() {
+		if (servoCmdWaiting) {
+			String cmd_ = "?\r";
+			if (bfrSize + cmd_.length() <= bfrSizeMx) {
+				bfrSize += cmd_.length();
+				grblBfr.add(cmd_);
+				serialComm.write(cmd_);
 			}
-			else
-				break;
+		}
+		else {
+			while (bfrSize <= bfrSizeMx && reservedMsg.size() > 0) {
+				String cmd_;
+				cmd_ = reservedMsg.get(0).toString();
+				if (bfrSize + cmd_.length() <= bfrSizeMx) {
+					bfrSize += cmd_.length();
+					grblBfr.add(cmd_);
+					if (isServoCmd(cmd_)) {
+						servoCmdWaiting = true;
+					}
+					serialComm.write(cmd_);
+					reservedMsg.remove(0);
+				}
+				else
+					break;
+			}
 		}
 	}
+
+	// cmd_ = reservedMsg.get(0).toString();
+	// if (bfrSize + cmd_.length() <= bfrSizeMx) {
+	// bfrSize += cmd_.length();
+	// grblBfr.add(cmd_);
+	// if (isMotionCmd(cmd_)) {
+	// isIdle = false;
+	// }
+	// serialComm.write(cmd_);
+	// reservedMsg.remove(0);
+	// }
+	// else
+	// break;
 
 	public void init() {
 		reservedMsg.clear();
@@ -57,7 +87,15 @@ public class Grbl {
 	}
 
 	public void read(String _msg) {
+
+		servoCmdWaiting = false;
+
 		if (_msg.equals("ok") || _msg.contains("error:")) {
+			String cmd_ = grblBfr.get(0);
+			if (isStatusReportCmd(cmd_)) {
+				for (int i = 0; i < receivedMsg.size(); i++)
+					System.out.println(receivedMsg.get(i));
+			}
 			receivedMsg.clear();
 			bfrSize -= grblBfr.get(0).length();
 			grblBfr.remove(0);
@@ -82,12 +120,12 @@ public class Grbl {
 		return false;
 	}
 
-	public boolean isServoUpCmd(String _cmd) {
-		String[] split_ = _cmd.split("S");
-		String trimmed_ = split_[1].substring(0, split_[1].length() - 1);
-		int val_ = Integer.parseInt(trimmed_);
-		return val_ == Setting.servoHover;
-	}
+	// public boolean isServoUpCmd(String _cmd) {
+	// String[] split_ = _cmd.split("S");
+	// String trimmed_ = split_[1].substring(0, split_[1].length() - 1);
+	// int val_ = Integer.parseInt(trimmed_);
+	// return val_ == Setting.servoHover;
+	// }
 
 	public boolean isStatusReportCmd(String _cmd) {
 		if (_cmd.length() >= 2)

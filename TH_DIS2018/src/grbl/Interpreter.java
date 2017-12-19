@@ -39,10 +39,10 @@ public class Interpreter {
 	}
 
 	public void pre() {
-		interpreting();
+		interpret();
 	}
 
-	public void interpreting() {
+	public void interpret() {
 		while (drawing.getStrokesNum() > 0) {
 			Stroke stroke_ = drawing.getFirstStroke();
 			while (stroke_.getPointsNum() >= 2) {

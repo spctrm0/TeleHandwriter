@@ -49,19 +49,20 @@ public class OscComm {
 	}
 
 	public void pre() {
-		if (!isConnected && !isRecievedSynMsg)
-			tryConnect(connectIntervalMsec);
+		tryConnect(connectIntervalMsec);
 	}
 
 	public void tryConnect(int _tryIntervalMsec) {
-		if (getWaitingTimeMsec() >= _tryIntervalMsec) {
-			disconnect(Setting.targetIp, Setting.targetPort);
-			sendConnectionMsg(addrPtrnSyn);
-			prtTxtBfr.append("<OSC>").append('\t').append("Send (Syn) Msg to ").append(Setting.targetIp).append(":")
-					.append(Setting.targetPort);
-			System.out.println(prtTxtBfr);
-			prtTxtBfr.setLength(0);
-			connectTrialTimeUsec = System.nanoTime();
+		if (!isConnected && !isRecievedSynMsg) {
+			if (getWaitingTimeMsec() >= _tryIntervalMsec) {
+				disconnect(Setting.targetIp, Setting.targetPort);
+				sendConnectionMsg(addrPtrnSyn);
+				prtTxtBfr.append("<OSC>").append('\t').append("Send (Syn) Msg to ").append(Setting.targetIp).append(":")
+						.append(Setting.targetPort);
+				System.out.println(prtTxtBfr);
+				prtTxtBfr.setLength(0);
+				connectTrialTimeUsec = System.nanoTime();
+			}
 		}
 	}
 
