@@ -48,4 +48,11 @@ public class Setting {
 	public static int	myScreenHeight			= 1080;
 	public static int	targetScreentWidth	= 1920;
 	public static int	targetScreenHeight	= 1080;
+
+	public static void update() {
+		servoDelayPreDown = 0.001f;
+		servoDelayPostDown = 0.001f;
+		servoDelayPreUp = 0.001f;
+		servoDelayPostUp = 0.001f;
+	}
 }
