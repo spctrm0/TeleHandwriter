@@ -88,13 +88,13 @@ public class Grbl {
 
 	public void read(String _msg) {
 
-		servoCmdWaiting = false;
+//		servoCmdWaiting = false;
 
 		if (_msg.equals("ok") || _msg.contains("error:")) {
 			String cmd_ = grblBfr.get(0);
 			if (isStatusReportCmd(cmd_)) {
 				for (int i = 0; i < receivedMsg.size(); i++)
-					System.out.println(receivedMsg.get(i));
+					System.out.println(i + ": " + receivedMsg.get(i));
 			}
 			receivedMsg.clear();
 			bfrSize -= grblBfr.get(0).length();
