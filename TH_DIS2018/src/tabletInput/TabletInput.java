@@ -10,11 +10,20 @@ public class TabletInput {
 	private OscComm	oscComm	= null;
 	private Tablet	tablet;
 
-	private boolean	isWritable		= false;
-	private long		lastMillis		= -1;
-	private int			totalPointIdx	= -1;
-	private int			strokeIdx			= -1;
-	private int			pointIdx			= -1;
+	private boolean isWritable = false;
+
+	private int			arryIdx				= 0;
+	private float[]	arryPenX			= { 0, 0 };
+	private float[]	arryPenY			= { 0, 0 };
+	private float[]	arryPressure	= { 0, 0 };
+	private float[]	arryTiltX			= { 0, 0 };
+	private float[]	arryTiltY			= { 0, 0 };
+	private long[]	arryMillis		= { 0, 0 };
+	private int[]		arryKind			= { 0, 0 };
+
+	private int	totalPointIdx	= -1;
+	private int	strokeIdx			= -1;
+	private int	pointIdx			= -1;
 
 	public void setOscComm(OscComm _oscComm) {
 		oscComm = _oscComm;
@@ -32,20 +41,60 @@ public class TabletInput {
 				if (_mEvt.getAction() == MouseEvent.PRESS || _mEvt.getAction() == MouseEvent.DRAG
 						|| _mEvt.getAction() == MouseEvent.RELEASE) {
 					int kind_ = 1;
-					if (_mEvt.getAction() == MouseEvent.PRESS) {
-						strokeIdx++;
-						pointIdx = -1;
+					if (_mEvt.getAction() == MouseEvent.PRESS)
 						kind_ = 0;
-					}
 					else if (_mEvt.getAction() == MouseEvent.RELEASE)
 						kind_ = 2;
-					totalPointIdx++;
-					pointIdx++;
-					if (_mEvt.getMillis() - lastMillis != 0 || kind_ != 1)
-						oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, tablet.getPenX(), tablet.getPenY(),
-								tablet.getPressure(), tablet.getTiltX(), tablet.getTiltY(), _mEvt.getMillis(), kind_);
+					arryPenX[arryIdx] = tablet.getPenX();
+					arryPenY[arryIdx] = tablet.getPenY();
+					arryPressure[arryIdx] = tablet.getPressure();
+					arryTiltX[arryIdx] = tablet.getTiltX();
+					arryTiltY[arryIdx] = tablet.getTiltY();
+					arryMillis[arryIdx] = _mEvt.getMillis();
+					arryKind[arryIdx] = kind_;
+					if (arryIdx == 1) {
+						if (arryMillis[0] - arryMillis[1] != 0) {
+							if (arryKind[0] == 0) {// MouseEvent.PRESS
+								strokeIdx++;
+								pointIdx = -1;
+							}
+							pointIdx++;
+							totalPointIdx++;
+							oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, arryPenX[0], arryPenY[0], arryPressure[0],
+									arryTiltX[0], arryTiltY[0], arryMillis[0], arryKind[0]);
+							arryPenX[0] = arryPenX[1];
+							arryPenY[0] = arryPenY[1];
+							arryPressure[0] = arryPressure[1];
+							arryTiltX[0] = arryTiltX[1];
+							arryTiltY[0] = arryTiltY[1];
+							arryMillis[0] = arryMillis[1];
+							arryKind[0] = arryKind[1];
+							if (arryKind[0] == 2) { // MouseEvent.RELEASE
+								pointIdx++;
+								totalPointIdx++;
+								oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, arryPenX[0], arryPenY[0],
+										arryPressure[0], arryTiltX[0], arryTiltY[0], arryMillis[0], arryKind[0]);
+							}
+						}
+						else if (arryKind[1] == 2) {
+							arryPenX[0] = arryPenX[1];
+							arryPenY[0] = arryPenY[1];
+							arryPressure[0] = arryPressure[1];
+							arryTiltX[0] = arryTiltX[1];
+							arryTiltY[0] = arryTiltY[1];
+							arryMillis[0] = arryMillis[1];
+							arryKind[0] = arryKind[1];
+							pointIdx++;
+							totalPointIdx++;
+							oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, arryPenX[0], arryPenY[0], arryPressure[0],
+									arryTiltX[0], arryTiltY[0], arryMillis[0], arryKind[0]);
+						}
+					}
+					if (arryKind[0] == 0)
+						arryIdx = 1;
+					else if (arryKind[0] == 2)
+						arryIdx = 0;
 				}
-				lastMillis = _mEvt.getMillis();
 			}
 		}
 	}

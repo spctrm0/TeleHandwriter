@@ -45,7 +45,6 @@ public class Interpreter {
 	public void interpreting() {
 		while (drawing.getStrokesNum() > 0) {
 			Stroke stroke_ = drawing.getFirstStroke();
-			float lastF_ = 60000 / 500.0f;
 			while (stroke_.getPointsNum() >= 2) {
 				Point a_ = stroke_.getFirstPoint();
 				Point b_ = stroke_.getSecondPoint();
@@ -53,10 +52,8 @@ public class Interpreter {
 				float aY_ = Setting.targetTabletHeight * ((a_.getPenY()) / Setting.targetScreenHeight);
 				float bX_ = Setting.targetTabletWidth * ((b_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
 				float bY_ = Setting.targetTabletHeight * ((b_.getPenY()) / Setting.targetScreenHeight);
-				float f_ = lastF_;
 				long duration_ = b_.getMillis() - a_.getMillis();
-				if (duration_ != 0)
-					f_ = (float) (60000 / (double) duration_);
+				float f_ = (float) (60000 / (double) duration_);
 				// Head
 				if (a_.getKind() == 0) {
 					interpretCnt++;
@@ -99,8 +96,6 @@ public class Interpreter {
 					// remove first stroke which just has been empty
 					drawing.removeFirstStroke();
 				}
-				// remember feedrate of this time
-				lastF_ = f_;
 			}
 			if (stroke_.getPointsNum() == 1)
 				break;
