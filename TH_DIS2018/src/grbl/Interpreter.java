@@ -15,8 +15,6 @@ public class Interpreter {
 	Grbl		grbl		= null;
 	Table		table		= null;
 
-	int interpretCnt = 0;
-
 	StringBuffer strBfr = null;
 
 	public void setDrawing(Drawing _drawing) {
@@ -56,7 +54,6 @@ public class Interpreter {
 				float f_ = (float) (60000 / (double) duration_);
 				// Head
 				if (a_.getKind() == 0) {
-					interpretCnt++;
 					grbl.reserve("G94\r");
 					strBfr.append("G1")//
 							.append("X").append(String.format("%.3f", Setting.isXInverted ? -aX_ : aX_))//
@@ -66,10 +63,29 @@ public class Interpreter {
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
 					grbl.reserve("G93\r");
-					strBfr.append("M3").append("S").append(Setting.servoZero).append('\r');
+
+					strBfr.append("G4")//
+							.append("P")//
+							.append(Setting.servoDelayPreDown)//
+							.append('\r');
+					grbl.reserve(strBfr.toString());
+					strBfr.setLength(0);
+
+					strBfr.append("M3")//
+							.append("S")//
+							.append(Setting.servoZero)//
+							.append('\r');
+					grbl.reserve(strBfr.toString());
+					strBfr.setLength(0);
+
+					strBfr.append("G4")//
+							.append("P")//
+							.append(Setting.servoDelayPostDown)//
+							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
 				}
+
 				// For all
 				strBfr.append("G1")//
 						.append("X").append(String.format("%.3f", Setting.isXInverted ? -bX_ : bX_))//
@@ -78,16 +94,36 @@ public class Interpreter {
 						.append('\r');
 				grbl.reserve(strBfr.toString());
 				strBfr.setLength(0);
+
 				// logging first point on table
 				logTable(a_.getStrokeIdx(), a_.getPenX(), a_.getPenY(), a_.getPressure(), a_.getTiltX(), a_.getTiltY(),
 						a_.getMillis());
 				// remove first point
 				stroke_.removeFirstPoint();
+
 				// Tail
 				if (b_.getKind() == 2) {
-					strBfr.append("M3").append("S").append(Setting.servoHover).append('\r');
+					strBfr.append("G4")//
+							.append("P")//
+							.append(Setting.servoDelayPreUp)//
+							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
+
+					strBfr.append("M3")//
+							.append("S")//
+							.append(Setting.servoHover)//
+							.append('\r');
+					grbl.reserve(strBfr.toString());
+					strBfr.setLength(0);
+
+					strBfr.append("G4")//
+							.append("P")//
+							.append(Setting.servoDelayPostUp)//
+							.append('\r');
+					grbl.reserve(strBfr.toString());
+					strBfr.setLength(0);
+
 					// logging second (last) point on table
 					logTable(b_.getStrokeIdx(), b_.getPenX(), b_.getPenY(), b_.getPressure(), b_.getTiltX(), b_.getTiltY(),
 							b_.getMillis());

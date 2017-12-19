@@ -25,8 +25,12 @@ public class Setting {
 
 	public static String connectionChkTxt = "Grbl 1.1f ['$' for help]";
 
-	public static int	servoHover	= 95;
-	public static int	servoZero		= 63;
+	public static int		servoHover					= 95;
+	public static int		servoZero						= 63;
+	public static float	servoDelayPreDown		= 0.001f;
+	public static float	servoDelayPostDown	= 0.001f;
+	public static float	servoDelayPreUp			= 0.001f;
+	public static float	servoDelayPostUp		= 0.001f;
 
 	public static int feedrateStrokeToStoke = 60 * 250; // 1min * (mm / sec)
 

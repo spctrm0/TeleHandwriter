@@ -37,48 +37,20 @@ public class Grbl {
 		stream();
 	}
 
-	boolean servoCmdWaiting = false;
-
 	public void stream() {
-		if (servoCmdWaiting) {
-			String cmd_ = "?\r";
+		while (bfrSize <= bfrSizeMx && reservedMsg.size() > 0) {
+			String cmd_;
+			cmd_ = reservedMsg.get(0).toString();
 			if (bfrSize + cmd_.length() <= bfrSizeMx) {
 				bfrSize += cmd_.length();
 				grblBfr.add(cmd_);
 				serialComm.write(cmd_);
+				reservedMsg.remove(0);
 			}
-		}
-		else {
-			while (bfrSize <= bfrSizeMx && reservedMsg.size() > 0) {
-				String cmd_;
-				cmd_ = reservedMsg.get(0).toString();
-				if (bfrSize + cmd_.length() <= bfrSizeMx) {
-					bfrSize += cmd_.length();
-					grblBfr.add(cmd_);
-					if (isServoCmd(cmd_)) {
-						servoCmdWaiting = true;
-					}
-					serialComm.write(cmd_);
-					reservedMsg.remove(0);
-				}
-				else
-					break;
-			}
+			else
+				break;
 		}
 	}
-
-	// cmd_ = reservedMsg.get(0).toString();
-	// if (bfrSize + cmd_.length() <= bfrSizeMx) {
-	// bfrSize += cmd_.length();
-	// grblBfr.add(cmd_);
-	// if (isMotionCmd(cmd_)) {
-	// isIdle = false;
-	// }
-	// serialComm.write(cmd_);
-	// reservedMsg.remove(0);
-	// }
-	// else
-	// break;
 
 	public void init() {
 		reservedMsg.clear();
@@ -87,17 +59,10 @@ public class Grbl {
 	}
 
 	public void read(String _msg) {
-
-//		servoCmdWaiting = false;
-
 		if (_msg.equals("ok") || _msg.contains("error:")) {
 			String cmd_ = grblBfr.get(0);
-			if (isStatusReportCmd(cmd_)) {
-				for (int i = 0; i < receivedMsg.size(); i++)
-					System.out.println(i + ": " + receivedMsg.get(i));
-			}
 			receivedMsg.clear();
-			bfrSize -= grblBfr.get(0).length();
+			bfrSize -= cmd_.length();
 			grblBfr.remove(0);
 		}
 		else
