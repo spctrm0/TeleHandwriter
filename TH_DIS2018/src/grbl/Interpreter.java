@@ -66,7 +66,7 @@ public class Interpreter {
 
 					strBfr.append("G4")//
 							.append("P")//
-							.append(Setting.servoDelayPreDown)//
+							.append(String.format("%.3f", Setting.servoDelayPreDown))//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
@@ -80,7 +80,7 @@ public class Interpreter {
 
 					strBfr.append("G4")//
 							.append("P")//
-							.append(Setting.servoDelayPostDown)//
+							.append(String.format("%.3f", Setting.servoDelayPostDown))//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
@@ -105,7 +105,7 @@ public class Interpreter {
 				if (b_.getKind() == 2) {
 					strBfr.append("G4")//
 							.append("P")//
-							.append(Setting.servoDelayPreUp)//
+							.append(String.format("%.3f", Setting.servoDelayPreUp))//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
@@ -119,7 +119,7 @@ public class Interpreter {
 
 					strBfr.append("G4")//
 							.append("P")//
-							.append(Setting.servoDelayPostUp)//
+							.append(String.format("%.3f", Setting.servoDelayPostUp))//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
