@@ -17,8 +17,8 @@ public class Grbl {
 	public long			strokeEndTimeUsec	= 0;
 	public int			bfrSize						= 0;
 
-	boolean			gate					= false;
-	public int	strokeEndCnt	= 0;
+	public boolean	returnHomeGate	= false;
+	public int			strokeEndCnt		= 0;
 
 	public ArrayList<String>	receivedMsg	= null;
 	public ArrayList<String>	grblBfr			= null;
@@ -53,10 +53,10 @@ public class Grbl {
 	}
 
 	public void returnHome(int _returnIntervalMsec) {
-		if (gate) {
+		if (returnHomeGate) {
 			if (getWaitingTimeMsec() >= _returnIntervalMsec) {
 				reserveGoBackHomeCmd();
-				gate = false;
+				returnHomeGate = false;
 			}
 		}
 	}
@@ -95,7 +95,7 @@ public class Grbl {
 			else if (isStrokeEndCmd(cmd_)) {
 				strokeEndCnt++;
 				if (reservedMsg.size() == 0 && bfrSize == 0 && !isHome) {
-					gate = true;
+					returnHomeGate = true;
 					strokeEndTimeUsec = System.nanoTime();
 				}
 			}
