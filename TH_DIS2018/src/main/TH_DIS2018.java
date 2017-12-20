@@ -148,7 +148,7 @@ public class TH_DIS2018 extends PApplet {
 		else if (key == 'x' || key == 'X') // servo off
 		{
 			strBfr.append("M3")//
-					.append("0")//
+					.append("S0")//
 					.append('\r');
 			grbl.reserve(strBfr.toString());
 			strBfr.setLength(0);

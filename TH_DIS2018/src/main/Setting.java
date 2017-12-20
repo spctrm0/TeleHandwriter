@@ -41,6 +41,9 @@ public class Setting {
 	//
 	// public static float xZero = 43;
 	// public static float yZero = 31;
+	
+
+	public static float	xBackOff	= -20;
 
 	public static String connectionChkTxt = "Grbl 1.1f ['$' for help]";
 
