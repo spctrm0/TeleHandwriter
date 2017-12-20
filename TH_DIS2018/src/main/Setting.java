@@ -2,16 +2,16 @@ package main;
 
 public class Setting {
 	public static void update() {
-		xZero = 43;
-		yZero = 25;
+		xZero = 43.5f;
+		yZero = 26;
 
-		servoHover = 95;
-		servoZero = 63;
+		servoHover = 255 - 32;
+		servoZero = 127;
 
-		servoDelayPreDown = 0.001f;
-		servoDelayPostDown = 0.001f;
-		servoDelayPreUp = 0.001f;
-		servoDelayPostUp = 0.001f;
+		servoDelay[0] = 0;
+		servoDelay[1] = 0.001f;
+		servoDelay[2] = 0;
+		servoDelay[3] = 0.001f;
 	}
 
 	public static int			myPort			= 8765;
@@ -25,8 +25,8 @@ public class Setting {
 	public static boolean	isXInverted	= false;
 	public static boolean	isYInverted	= true;
 
-	public static float	xZero	= 43;
-	public static float	yZero	= 25;
+	public static float	xZero	= 43.5f;
+	public static float	yZero	= 26;
 
 	// public static int myPort = 4321;
 	// public static int targetPort = 8765;
@@ -44,12 +44,9 @@ public class Setting {
 
 	public static String connectionChkTxt = "Grbl 1.1f ['$' for help]";
 
-	public static int		servoHover					= 95;
-	public static int		servoZero						= 63;
-	public static float	servoDelayPreDown		= 0.001f;
-	public static float	servoDelayPostDown	= 0.001f;
-	public static float	servoDelayPreUp			= 0.001f;
-	public static float	servoDelayPostUp		= 0.001f;
+	public static int			servoHover	= 255 - 32;
+	public static int			servoZero		= 127;
+	public static float[]	servoDelay	= { 0.001f, 0.001f, 0.001f, 0.001f };
 
 	public static int feedrateStrokeToStoke = 60 * 250; // 1min * (mm / sec)
 

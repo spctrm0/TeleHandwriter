@@ -109,6 +109,11 @@ public class TH_DIS2018 extends PApplet {
 		}
 		else if (key == 'h' || key == 'H') // set home
 		{
+			strBfr.append("M3")//
+					.append("S").append(Setting.servoHover)//
+					.append('\r');
+			grbl.reserve(strBfr.toString());
+			strBfr.setLength(0);
 
 			grbl.reserve("G92X0Y0\r");
 			grbl.reserve("G90\r");
