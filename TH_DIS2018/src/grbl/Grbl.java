@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import main.Setting;
+import oscComm.OscComm;
 import processing.core.PApplet;
 
 public class Grbl {
 	public PApplet		p5					= null;
 	public SerialComm	serialComm	= null;
+	public OscComm		oscComm			= null;
 
 	public final int	backOffIntervalMsec	= 500;
 	public final int	bfrSizeMx						= 128;
 
+	public boolean	isBusy						= false;
 	public boolean	isOnPaper					= false;
 	public long			strokeEndTimeUsec	= 0;
 	public int			bfrSize						= 0;
@@ -29,6 +32,10 @@ public class Grbl {
 
 	public void setSerialComm(SerialComm _serialComm) {
 		serialComm = _serialComm;
+	}
+
+	public void setOscComm(OscComm _oscComm) {
+		oscComm = _oscComm;
 	}
 
 	public Grbl(PApplet _p5) {
@@ -68,6 +75,12 @@ public class Grbl {
 			if (bfrSize + cmd_.length() <= bfrSizeMx) {
 				bfrSize += cmd_.length();
 				grblBfr.add(cmd_);
+				if (!isBusy) {
+					if (isMotionCmd(cmd_)) {
+						isBusy = true;
+						oscComm.sendStatusReport(!isBusy);
+					}
+				}
 				serialComm.write(cmd_);
 				reservedMsg.remove(0);
 			}
@@ -97,6 +110,8 @@ public class Grbl {
 				if (reservedMsg.size() == 0 && bfrSize == 0 && isOnPaper) {
 					backOffGate = true;
 					strokeEndTimeUsec = System.nanoTime();
+					isBusy = false;
+					oscComm.sendStatusReport(!isBusy);
 				}
 			}
 		}

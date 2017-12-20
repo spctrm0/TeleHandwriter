@@ -69,6 +69,9 @@ public class TH_DIS2018 extends PApplet {
 	public void draw() {
 		Setting.update();
 		background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255, (tabletInput.isWritable()) ? 0 : 255);
+		noStroke();
+		fill(oscComm.isTargetIdle ? 0 : 255, oscComm.isTargetIdle ? 255 : 0, 0);
+		rect(0, 0, 32, 32);
 		noFill();
 		stroke(255);
 		for (Stroke stroke_ : drawing.getStrokes()) {

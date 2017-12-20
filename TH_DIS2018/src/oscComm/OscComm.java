@@ -13,16 +13,18 @@ public class OscComm {
 	public PApplet	p5			= null;
 	public Drawing	drawing	= null;
 
-	public final int		connectIntervalMsec	= 1000;
-	public final String	addrPtrnSyn					= "Syn";
-	public final String	addrPtrnSynAck			= "SynAck";
-	public final String	addrPtrnAck					= "Ack";
-	public final String	addrPtrnDisconnect	= "Disconnect";
-	public final String	addrPtrnTabletInput	= "TabletInput";
+	public final int		connectIntervalMsec		= 1000;
+	public final String	addrPtrnSyn						= "Syn";
+	public final String	addrPtrnSynAck				= "SynAck";
+	public final String	addrPtrnAck						= "Ack";
+	public final String	addrPtrnDisconnect		= "Disconnect";
+	public final String	addrPtrnTabletInput		= "TabletInput";
+	public final String	addrPtrnStatusReport	= "StatusReport";
 
 	public long			connectTrialTimeUsec	= 0;
 	public boolean	isConnected						= false;
 	public boolean	isRecievedSynMsg			= false;
+	public boolean	isTargetIdle					= true;
 
 	public OscP5			oscPort			= null;
 	public NetAddress	myAddr			= null;
@@ -200,6 +202,9 @@ public class OscComm {
 				drawing.addPoint(totalPointIdx_, strokeIdx_, pointIdx_, penX_, penY_, pressure_, tiltX_, tiltY_, millis_,
 						kind_);
 		}
+		else if (_oscMsg.addrPattern().equals(addrPtrnStatusReport)) {
+			isTargetIdle = _oscMsg.get(0).intValue() == 1;
+		}
 	}
 
 	public void setToConnect(String _ip, int _port) {
@@ -217,5 +222,12 @@ public class OscComm {
 	public void activateAutoConnect() {
 		disconnect(Setting.targetIp, Setting.targetPort);
 		tryConnect(connectIntervalMsec);
+	}
+
+	public void sendStatusReport(boolean _isIdle) {
+		msg.clear();
+		msg.setAddrPattern(addrPtrnStatusReport);
+		msg.add(_isIdle ? 1 : 0);
+		oscPort.send(msg, targetAddr);
 	}
 }
