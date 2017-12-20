@@ -65,22 +65,19 @@ public class Interpreter {
 					grbl.reserve("G93\r");
 
 					strBfr.append("G4")//
-							.append("P")//
-							.append(String.format("%.3f", Setting.servoDelayPreDown))//
+							.append("P").append(String.format("%.3f", Setting.servoDelayPreDown))//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
 
 					strBfr.append("M3")//
-							.append("S")//
-							.append(Setting.servoZero)//
+							.append("S").append(Setting.servoZero)//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
 
 					strBfr.append("G4")//
-							.append("P")//
-							.append(String.format("%.3f", Setting.servoDelayPostDown))//
+							.append("P").append(String.format("%.3f", Setting.servoDelayPostDown))//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
@@ -104,22 +101,19 @@ public class Interpreter {
 				// Tail
 				if (b_.getKind() == 2) {
 					strBfr.append("G4")//
-							.append("P")//
-							.append(String.format("%.3f", Setting.servoDelayPreUp))//
+							.append("P").append(String.format("%.3f", Setting.servoDelayPreUp))//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
 
 					strBfr.append("M3")//
-							.append("S")//
-							.append(Setting.servoHover)//
+							.append("S").append(Setting.servoHover)//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);
 
 					strBfr.append("G4")//
-							.append("P")//
-							.append(String.format("%.3f", Setting.servoDelayPostUp))//
+							.append("P").append(String.format("%.3f", Setting.servoDelayPostUp))//
 							.append('\r');
 					grbl.reserve(strBfr.toString());
 					strBfr.setLength(0);

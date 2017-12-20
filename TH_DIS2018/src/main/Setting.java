@@ -1,6 +1,19 @@
 package main;
 
 public class Setting {
+	public static void update() {
+		xZero = 43;
+		yZero = 25;
+
+		servoHover = 95;
+		servoZero = 63;
+
+		servoDelayPreDown = 0.001f;
+		servoDelayPostDown = 0.001f;
+		servoDelayPreUp = 0.001f;
+		servoDelayPostUp = 0.001f;
+	}
+
 	public static int			myPort			= 8765;
 	public static int			targetPort	= 4321;
 	public static String	targetIp		= "192.168.0.4";
@@ -12,6 +25,9 @@ public class Setting {
 	public static boolean	isXInverted	= false;
 	public static boolean	isYInverted	= true;
 
+	public static float	xZero	= 43;
+	public static float	yZero	= 25;
+
 	// public static int myPort = 4321;
 	// public static int targetPort = 8765;
 	// public static String targetIp = "192.168.0.8";
@@ -22,6 +38,9 @@ public class Setting {
 	//
 	// public static boolean isXInverted = true;
 	// public static boolean isYInverted = false;
+	//
+	// public static float xZero = 43;
+	// public static float yZero = 31;
 
 	public static String connectionChkTxt = "Grbl 1.1f ['$' for help]";
 
@@ -48,14 +67,4 @@ public class Setting {
 	public static int	myScreenHeight			= 1080;
 	public static int	targetScreentWidth	= 1920;
 	public static int	targetScreenHeight	= 1080;
-
-	public static void update() {
-		servoHover = 95;
-		servoZero = 63;
-
-		servoDelayPreDown = 0.001f;
-		servoDelayPostDown = 0.001f;
-		servoDelayPreUp = 0.001f;
-		servoDelayPostUp = 0.001f;
-	}
 }

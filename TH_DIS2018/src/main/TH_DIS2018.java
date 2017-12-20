@@ -27,7 +27,7 @@ public class TH_DIS2018 extends PApplet {
 	Table				table;
 	Interpreter	interpreter;
 
-	int acc = 6000;
+	StringBuffer strBfr = null;
 
 	public void settings() {
 		fullScreen();
@@ -51,6 +51,8 @@ public class TH_DIS2018 extends PApplet {
 		table.addColumn("tiltY");
 		table.addColumn("millis");
 		interpreter = new Interpreter(this);
+
+		strBfr = new StringBuffer();
 
 		grbl.setSerialComm(serialComm);
 		serialComm.setGrbl(grbl);
@@ -107,50 +109,43 @@ public class TH_DIS2018 extends PApplet {
 		}
 		else if (key == 'h' || key == 'H') // set home
 		{
+
 			grbl.reserve("G92X0Y0\r");
 			grbl.reserve("G90\r");
-		}
-		else if (key == '?') // set home
-		{
-			grbl.reserve("$$\r");
-		}
-		else if (key == 'b' || key == 'B') // set home
-		{
-			System.out.print(grbl.bfrSize);
-			System.out.print(", ");
-			System.out.print(grbl.reservedMsg.size());
-			System.out.print(", ");
-			System.out.println(grbl.grblBfr.size());
-		}
-		else if (key == 'x' || key == 'X') // servo off
-		{
-			grbl.reserve("M3S0\r");
+			grbl.reserve("G94\r");
+			strBfr.append("G1")//
+					.append("F").append(Setting.feedrateStrokeToStoke)//
+					.append("X").append(String.format("%.3f", Setting.isXInverted ? -Setting.xZero : Setting.xZero))//
+					.append("Y").append(String.format("%.3f", Setting.isYInverted ? -Setting.yZero : Setting.yZero))//
+					.append('\r');
+			grbl.reserve(strBfr.toString());
+			strBfr.setLength(0);
+			grbl.reserve("G93\r");
+			grbl.reserve("G92X0Y0\r");
 		}
 		else if (key == 'w' || key == 'W') // servo up
 		{
-			grbl.reserve("M3S" + Setting.servoHover + "\r");
+			strBfr.append("M3")//
+					.append("S").append(Setting.servoHover)//
+					.append('\r');
+			grbl.reserve(strBfr.toString());
+			strBfr.setLength(0);
 		}
 		else if (key == 's' || key == 'S') // servo down
 		{
-			grbl.reserve("M3S" + Setting.servoZero + "\r");
+			strBfr.append("M3")//
+					.append("S").append(Setting.servoZero)//
+					.append('\r');
+			grbl.reserve(strBfr.toString());
+			strBfr.setLength(0);
 		}
-		else if (key == '\'') {
-			acc = 4000;
-			System.out.println(acc);
-		}
-		else if (keyCode == UP) {
-			acc += 50;
-			System.out.println(acc);
-		}
-		else if (keyCode == DOWN) {
-			acc -= 50;
-			System.out.println(acc);
-		}
-		else if (key == '[') {
-			grbl.reserve("$120=" + acc + "\r");
-		}
-		else if (key == ']') {
-			grbl.reserve("$121=" + acc + "\r");
+		else if (key == 'x' || key == 'X') // servo off
+		{
+			strBfr.append("M3")//
+					.append("0")//
+					.append('\r');
+			grbl.reserve(strBfr.toString());
+			strBfr.setLength(0);
 		}
 	}
 
