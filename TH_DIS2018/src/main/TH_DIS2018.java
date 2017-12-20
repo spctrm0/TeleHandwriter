@@ -63,6 +63,7 @@ public class TH_DIS2018 extends PApplet {
 		interpreter.setDrawing(drawing);
 		interpreter.setGrbl(grbl);
 		interpreter.setTable(table);
+		println(String.format("%.6f", Setting.servoDelay[3]));
 	}
 
 	public void draw() {

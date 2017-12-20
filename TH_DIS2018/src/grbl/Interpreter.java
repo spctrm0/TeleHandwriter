@@ -120,7 +120,7 @@ public class Interpreter {
 
 					if (Setting.servoDelay[3] != 0.0f) {
 						strBfr.append("G4")//
-								.append("P").append(String.format("%.3f", Setting.servoDelay[3]))//
+								.append("P").append(String.format("%.6f", Setting.servoDelay[3]))//
 								.append('\r');
 						grbl.reserve(strBfr.toString());
 						strBfr.setLength(0);

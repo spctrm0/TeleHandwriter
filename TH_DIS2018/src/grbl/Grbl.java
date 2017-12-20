@@ -1,6 +1,8 @@
 package grbl;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
 import main.Setting;
 import processing.core.PApplet;
 
@@ -8,15 +10,25 @@ public class Grbl {
 	public PApplet		p5					= null;
 	public SerialComm	serialComm	= null;
 
-	public final int bfrSizeMx = 128;
+	public final int	connectIntervalMsec	= 3000;
+	public final int	bfrSizeMx						= 128;
 
-	public int bfrSize = 0;
+	public boolean	isHome								= false;
+	public long			connectTrialTimeUsec	= 0;
+	public int			bfrSize								= 0;
+
+	boolean			gate	= false;
+	public int	cnt		= 0;
 
 	public ArrayList<String>	receivedMsg	= null;
 	public ArrayList<String>	grblBfr			= null;
 	public ArrayList<String>	reservedMsg	= null;
 
 	public StringBuffer prtTxtBfr = null;
+
+	public long getWaitingTimeMsec() {
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - connectTrialTimeUsec);
+	}
 
 	public void setSerialComm(SerialComm _serialComm) {
 		serialComm = _serialComm;
@@ -34,7 +46,17 @@ public class Grbl {
 	}
 
 	public void pre() {
+		a(connectIntervalMsec);
 		stream();
+	}
+
+	public void a(int _tryIntervalMsec) {
+		if (gate) {
+			if (getWaitingTimeMsec() >= _tryIntervalMsec) {
+				System.out.println("it is Time! (" + cnt + ")");
+				gate = false;
+			}
+		}
 	}
 
 	public void stream() {
@@ -64,6 +86,15 @@ public class Grbl {
 			receivedMsg.clear();
 			bfrSize -= cmd_.length();
 			grblBfr.remove(0);
+			if (isHomeCmd(cmd_))
+				isHome = true;
+			else if (isMotionCmd(cmd_))
+				isHome = false;
+			else if (isEndOfStrokeCmd(cmd_) && reservedMsg.size() == 0 && bfrSize == 0 && !isHome) {
+				gate = true;
+				connectTrialTimeUsec = System.nanoTime();
+				cnt++;
+			}
 		}
 		else
 			receivedMsg.add(_msg);
@@ -73,28 +104,15 @@ public class Grbl {
 		reservedMsg.add(strBfr);
 	}
 
+	public boolean isEndOfStrokeCmd(String _cmd) {
+		return (_cmd.contains("G4P") && _cmd.contains(String.format("%.6f", Setting.servoDelay[3])));
+	}
+
+	public boolean isHomeCmd(String _cmd) {
+		return (_cmd.equals("G92X0Y0\r") || _cmd.equals("G1X0Y0\r"));
+	}
+
 	public boolean isMotionCmd(String _cmd) {
-		if (_cmd.length() >= 2)
-			return _cmd.substring(0, 2).equals("G1");
-		return false;
-	}
-
-	public boolean isServoCmd(String _cmd) {
-		if (_cmd.length() >= 2)
-			return _cmd.substring(0, 2).equals("M3");
-		return false;
-	}
-
-	// public boolean isServoUpCmd(String _cmd) {
-	// String[] split_ = _cmd.split("S");
-	// String trimmed_ = split_[1].substring(0, split_[1].length() - 1);
-	// int val_ = Integer.parseInt(trimmed_);
-	// return val_ == Setting.servoHover;
-	// }
-
-	public boolean isStatusReportCmd(String _cmd) {
-		if (_cmd.length() >= 2)
-			return _cmd.equals("?\r");
-		return false;
+		return (_cmd.contains("G1") && (_cmd.contains("X") || _cmd.contains("Y")));
 	}
 }
