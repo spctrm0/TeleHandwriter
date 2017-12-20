@@ -50,6 +50,9 @@ public class Setting {
 	public static int	targetScreenHeight	= 1080;
 
 	public static void update() {
+		servoHover = 95;
+		servoZero = 63;
+
 		servoDelayPreDown = 0.001f;
 		servoDelayPostDown = 0.001f;
 		servoDelayPreUp = 0.001f;
