@@ -8,10 +8,10 @@ public class Setting {
 		servoHover = 255 - 32;
 		servoZero = 127;
 
-		servoDelay[0] = 0;
-		servoDelay[1] = 0.001f;
-		servoDelay[2] = 0;
-		servoDelay[3] = 0.001f;
+		servoDelay[0] = 0.025f;
+		servoDelay[1] = 0.150f;
+		servoDelay[2] = 0.025f;
+		servoDelay[3] = 0.150f;
 	}
 
 	public static int			myPort			= 8765;
@@ -46,7 +46,7 @@ public class Setting {
 
 	public static int			servoHover	= 255 - 32;
 	public static int			servoZero		= 127;
-	public static float[]	servoDelay	= { 0.001f, 0.001f, 0.001f, 0.001f };
+	public static float[]	servoDelay	= { 0.025f, 0.150f, 0.025f, 0.150f };
 
 	public static int feedrateStrokeToStoke = 60 * 250; // 1min * (mm / sec)
 
