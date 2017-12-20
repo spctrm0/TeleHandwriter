@@ -10,24 +10,25 @@ public class Grbl {
 	public PApplet		p5					= null;
 	public SerialComm	serialComm	= null;
 
-	public final int	connectIntervalMsec	= 3000;
+	public final int	returnIntervalMsec	= 1000;
 	public final int	bfrSizeMx						= 128;
 
-	public boolean	isHome								= false;
-	public long			connectTrialTimeUsec	= 0;
-	public int			bfrSize								= 0;
+	public boolean	isHome						= false;
+	public long			strokeEndTimeUsec	= 0;
+	public int			bfrSize						= 0;
 
-	boolean			gate	= false;
-	public int	cnt		= 0;
+	boolean			gate					= false;
+	public int	strokeEndCnt	= 0;
 
 	public ArrayList<String>	receivedMsg	= null;
 	public ArrayList<String>	grblBfr			= null;
 	public ArrayList<String>	reservedMsg	= null;
 
-	public StringBuffer prtTxtBfr = null;
+	public StringBuffer	strBfr		= null;
+	public StringBuffer	prtTxtBfr	= null;
 
 	public long getWaitingTimeMsec() {
-		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - connectTrialTimeUsec);
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - strokeEndTimeUsec);
 	}
 
 	public void setSerialComm(SerialComm _serialComm) {
@@ -42,18 +43,19 @@ public class Grbl {
 		grblBfr = new ArrayList<String>();
 		reservedMsg = new ArrayList<String>();
 
+		strBfr = new StringBuffer();
 		prtTxtBfr = new StringBuffer();
 	}
 
 	public void pre() {
-		a(connectIntervalMsec);
+		returnHome(returnIntervalMsec);
 		stream();
 	}
 
-	public void a(int _tryIntervalMsec) {
+	public void returnHome(int _returnIntervalMsec) {
 		if (gate) {
-			if (getWaitingTimeMsec() >= _tryIntervalMsec) {
-				System.out.println("it is Time! (" + cnt + ")");
+			if (getWaitingTimeMsec() >= _returnIntervalMsec) {
+				reserveGoBackHomeCmd();
 				gate = false;
 			}
 		}
@@ -90,10 +92,12 @@ public class Grbl {
 				isHome = true;
 			else if (isMotionCmd(cmd_))
 				isHome = false;
-			else if (isEndOfStrokeCmd(cmd_) && reservedMsg.size() == 0 && bfrSize == 0 && !isHome) {
-				gate = true;
-				connectTrialTimeUsec = System.nanoTime();
-				cnt++;
+			else if (isStrokeEndCmd(cmd_)) {
+				strokeEndCnt++;
+				if (reservedMsg.size() == 0 && bfrSize == 0 && !isHome) {
+					gate = true;
+					strokeEndTimeUsec = System.nanoTime();
+				}
 			}
 		}
 		else
@@ -104,7 +108,7 @@ public class Grbl {
 		reservedMsg.add(strBfr);
 	}
 
-	public boolean isEndOfStrokeCmd(String _cmd) {
+	public boolean isStrokeEndCmd(String _cmd) {
 		return (_cmd.contains("G4P") && _cmd.contains(String.format("%.6f", Setting.servoDelay[3])));
 	}
 
@@ -114,5 +118,15 @@ public class Grbl {
 
 	public boolean isMotionCmd(String _cmd) {
 		return (_cmd.contains("G1") && (_cmd.contains("X") || _cmd.contains("Y")));
+	}
+
+	public void reserveGoBackHomeCmd() {
+		reserve("G94\r");
+		strBfr.append("G1")//
+				.append("X0").append("Y0").append("F").append(Setting.feedrateStrokeToStoke)//
+				.append('\r');
+		reserve(strBfr.toString());
+		strBfr.setLength(0);
+		reserve("G93\r");
 	}
 }
