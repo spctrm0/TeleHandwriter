@@ -101,8 +101,13 @@ public class Grbl {
 			receivedMsg.clear();
 			bfrSize -= cmd_.length();
 			grblBfr.remove(0);
-			if (isHomeCmd(cmd_) || isBackOffCmd(cmd_))
+			if (isHomeCmd(cmd_) || isBackOffCmd(cmd_)) {
 				isOnPaper = false;
+				if (isBusy) {
+					isBusy = false;
+					oscComm.sendStatusReport(!isBusy);
+				}
+			}
 			else if (isMotionCmd(cmd_))
 				isOnPaper = true;
 			else if (isStrokeEndCmd(cmd_)) {
@@ -110,8 +115,10 @@ public class Grbl {
 				if (reservedMsg.size() == 0 && bfrSize == 0 && isOnPaper) {
 					backOffGate = true;
 					strokeEndTimeUsec = System.nanoTime();
-					isBusy = false;
-					oscComm.sendStatusReport(!isBusy);
+					if (isBusy) {
+						isBusy = false;
+						oscComm.sendStatusReport(!isBusy);
+					}
 				}
 			}
 		}
