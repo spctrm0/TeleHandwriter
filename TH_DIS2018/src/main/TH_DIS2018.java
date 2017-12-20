@@ -17,12 +17,12 @@ import processing.serial.Serial;
 import tabletInput.TabletInput;
 
 public class TH_DIS2018 extends PApplet {
-	Grbl				grbl;
-	SerialComm	serialComm;
-
 	Drawing			drawing;		//
 	OscComm			oscComm;		//
 	TabletInput	tabletInput;//
+
+	Grbl				grbl;
+	SerialComm	serialComm;
 
 	Table				table;
 	Interpreter	interpreter;
@@ -35,12 +35,12 @@ public class TH_DIS2018 extends PApplet {
 	}
 
 	public void setup() {
-		grbl = new Grbl(this);
-		serialComm = new SerialComm(this);
-
 		drawing = new Drawing();
 		oscComm = new OscComm(this);
 		tabletInput = new TabletInput(this);
+
+		grbl = new Grbl(this);
+		serialComm = new SerialComm(this);
 
 		table = new Table();
 		table.addColumn("strokeIdx");
@@ -54,11 +54,12 @@ public class TH_DIS2018 extends PApplet {
 
 		strBfr = new StringBuffer();
 
-		grbl.setSerialComm(serialComm);
-		serialComm.setGrbl(grbl);
-
 		oscComm.setDrawing(drawing);
 		tabletInput.setOscComm(oscComm);
+
+		grbl.setSerialComm(serialComm);
+		grbl.setOscComm(oscComm);
+		serialComm.setGrbl(grbl);
 
 		interpreter.setDrawing(drawing);
 		interpreter.setGrbl(grbl);
