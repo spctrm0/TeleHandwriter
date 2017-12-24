@@ -1,21 +1,35 @@
-Table    table;
+import processing.serial.*;
+import java.util.Calendar;
+import oscP5.OscMessage;
+import codeanticode.tablet.Tablet;
+import java.util.concurrent.TimeUnit;
+import netP5.NetAddress;
+import oscP5.OscMessage;
+import oscP5.OscP5;
+import java.util.ArrayList;
 
-KeyInput  keyInput;
 
-TabletInput  tabletInput;
-OscComm    oscComm;
-Drawing    drawing;
-Interpreter  interpreter;
-Grbl    grbl;
-SerialComm  serialComm;
+Drawing			drawing;		//
+OscComm			oscComm;		//
+TabletInput	tabletInput;//
 
-int      acc  = 6000;
+Grbl				grbl;
+SerialComm	serialComm;
 
-public void settings() {
-  fullScreen();
-}
+Table				table;
+Interpreter	interpreter;
+
+StringBuffer strBfr = null;
 
 public void setup() {
+  fullScreen();
+  drawing = new Drawing();
+  oscComm = new OscComm(this);
+  tabletInput = new TabletInput(this);
+
+  grbl = new Grbl(this);
+  serialComm = new SerialComm(this);
+
   table = new Table();
   table.addColumn("strokeIdx");
   table.addColumn("penX");
@@ -24,48 +38,41 @@ public void setup() {
   table.addColumn("tiltX");
   table.addColumn("tiltY");
   table.addColumn("millis");
+  interpreter = new Interpreter(this);
 
-  keyInput = new KeyInput(this);
+  strBfr = new StringBuffer();
 
-  tabletInput = new TabletInput(this);
-  oscComm = new OscComm(this);
-  drawing = new Drawing();
-  interpreter = new Interpreter();
-  grbl = new Grbl(this);
-  serialComm = new SerialComm(this);
-
-  oscComm.setTabletInput(tabletInput);
   oscComm.setDrawing(drawing);
+  tabletInput.setOscComm(oscComm);
+
+  grbl.setSerialComm(serialComm);
+  grbl.setOscComm(oscComm);
+  serialComm.setGrbl(grbl);
 
   interpreter.setDrawing(drawing);
   interpreter.setGrbl(grbl);
   interpreter.setTable(table);
-
-  serialComm.setGrbl(grbl);
-
-  grbl.setSerialComm(serialComm);
-
-  thread("OscCommThread");
-  thread("InterpreterThread");
+  println(String.format("%.6f", servoDelay[3]));
 }
 
 public void draw() {
-  background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255, 
-    (!tabletInput.modeCalibration && tabletInput.modeWritable) ? 0 : 255);
-
+  background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255, (tabletInput.isWritable()) ? 0 : 255);
+  noStroke();
+  fill(oscComm.isTargetIdle ? 0 : 255, oscComm.isTargetIdle ? 255 : 0, 0);
+  rect(0, 0, 32, 32);
   noFill();
   stroke(255);
-  for (int i = 0; i < drawing.strokes.size(); i++) {
-    Stroke stroke_ = drawing.strokes.get(i);
-    for (int j = 0; j < stroke_.points.size() - 1; j++) {
-      Point a_ = stroke_.points.get(j);
-      Point b_ = stroke_.points.get(j + 1);
-      line(a_.penX, a_.penY, b_.penX, b_.penY);
+  for (Stroke stroke_ : drawing.getStrokes()) {
+    for (int j = 0; j < stroke_.getPointsNum() - 1; j++) {
+      Point a_ = stroke_.getPoints().get(j);
+      Point b_ = stroke_.getPoints().get(j + 1);
+      line(a_.getPenX(), a_.getPenY(), b_.getPenX(), b_.getPenY());
     }
   }
 }
 
 public void exit() {
+  grbl.reserve("M3S0\r");
   saveTable(table, "tabletInputLogs\\" + timestamp() + ".csv");
   super.exit();
 }
@@ -79,73 +86,54 @@ public void serialEvent(Serial _serialEvt) {
   serialComm.read(replyChar_);
 }
 
-public void OscCommThread() {
-  while (true) {
-    oscComm.thread();
-  }
-}
-
-public void InterpreterThread() {
-  while (true) {
-    interpreter.thread();
-  }
-}
-
 public void keyPressed() {
   if (key == '~') {
-    oscComm.tryToConnect();
-  } else if (key == 'c' || key == 'C') // toggle calibration
-  {
-    tabletInput.toggleCalibration();
+    oscComm.activateAutoConnect();
   } else if (key == 'i' || key == 'I') // toggle writable
   {
     tabletInput.toggleWritable();
   } else if (key == 'h' || key == 'H') // set home
   {
+    strBfr.append("M3")//
+      .append("S").append(servoHover)//
+      .append('\r');
+    grbl.reserve(strBfr.toString());
+    strBfr.setLength(0);
+
     grbl.reserve("G92X0Y0\r");
     grbl.reserve("G90\r");
+    grbl.reserve("G94\r");
+    strBfr.append("G1")//
+      .append("F").append(feedrateStrokeToStoke)//
+      .append("X").append(String.format("%.3f", isXInverted ? -xZero : xZero))//
+      .append("Y").append(String.format("%.3f", isYInverted ? -yZero : yZero))//
+      .append('\r');
+    grbl.reserve(strBfr.toString());
+    strBfr.setLength(0);
     grbl.reserve("G93\r");
-  } else if (key == '?') // set home
-  {
-    grbl.reserve("$$\r");
-  } else if (key == 'b' || key == 'B') // set home
-  {
-    System.out.print(grbl.bfrSize);
-    System.out.print(", ");
-    System.out.print(grbl.reservedMsg.size());
-    System.out.print(", ");
-    System.out.println(grbl.grblBfr.size());
-  } else if (key == 'x' || key == 'X') // servo off
-  {
-    grbl.reserve("M3S0\r");
+    grbl.reserve("G92X0Y0\r");
   } else if (key == 'w' || key == 'W') // servo up
   {
-    grbl.reserve("M3S" + Setting.servoHover + "\r");
+    strBfr.append("M3")//
+      .append("S").append(servoHover)//
+      .append('\r');
+    grbl.reserve(strBfr.toString());
+    strBfr.setLength(0);
   } else if (key == 's' || key == 'S') // servo down
   {
-    grbl.reserve("M3S" + Setting.servoZero + "\r");
-  } else if (key == '\'') {
-    acc = 4000;
-    System.out.println(acc);
-  } else if (keyCode == UP) {
-    acc += 50;
-    System.out.println(acc);
-  } else if (keyCode == DOWN) {
-    acc -= 50;
-    System.out.println(acc);
-  } else if (key == '[') {
-    grbl.reserve("$120=" + acc + "\r");
-  } else if (key == ']') {
-    grbl.reserve("$121=" + acc + "\r");
+    strBfr.append("M3")//
+      .append("S").append(servoZero)//
+      .append('\r');
+    grbl.reserve(strBfr.toString());
+    strBfr.setLength(0);
+  } else if (key == 'x' || key == 'X') // servo off
+  {
+    strBfr.append("M3")//
+      .append("S0")//
+      .append('\r');
+    grbl.reserve(strBfr.toString());
+    strBfr.setLength(0);
   }
-}
-
-static public void main(String[] passedArgs) {
-  String[] appletArgs = new String[] { main.TH_DIS2018.class.getName() };
-  if (passedArgs != null)
-    PApplet.main(concat(appletArgs, passedArgs));
-  else
-    PApplet.main(appletArgs);
 }
 
 String timestamp() {
