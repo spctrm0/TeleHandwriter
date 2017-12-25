@@ -12,9 +12,9 @@ public boolean	isYInverted	= true;
 public float	xZero	= 43.5f;
 public float	yZero	= 26;
 
-//public int    myPort      = 8765;
-//public int    targetPort  = 4321;
-//public String  targetIp    = "192.168.0.4";
+//public int    myPort      = 4321;
+//public int    targetPort  = 8765;
+//public String  targetIp    = "192.168.0.8";
 
 //// public int myPort = 4321;
 //// public int targetPort = 4321;

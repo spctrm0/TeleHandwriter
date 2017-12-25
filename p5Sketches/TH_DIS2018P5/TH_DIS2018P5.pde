@@ -9,9 +9,9 @@ import oscP5.OscP5;
 import java.util.ArrayList;
 
 
-Drawing			drawing;		//
-OscComm			oscComm;		//
-TabletInput	tabletInput;//
+Drawing			drawing;
+OscComm			oscComm;
+TabletInput	tabletInput;
 
 Grbl				grbl;
 SerialComm	serialComm;
@@ -21,8 +21,49 @@ Interpreter	interpreter;
 
 StringBuffer strBfr = null;
 
+public void loadSetting() {
+  String[] lines_ = loadStrings("txt");
+  for (String line_ : lines_) {
+    String[] parsed_ = line_.split("=");
+    if (parsed_.length >= 2) {
+      parsed_[0] = parsed_[0].trim();
+      parsed_[1] = parsed_[1].trim();
+      println("a");
+      if (parsed_[0].equals("myPort"))
+        myPort = Integer.parseInt(parsed_[1]);
+      else if (parsed_[0].equals("targetPort"))
+        targetPort = Integer.parseInt(parsed_[1]);
+      else if (parsed_[0].equals("targetIp"))
+        targetIp = parsed_[1].toString();
+      else if (parsed_[0].equals("isXInverted"))
+        isXInverted = Boolean.parseBoolean(parsed_[1]);
+      else if (parsed_[0].equals("isYInverted"))
+        isYInverted = Boolean.parseBoolean(parsed_[1]);
+      else if (parsed_[0].equals("xZero"))
+        xZero = Float.parseFloat(parsed_[1]);
+      else if (parsed_[0].equals("yZero"))
+        yZero = Float.parseFloat(parsed_[1]);
+      else if (parsed_[0].equals("servoHover"))
+        servoHover = Integer.parseInt(parsed_[1]);
+      else if (parsed_[0].equals("servoZero"))
+        servoZero = Integer.parseInt(parsed_[1]);
+      else if (parsed_[0].equals("servoDelay[0]"))
+        servoDelay[0] = Float.parseFloat(parsed_[1]);
+      else if (parsed_[0].equals("servoDelay[1]"))
+        servoDelay[1] = Float.parseFloat(parsed_[1]);
+      else if (parsed_[0].equals("servoDelay[2]"))
+        servoDelay[2] = Float.parseFloat(parsed_[1]);
+      else if (parsed_[0].equals("servoDelay[3]"))
+        servoDelay[3] = Float.parseFloat(parsed_[1]);
+    }
+  }
+}
+
 public void setup() {
   fullScreen();
+
+  loadSetting();
+
   drawing = new Drawing();
   oscComm = new OscComm(this);
   tabletInput = new TabletInput(this);

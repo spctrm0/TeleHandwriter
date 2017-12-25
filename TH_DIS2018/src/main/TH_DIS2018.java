@@ -17,9 +17,9 @@ import processing.serial.Serial;
 import tabletInput.TabletInput;
 
 public class TH_DIS2018 extends PApplet {
-	Drawing			drawing;		//
-	OscComm			oscComm;		//
-	TabletInput	tabletInput;//
+	Drawing			drawing;
+	OscComm			oscComm;
+	TabletInput	tabletInput;
 
 	Grbl				grbl;
 	SerialComm	serialComm;
@@ -34,7 +34,47 @@ public class TH_DIS2018 extends PApplet {
 		// size(500, 500);
 	}
 
+	public void loadSetting() {
+		String[] lines_ = loadStrings("Setting.txt");
+		for (String line_ : lines_) {
+			String[] parsed_ = line_.split("=");
+			if (parsed_.length >= 2) {
+				parsed_[0] = parsed_[0].trim();
+				parsed_[1] = parsed_[1].trim();
+				println("a");
+				if (parsed_[0].equals("myPort"))
+					Setting.myPort = Integer.parseInt(parsed_[1]);
+				else if (parsed_[0].equals("targetPort"))
+					Setting.targetPort = Integer.parseInt(parsed_[1]);
+				else if (parsed_[0].equals("targetIp"))
+					Setting.targetIp = parsed_[1].toString();
+				else if (parsed_[0].equals("isXInverted"))
+					Setting.isXInverted = Boolean.parseBoolean(parsed_[1]);
+				else if (parsed_[0].equals("isYInverted"))
+					Setting.isYInverted = Boolean.parseBoolean(parsed_[1]);
+				else if (parsed_[0].equals("xZero"))
+					Setting.xZero = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("yZero"))
+					Setting.yZero = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("servoHover"))
+					Setting.servoHover = Integer.parseInt(parsed_[1]);
+				else if (parsed_[0].equals("servoZero"))
+					Setting.servoZero = Integer.parseInt(parsed_[1]);
+				else if (parsed_[0].equals("servoDelay[0]"))
+					Setting.servoDelay[0] = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("servoDelay[1]"))
+					Setting.servoDelay[1] = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("servoDelay[2]"))
+					Setting.servoDelay[2] = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("servoDelay[3]"))
+					Setting.servoDelay[3] = Float.parseFloat(parsed_[1]);
+			}
+		}
+	}
+
 	public void setup() {
+		loadSetting();
+
 		drawing = new Drawing();
 		oscComm = new OscComm(this);
 		tabletInput = new TabletInput(this);
@@ -64,6 +104,7 @@ public class TH_DIS2018 extends PApplet {
 		interpreter.setDrawing(drawing);
 		interpreter.setGrbl(grbl);
 		interpreter.setTable(table);
+
 		println(String.format("%.6f", Setting.servoDelay[3]));
 	}
 
