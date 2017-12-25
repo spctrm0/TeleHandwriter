@@ -87,7 +87,7 @@ public class Interpreter {
         strBfr.setLength(0);
 
         // logging first point on table
-        logTable(a_.getStrokeIdx(), a_.getPenX(), a_.getPenY(), a_.getPressure(), a_.getTiltX(), a_.getTiltY(), 
+        logTable(a_.getTotalPointIdx(), a_.getStrokeIdx(), a_.getPointIdx(), a_.getPenX(), a_.getPenY(), aX_, aY_, f_, a_.getPressure(), a_.getTiltX(), a_.getTiltY(), 
           a_.getMillis());
         // remove first point
         stroke_.removeFirstPoint();
@@ -117,7 +117,7 @@ public class Interpreter {
           }
 
           // logging second (last) point on table
-          logTable(b_.getStrokeIdx(), b_.getPenX(), b_.getPenY(), b_.getPressure(), b_.getTiltX(), b_.getTiltY(), 
+          logTable(b_.getTotalPointIdx(), b_.getStrokeIdx(), b_.getPointIdx(), b_.getPenX(), b_.getPenY(), bX_, bY_, f_, b_.getPressure(), b_.getTiltX(), b_.getTiltY(), 
             b_.getMillis());
           // remove second (last) point
           stroke_.removeFirstPoint();
@@ -130,12 +130,17 @@ public class Interpreter {
     }
   }
 
-  public void logTable(int _strokeIdx, float _penX, float _penY, float _pressure, float _tiltX, float _tiltY, 
+  public void logTable(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY, float _x, float _y, float _f, float _pressure, float _tiltX, float _tiltY, 
     long _millis) {
     TableRow newRow_ = table.addRow();
+    newRow_.setInt("totalPointIdx", _totalPointIdx);
     newRow_.setInt("strokeIdx", _strokeIdx);
+    newRow_.setInt("pointIdx", _pointIdx);
     newRow_.setFloat("penX", _penX);
     newRow_.setFloat("penY", _penY);
+    newRow_.setFloat("x", _x);
+    newRow_.setFloat("y", _y);
+    newRow_.setFloat("f", _f);
     newRow_.setFloat("pressure", _pressure);
     newRow_.setFloat("tiltX", _tiltX);
     newRow_.setFloat("tiltY", _tiltY);
