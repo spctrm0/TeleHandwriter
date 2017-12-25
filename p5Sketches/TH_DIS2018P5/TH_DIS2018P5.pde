@@ -24,6 +24,7 @@ StringBuffer strBfr = null;
 
 long homeCmdTriggeredUsec = 0;
 int waitingTimeMsec = 5000;
+int waitingTimeMsecSet = 5000;
 boolean isHomeCmdExecuted = false;
 
 //public void settings() {
@@ -145,6 +146,7 @@ public void setup() {
   interpreter.setTable(table);
 
   homeCmdTrigger();
+  waitingTimeMsec = waitingTimeMsecSet;
 }
 
 public void draw() {
@@ -152,6 +154,7 @@ public void draw() {
     if (getWaitingTimeMsec() >= waitingTimeMsec) {
       homeCmd();
       setWritable(true);
+      waitingTimeMsec = waitingTimeMsecSet;
     }
   }
 
@@ -198,6 +201,7 @@ public void keyPressed() {
   } else if (key == 'h' || key == 'H') // set home
   {
     homeCmdTrigger();
+    waitingTimeMsec = 500;
   } else if (key == 'w' || key == 'W') // servo up
   {
     strBfr.append("M3")//
