@@ -99,8 +99,8 @@ public class TabletInput {
 		}
 	}
 
-	public void toggleWritable() {
-		isWritable = !isWritable;
+	public void setWritable(boolean _isWritable) {
+		isWritable = _isWritable;
 	}
 
 	public boolean isWritable() {

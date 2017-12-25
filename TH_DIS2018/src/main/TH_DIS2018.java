@@ -6,6 +6,7 @@ import grbl.Interpreter;
 import grbl.SerialComm;
 
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 import drawing.Drawing;
 import drawing.Point;
@@ -29,9 +30,48 @@ public class TH_DIS2018 extends PApplet {
 
 	StringBuffer strBfr = null;
 
+	long		homeCmdTriggeredUsec	= 0;
+	int			waitingTimeMsec				= 5000;
+	boolean	isHomeCmdExecuted			= false;
+
 	public void settings() {
 		fullScreen();
 		// size(500, 500);
+	}
+
+	public void homeCmd() {
+		strBfr.append("M3")//
+				.append("S").append(Setting.servoHover)//
+				.append('\r');
+		grbl.reserve(strBfr.toString());
+		strBfr.setLength(0);
+
+		grbl.reserve("G92X0Y0\r");
+		grbl.reserve("G90\r");
+		grbl.reserve("G94\r");
+		strBfr.append("G1")//
+				.append("F").append(Setting.feedrateStrokeToStoke)//
+				.append("X").append(String.format("%.3f", Setting.isXInverted ? -Setting.xZero : Setting.xZero))//
+				.append("Y").append(String.format("%.3f", Setting.isYInverted ? -Setting.yZero : Setting.yZero))//
+				.append('\r');
+		grbl.reserve(strBfr.toString());
+		strBfr.setLength(0);
+		grbl.reserve("G93\r");
+		grbl.reserve("G92X0Y0\r");
+		isHomeCmdExecuted = true;
+	}
+
+	public void homeCmdTrigger() {
+		homeCmdTriggeredUsec = System.nanoTime();
+		isHomeCmdExecuted = false;
+	}
+
+	public long getWaitingTimeMsec() {
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - homeCmdTriggeredUsec);
+	}
+
+	public void setWritable(boolean _isWritable) {
+		tabletInput.setWritable(_isWritable);
 	}
 
 	public void loadSetting() {
@@ -41,7 +81,6 @@ public class TH_DIS2018 extends PApplet {
 			if (parsed_.length >= 2) {
 				parsed_[0] = parsed_[0].trim();
 				parsed_[1] = parsed_[1].trim();
-				println("a");
 				if (parsed_[0].equals("myPort"))
 					Setting.myPort = Integer.parseInt(parsed_[1]);
 				else if (parsed_[0].equals("targetPort"))
@@ -105,10 +144,17 @@ public class TH_DIS2018 extends PApplet {
 		interpreter.setGrbl(grbl);
 		interpreter.setTable(table);
 
-		println(String.format("%.6f", Setting.servoDelay[3]));
+		homeCmdTrigger();
 	}
 
 	public void draw() {
+		if (!isHomeCmdExecuted) {
+			if (getWaitingTimeMsec() >= waitingTimeMsec) {
+				homeCmd();
+				setWritable(true);
+			}
+		}
+
 		Setting.update();
 		background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255, (tabletInput.isWritable()) ? 0 : 255);
 		noStroke();
@@ -131,7 +177,6 @@ public class TH_DIS2018 extends PApplet {
 	}
 
 	public void exit() {
-		grbl.reserve("M3S0\r");
 		saveTable(table, "tabletInputLogs\\" + timestamp() + ".csv");
 		super.exit();
 	}
@@ -151,28 +196,11 @@ public class TH_DIS2018 extends PApplet {
 		}
 		else if (key == 'i' || key == 'I') // toggle writable
 		{
-			tabletInput.toggleWritable();
+			setWritable(!tabletInput.isWritable());
 		}
 		else if (key == 'h' || key == 'H') // set home
 		{
-			strBfr.append("M3")//
-					.append("S").append(Setting.servoHover)//
-					.append('\r');
-			grbl.reserve(strBfr.toString());
-			strBfr.setLength(0);
-
-			grbl.reserve("G92X0Y0\r");
-			grbl.reserve("G90\r");
-			grbl.reserve("G94\r");
-			strBfr.append("G1")//
-					.append("F").append(Setting.feedrateStrokeToStoke)//
-					.append("X").append(String.format("%.3f", Setting.isXInverted ? -Setting.xZero : Setting.xZero))//
-					.append("Y").append(String.format("%.3f", Setting.isYInverted ? -Setting.yZero : Setting.yZero))//
-					.append('\r');
-			grbl.reserve(strBfr.toString());
-			strBfr.setLength(0);
-			grbl.reserve("G93\r");
-			grbl.reserve("G92X0Y0\r");
+			homeCmdTrigger();
 		}
 		else if (key == 'w' || key == 'W') // servo up
 		{

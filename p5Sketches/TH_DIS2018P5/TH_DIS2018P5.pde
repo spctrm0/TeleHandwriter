@@ -1,25 +1,70 @@
-import processing.serial.*;
+import java.util.ArrayList;
 import java.util.Calendar;
-import oscP5.OscMessage;
-import codeanticode.tablet.Tablet;
 import java.util.concurrent.TimeUnit;
+
+import codeanticode.tablet.Tablet;
+
 import netP5.NetAddress;
 import oscP5.OscMessage;
 import oscP5.OscP5;
-import java.util.ArrayList;
 
+import processing.serial.*;
 
-Drawing			drawing;
-OscComm			oscComm;
-TabletInput	tabletInput;
+Drawing drawing;
+OscComm oscComm;
+TabletInput tabletInput;
 
-Grbl				grbl;
-SerialComm	serialComm;
+Grbl grbl;
+SerialComm serialComm;
 
-Table				table;
-Interpreter	interpreter;
+Table table;
+Interpreter interpreter;
 
 StringBuffer strBfr = null;
+
+long homeCmdTriggeredUsec = 0;
+int waitingTimeMsec = 5000;
+boolean isHomeCmdExecuted = false;
+
+//public void settings() {
+// fullScreen();
+// // size(500, 500);
+//}
+
+public void homeCmd() {
+  strBfr.append("M3")//
+    .append("S").append(servoHover)//
+    .append('\r');
+  grbl.reserve(strBfr.toString());
+  strBfr.setLength(0);
+
+  grbl.reserve("G92X0Y0\r");
+  grbl.reserve("G90\r");
+  grbl.reserve("G94\r");
+  strBfr.append("G1")//
+    .append("F").append(feedrateStrokeToStoke)//
+    .append("X").append(String.format("%.3f", isXInverted ? -xZero : xZero))//
+    .append("Y").append(String.format("%.3f", isYInverted ? -yZero : yZero))//
+    .append('\r');
+  grbl.reserve(strBfr.toString());
+  strBfr.setLength(0);
+  grbl.reserve("G93\r");
+  grbl.reserve("G92X0Y0\r");
+  isHomeCmdExecuted = true;
+}
+
+public void homeCmdTrigger() {
+  homeCmdTriggeredUsec = System.nanoTime();
+  isHomeCmdExecuted = false;
+}
+
+public long getWaitingTimeMsec() {
+  return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - homeCmdTriggeredUsec);
+}
+
+public void setWritable(boolean _isWritable) {
+  tabletInput.setWritable(_isWritable);
+}
 
 public void loadSetting() {
   String[] lines_ = loadStrings("Setting.txt");
@@ -92,10 +137,18 @@ public void setup() {
   interpreter.setDrawing(drawing);
   interpreter.setGrbl(grbl);
   interpreter.setTable(table);
-  println(String.format("%.6f", servoDelay[3]));
+
+  homeCmdTrigger();
 }
 
 public void draw() {
+  if (!isHomeCmdExecuted) {
+    if (getWaitingTimeMsec() >= waitingTimeMsec) {
+      homeCmd();
+      setWritable(true);
+    }
+  }
+
   background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255, (tabletInput.isWritable()) ? 0 : 255);
   noStroke();
   fill(oscComm.isTargetIdle ? 0 : 255, oscComm.isTargetIdle ? 255 : 0, 0);
@@ -109,10 +162,14 @@ public void draw() {
       line(a_.getPenX(), a_.getPenY(), b_.getPenX(), b_.getPenY());
     }
   }
+  // System.out.print(grbl.bfrSize);
+  // System.out.print(", ");
+  // System.out.print(grbl.grblBfr.size());
+  // System.out.print(", ");
+  // System.out.print(grbl.reservedMsg.size());
 }
 
 public void exit() {
-  grbl.reserve("M3S0\r");
   saveTable(table, "tabletInputLogs\\" + timestamp() + ".csv");
   super.exit();
 }
@@ -131,27 +188,10 @@ public void keyPressed() {
     oscComm.activateAutoConnect();
   } else if (key == 'i' || key == 'I') // toggle writable
   {
-    tabletInput.toggleWritable();
+    setWritable(!tabletInput.isWritable());
   } else if (key == 'h' || key == 'H') // set home
   {
-    strBfr.append("M3")//
-      .append("S").append(servoHover)//
-      .append('\r');
-    grbl.reserve(strBfr.toString());
-    strBfr.setLength(0);
-
-    grbl.reserve("G92X0Y0\r");
-    grbl.reserve("G90\r");
-    grbl.reserve("G94\r");
-    strBfr.append("G1")//
-      .append("F").append(feedrateStrokeToStoke)//
-      .append("X").append(String.format("%.3f", isXInverted ? -xZero : xZero))//
-      .append("Y").append(String.format("%.3f", isYInverted ? -yZero : yZero))//
-      .append('\r');
-    grbl.reserve(strBfr.toString());
-    strBfr.setLength(0);
-    grbl.reserve("G93\r");
-    grbl.reserve("G92X0Y0\r");
+    homeCmdTrigger();
   } else if (key == 'w' || key == 'W') // servo up
   {
     strBfr.append("M3")//
