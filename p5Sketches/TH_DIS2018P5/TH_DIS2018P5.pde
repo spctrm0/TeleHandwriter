@@ -116,13 +116,19 @@ public void setup() {
   serialComm = new SerialComm(this);
 
   table = new Table();
+  table.addColumn("totalPointIdx");
   table.addColumn("strokeIdx");
+  table.addColumn("pointIdx");
   table.addColumn("penX");
   table.addColumn("penY");
+  table.addColumn("x");
+  table.addColumn("y");
+  table.addColumn("f");
   table.addColumn("pressure");
   table.addColumn("tiltX");
   table.addColumn("tiltY");
   table.addColumn("millis");
+  table.addColumn("kind");
   interpreter = new Interpreter(this);
 
   strBfr = new StringBuffer();
