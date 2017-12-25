@@ -22,13 +22,12 @@ Interpreter	interpreter;
 StringBuffer strBfr = null;
 
 public void loadSetting() {
-  String[] lines_ = loadStrings("txt");
+  String[] lines_ = loadStrings("Setting.txt");
   for (String line_ : lines_) {
     String[] parsed_ = line_.split("=");
     if (parsed_.length >= 2) {
       parsed_[0] = parsed_[0].trim();
       parsed_[1] = parsed_[1].trim();
-      println("a");
       if (parsed_[0].equals("myPort"))
         myPort = Integer.parseInt(parsed_[1]);
       else if (parsed_[0].equals("targetPort"))
