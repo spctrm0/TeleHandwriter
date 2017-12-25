@@ -100,6 +100,10 @@ public void loadSetting() {
         servoDelay[2] = Float.parseFloat(parsed_[1]);
       else if (parsed_[0].equals("servoDelay[3]"))
         servoDelay[3] = Float.parseFloat(parsed_[1]);
+      else if (parsed_[0].equals("targetCalibX"))
+        targetCalibX = Float.parseFloat(parsed_[1]);
+      else if (parsed_[0].equals("targetCalibY"))
+        targetCalibY = Float.parseFloat(parsed_[1]);
     }
   }
 }

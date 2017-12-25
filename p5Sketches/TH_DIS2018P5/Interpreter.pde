@@ -36,10 +36,10 @@ public class Interpreter {
       while (stroke_.getPointsNum() >= 2) {
         Point a_ = stroke_.getFirstPoint();
         Point b_ = stroke_.getSecondPoint();
-        float aX_ = targetTabletWidth * ((a_.getPenX() - targetCalibX) / targetScreentWidth);
-        float aY_ = targetTabletHeight * ((a_.getPenY()) / targetScreenHeight);
-        float bX_ = targetTabletWidth * ((b_.getPenX() - targetCalibX) / targetScreentWidth);
-        float bY_ = targetTabletHeight * ((b_.getPenY()) / targetScreenHeight);
+        float aX_ = targetTabletWidth * ((a_.getPenX() - targetCalibX) / (float) targetScreentWidth);
+        float aY_ = targetTabletHeight * ((a_.getPenY() - targetCalibY) / (float) targetScreenHeight);
+        float bX_ = targetTabletWidth * ((b_.getPenX() - targetCalibX) / (float) targetScreentWidth);
+        float bY_ = targetTabletHeight * ((b_.getPenY() - targetCalibY) / (float) targetScreenHeight);
         long duration_ = b_.getMillis() - a_.getMillis();
         float f_ = (float) (60000 / (double) duration_);
         // Head
