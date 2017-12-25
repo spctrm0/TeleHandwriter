@@ -1,3 +1,5 @@
 tabletInputLogs/
 Setting.txt
 *.autosave
+application.windows64/
+application.windows32/
