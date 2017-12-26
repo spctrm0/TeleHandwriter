@@ -1,19 +1,6 @@
 package main;
 
 public class Setting {
-	public static void update() {
-		xZero = 43.5f;
-		yZero = 26;
-
-		servoHover = 255 - 32;
-		servoZero = 127;
-
-		servoDelay[0] = 0.025f;
-		servoDelay[1] = 0.150f;
-		servoDelay[2] = 0.025f;
-		servoDelay[3] = 0.150f;
-	}
-
 	public static int			myPort			= 8765;
 	public static int			targetPort	= 4321;
 	public static String	targetIp		= "192.168.0.4";
@@ -31,19 +18,18 @@ public class Setting {
 	// public static int myPort = 4321;
 	// public static int targetPort = 8765;
 	// public static String targetIp = "192.168.0.8";
-	//
-	// // public static int myPort = 4321;
-	// // public static int targetPort = 4321;
-	// // public static String targetIp = "192.168.0.4";
-	//
+
+	//// public static int myPort = 4321;
+	//// public static int targetPort = 4321;
+	//// public static String targetIp = "192.168.0.4";
+
 	// public static boolean isXInverted = true;
 	// public static boolean isYInverted = false;
-	//
+
 	// public static float xZero = 43;
 	// public static float yZero = 31;
-	
 
-	public static float	xBackOff	= -20;
+	public static float xBackOff = -20;
 
 	public static String connectionChkTxt = "Grbl 1.1f ['$' for help]";
 

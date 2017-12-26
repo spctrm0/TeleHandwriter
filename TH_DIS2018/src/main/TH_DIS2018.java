@@ -32,6 +32,7 @@ public class TH_DIS2018 extends PApplet {
 
 	long		homeCmdTriggeredUsec	= 0;
 	int			waitingTimeMsec				= 5000;
+	int			waitingTimeMsecSet		= 5000;
 	boolean	isHomeCmdExecuted			= false;
 
 	public void settings() {
@@ -107,6 +108,10 @@ public class TH_DIS2018 extends PApplet {
 					Setting.servoDelay[2] = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("servoDelay[3]"))
 					Setting.servoDelay[3] = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("targetCalibX"))
+					Setting.targetCalibX = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("targetCalibY"))
+					Setting.targetCalibY = Float.parseFloat(parsed_[1]);
 			}
 		}
 	}
@@ -122,13 +127,19 @@ public class TH_DIS2018 extends PApplet {
 		serialComm = new SerialComm(this);
 
 		table = new Table();
+		table.addColumn("totalPointIdx");
 		table.addColumn("strokeIdx");
+		table.addColumn("pointIdx");
 		table.addColumn("penX");
 		table.addColumn("penY");
+		table.addColumn("x");
+		table.addColumn("y");
+		table.addColumn("f");
 		table.addColumn("pressure");
 		table.addColumn("tiltX");
 		table.addColumn("tiltY");
 		table.addColumn("millis");
+		table.addColumn("kind");
 		interpreter = new Interpreter(this);
 
 		strBfr = new StringBuffer();
@@ -145,6 +156,7 @@ public class TH_DIS2018 extends PApplet {
 		interpreter.setTable(table);
 
 		homeCmdTrigger();
+		waitingTimeMsec = waitingTimeMsecSet;
 	}
 
 	public void draw() {
@@ -152,10 +164,10 @@ public class TH_DIS2018 extends PApplet {
 			if (getWaitingTimeMsec() >= waitingTimeMsec) {
 				homeCmd();
 				setWritable(true);
+				waitingTimeMsec = waitingTimeMsecSet;
 			}
 		}
 
-		Setting.update();
 		background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255, (tabletInput.isWritable()) ? 0 : 255);
 		noStroke();
 		fill(oscComm.isTargetIdle ? 0 : 255, oscComm.isTargetIdle ? 255 : 0, 0);
@@ -201,6 +213,7 @@ public class TH_DIS2018 extends PApplet {
 		else if (key == 'h' || key == 'H') // set home
 		{
 			homeCmdTrigger();
+			waitingTimeMsec = 500;
 		}
 		else if (key == 'w' || key == 'W') // servo up
 		{
@@ -228,16 +241,16 @@ public class TH_DIS2018 extends PApplet {
 		}
 	}
 
+	String timestamp() {
+		Calendar now = Calendar.getInstance();
+		return String.format("%1$ty%1$tm%1$td_%1$tH%1$tM%1$tS", now);
+	}
+
 	static public void main(String[] passedArgs) {
 		String[] appletArgs = new String[] { main.TH_DIS2018.class.getName() };
 		if (passedArgs != null)
 			PApplet.main(concat(appletArgs, passedArgs));
 		else
 			PApplet.main(appletArgs);
-	}
-
-	String timestamp() {
-		Calendar now = Calendar.getInstance();
-		return String.format("%1$ty%1$tm%1$td_%1$tH%1$tM%1$tS", now);
 	}
 }

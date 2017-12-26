@@ -46,10 +46,18 @@ public class Interpreter {
 			while (stroke_.getPointsNum() >= 2) {
 				Point a_ = stroke_.getFirstPoint();
 				Point b_ = stroke_.getSecondPoint();
-				float aX_ = Setting.targetTabletWidth * ((a_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
-				float aY_ = Setting.targetTabletHeight * ((a_.getPenY()) / Setting.targetScreenHeight);
-				float bX_ = Setting.targetTabletWidth * ((b_.getPenX() - Setting.targetCalibX) / Setting.targetScreentWidth);
-				float bY_ = Setting.targetTabletHeight * ((b_.getPenY()) / Setting.targetScreenHeight);
+				float aCalibX_ = Math.min(Math.max((a_.getPenX() - Setting.targetCalibX), 0),
+						(Setting.targetScreentWidth - Setting.targetCalibX));
+				float aCalibY_ = Math.min(Math.max((a_.getPenY() - Setting.targetCalibY), 0),
+						(Setting.targetScreenHeight - Setting.targetCalibY));
+				float bCalibX_ = Math.min(Math.max((b_.getPenX() - Setting.targetCalibX), 0),
+						(Setting.targetScreentWidth - Setting.targetCalibX));
+				float bCalibY_ = Math.min(Math.max((b_.getPenY() - Setting.targetCalibY), 0),
+						(Setting.targetScreenHeight - Setting.targetCalibY));
+				float aX_ = Setting.targetTabletWidth * aCalibX_ / (float) Setting.targetScreentWidth;
+				float aY_ = Setting.targetTabletHeight * aCalibY_ / (float) Setting.targetScreenHeight;
+				float bX_ = Setting.targetTabletWidth * bCalibX_ / (float) Setting.targetScreentWidth;
+				float bY_ = Setting.targetTabletHeight * bCalibY_ / (float) Setting.targetScreenHeight;
 				long duration_ = b_.getMillis() - a_.getMillis();
 				float f_ = (float) (60000 / (double) duration_);
 				// Head
@@ -97,8 +105,8 @@ public class Interpreter {
 				strBfr.setLength(0);
 
 				// logging first point on table
-				logTable(a_.getStrokeIdx(), a_.getPenX(), a_.getPenY(), a_.getPressure(), a_.getTiltX(), a_.getTiltY(),
-						a_.getMillis());
+				logTable(a_.getTotalPointIdx(), a_.getStrokeIdx(), a_.getPointIdx(), a_.getPenX(), a_.getPenY(), aX_, aY_, f_,
+						a_.getPressure(), a_.getTiltX(), a_.getTiltY(), a_.getMillis());
 				// remove first point
 				stroke_.removeFirstPoint();
 
@@ -127,8 +135,8 @@ public class Interpreter {
 					}
 
 					// logging second (last) point on table
-					logTable(b_.getStrokeIdx(), b_.getPenX(), b_.getPenY(), b_.getPressure(), b_.getTiltX(), b_.getTiltY(),
-							b_.getMillis());
+					logTable(b_.getTotalPointIdx(), b_.getStrokeIdx(), b_.getPointIdx(), b_.getPenX(), b_.getPenY(), bX_, bY_, f_,
+							b_.getPressure(), b_.getTiltX(), b_.getTiltY(), b_.getMillis());
 					// remove second (last) point
 					stroke_.removeFirstPoint();
 					// remove first stroke which just has been empty
@@ -140,12 +148,17 @@ public class Interpreter {
 		}
 	}
 
-	public void logTable(int _strokeIdx, float _penX, float _penY, float _pressure, float _tiltX, float _tiltY,
-			long _millis) {
+	public void logTable(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY, float _x, float _y,
+			float _f, float _pressure, float _tiltX, float _tiltY, long _millis) {
 		TableRow newRow_ = table.addRow();
+		newRow_.setInt("totalPointIdx", _totalPointIdx);
 		newRow_.setInt("strokeIdx", _strokeIdx);
+		newRow_.setInt("pointIdx", _pointIdx);
 		newRow_.setFloat("penX", _penX);
 		newRow_.setFloat("penY", _penY);
+		newRow_.setFloat("x", _x);
+		newRow_.setFloat("y", _y);
+		newRow_.setFloat("f", _f);
 		newRow_.setFloat("pressure", _pressure);
 		newRow_.setFloat("tiltX", _tiltX);
 		newRow_.setFloat("tiltY", _tiltY);
