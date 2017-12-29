@@ -12,18 +12,18 @@ public class TabletInput {
 
 	private boolean isWritable = false;
 
-	private int			arryIdx				= 0;
-	private float[]	arryPenX			= { 0, 0 };
-	private float[]	arryPenY			= { 0, 0 };
-	private float[]	arryPressure	= { 0, 0 };
-	private float[]	arryTiltX			= { 0, 0 };
-	private float[]	arryTiltY			= { 0, 0 };
-	private long[]	arryMillis		= { 0, 0 };
-	private int[]		arryKind			= { 0, 0 };
+	private int			pointArryIdx						= 0;
+	private float[]	pointArryX							= { 0, 0 };
+	private float[]	pointArryY							= { 0, 0 };
+	private float[]	pointArryPressure				= { 0, 0 };
+	private float[]	pointArryTiltX					= { 0, 0 };
+	private float[]	pointArryTiltY					= { 0, 0 };
+	private long[]	pointArryEvtTimeInMsec	= { 0, 0 };
+	private int[]		pointArryType						= { 0, 0 };
 
-	private int	totalPointIdx	= -1;
-	private int	strokeIdx			= -1;
-	private int	pointIdx			= -1;
+	private int	nthPoint					= 0;
+	private int	nthStroke					= 0;
+	private int	nthPointInStroke	= 0;
 
 	public void setOscComm(OscComm _oscComm) {
 		oscComm = _oscComm;
@@ -40,82 +40,66 @@ public class TabletInput {
 			if (isWritable) {
 				if (_mEvt.getAction() == MouseEvent.PRESS || _mEvt.getAction() == MouseEvent.DRAG
 						|| _mEvt.getAction() == MouseEvent.RELEASE) {
-					int kind_ = 1;
+					int pointType_ = 1; // Body
 					if (_mEvt.getAction() == MouseEvent.PRESS)
-						kind_ = 0;
+						pointType_ = 0; // Head
 					else if (_mEvt.getAction() == MouseEvent.RELEASE)
-						kind_ = 2;
-					arryPenX[arryIdx] = tablet.getPenX();
-					arryPenY[arryIdx] = tablet.getPenY();
-					arryPressure[arryIdx] = tablet.getPressure();
-					arryTiltX[arryIdx] = tablet.getTiltX();
-					arryTiltY[arryIdx] = tablet.getTiltY();
-					arryMillis[arryIdx] = _mEvt.getMillis();
-					arryKind[arryIdx] = kind_;
-					if (arryIdx == 1) {
-						if (arryMillis[0] - arryMillis[1] != 0) {
-							if (arryKind[0] == 0) {// MouseEvent.PRESS
-								strokeIdx++;
-								pointIdx = -1;
+						pointType_ = 2; // Tail
+					pointArryX[pointArryIdx] = tablet.getPenX();
+					pointArryY[pointArryIdx] = tablet.getPenY();
+					pointArryPressure[pointArryIdx] = tablet.getPressure();
+					pointArryTiltX[pointArryIdx] = tablet.getTiltX();
+					pointArryTiltY[pointArryIdx] = tablet.getTiltY();
+					pointArryEvtTimeInMsec[pointArryIdx] = _mEvt.getMillis();
+					pointArryType[pointArryIdx] = pointType_;
+					if (pointArryIdx == 1) { // Event triggered more then a time aeswfaw vrqwerevwqwrrvwvrqavrvrwrvvrwqrwvqeavwqarvawvq3rva3w
+						if (pointArryEvtTimeInMsec[0] - pointArryEvtTimeInMsec[1] != 0) {
+							if (pointArryType[0] == 0) { // MouseEvent.PRESS
+								nthStroke++;
+								nthPointInStroke = 0;
 							}
-							pointIdx++;
-							totalPointIdx++;
-							oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, arryPenX[0], arryPenY[0], arryPressure[0],
-									arryTiltX[0], arryTiltY[0], arryMillis[0], arryKind[0]);
-							arryPenX[0] = arryPenX[1];
-							arryPenY[0] = arryPenY[1];
-							arryPressure[0] = arryPressure[1];
-							arryTiltX[0] = arryTiltX[1];
-							arryTiltY[0] = arryTiltY[1];
-							arryMillis[0] = arryMillis[1];
-							arryKind[0] = arryKind[1];
-							if (arryKind[0] == 2) { // MouseEvent.RELEASE
-								pointIdx++;
-								totalPointIdx++;
-								oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, arryPenX[0], arryPenY[0],
-										arryPressure[0], arryTiltX[0], arryTiltY[0], arryMillis[0], arryKind[0]);
+							countPointAndSendFirstArryDataAsStylusInput();
+							pollArry();
+							if (pointArryType[0] == 2) { // MouseEvent.RELEASE
+								countPointAndSendFirstArryDataAsStylusInput();
 							}
 						}
-						else if (arryKind[1] == 2) {
-							arryPenX[0] = arryPenX[1];
-							arryPenY[0] = arryPenY[1];
-							arryPressure[0] = arryPressure[1];
-							arryTiltX[0] = arryTiltX[1];
-							arryTiltY[0] = arryTiltY[1];
-							arryMillis[0] = arryMillis[1];
-							arryKind[0] = arryKind[1];
-							pointIdx++;
-							totalPointIdx++;
-							oscComm.sendTabletInputMsg(totalPointIdx, strokeIdx, pointIdx, arryPenX[0], arryPenY[0], arryPressure[0],
-									arryTiltX[0], arryTiltY[0], arryMillis[0], arryKind[0]);
+						else if (pointArryType[1] == 2) { // MouseEvent.RELEASE
+							pollArry();
+							countPointAndSendFirstArryDataAsStylusInput();
 						}
 					}
-					if (arryKind[0] == 0)
-						arryIdx = 1;
-					else if (arryKind[0] == 2)
-						arryIdx = 0;
+					if (pointArryType[0] == 0)
+						pointArryIdx = 1;
+					else if (pointArryType[0] == 2)
+						pointArryIdx = 0;
 				}
 			}
 		}
 	}
 
-	public void setWritable(boolean _isWritable) {
-		isWritable = _isWritable;
+	private void countPointAndSendFirstArryDataAsStylusInput() {
+		nthPointInStroke++;
+		nthPoint++;
+		oscComm.sendStylusInputMsg(nthPoint, nthStroke, nthPointInStroke, pointArryX[0], pointArryY[0],
+				pointArryPressure[0], pointArryTiltX[0], pointArryTiltY[0], pointArryEvtTimeInMsec[0], pointArryType[0]);
+	}
+
+	private void pollArry() {
+		pointArryX[0] = pointArryX[1];
+		pointArryY[0] = pointArryY[1];
+		pointArryPressure[0] = pointArryPressure[1];
+		pointArryTiltX[0] = pointArryTiltX[1];
+		pointArryTiltY[0] = pointArryTiltY[1];
+		pointArryEvtTimeInMsec[0] = pointArryEvtTimeInMsec[1];
+		pointArryType[0] = pointArryType[1];
 	}
 
 	public boolean isWritable() {
 		return isWritable;
 	}
 
-	public int getTotalPointIdx() {
-		return totalPointIdx;
-	}
-
-	public int getStrokeIdx() {
-		return strokeIdx;
-	}
-
-	public int getPointIdx() {
-		return pointIdx;
+	public void setWritable(boolean _isWritable) {
+		isWritable = _isWritable;
 	}
 }

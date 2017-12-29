@@ -7,18 +7,19 @@ public class Stroke {
 
 	private boolean isCompleted = false;
 
-	public Stroke(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY, float _pressure,
-			float _tiltX, float _tiltY, long _millis, int _kind) {
+	public Stroke(int _nthPoint, int _nthStroke, int _nthPointInStroke, float _x, float _y, float _pressure, float _tiltX,
+			float _tiltY, long _evtTimeInMsec, int _type) {
 		points = new ArrayList<Point>();
-		points
-				.add(new Point(_totalPointIdx, _strokeIdx, _pointIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis, _kind));
+		points.add(
+				new Point(_nthPoint, _nthStroke, _nthPointInStroke, _x, _y, _pressure, _tiltX, _tiltY, _evtTimeInMsec, _type));
 	}
 
-	public void addPoint(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY, float _pressure,
-			float _tiltX, float _tiltY, long _millis, int _kind) {
-		points
-				.add(new Point(_totalPointIdx, _strokeIdx, _pointIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis, _kind));
-		if (_kind == 2)
+	public void addPoint(int _nthPoint, int _nthStroke, int _nthPointInStroke, float _x, float _y, float _pressure,
+			float _tiltX, float _tiltY, long _evtTimeInMsec, int _type) {
+		points.add(
+				new Point(_nthPoint, _nthStroke, _nthPointInStroke, _x, _y, _pressure, _tiltX, _tiltY, _evtTimeInMsec, _type));
+		boolean isTail_ = _type == 2;
+		if (isTail_)
 			isCompleted = true;
 	}
 
@@ -31,19 +32,26 @@ public class Stroke {
 	}
 
 	public Point getFirstPoint() {
-		return points.get(0);
+		if (getPointsNum() > 0)
+			return points.get(0);
+		return null;
 	}
 
 	public Point getSecondPoint() {
-		return points.get(1);
+		if (getPointsNum() > 1)
+			return points.get(1);
+		return null;
 	}
 
 	public Point getLastPoint() {
-		return points.get(points.size() - 1);
+		if (getPointsNum() > 0)
+			return points.get(getPointsNum() - 1);
+		return null;
 	}
 
 	public void removeFirstPoint() {
-		points.remove(0);
+		if (getPointsNum() > 0)
+			points.remove(0);
 	}
 
 	public boolean isCompleted() {

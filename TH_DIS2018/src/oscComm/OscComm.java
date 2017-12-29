@@ -10,26 +10,27 @@ import oscP5.OscP5;
 import processing.core.PApplet;
 
 public class OscComm {
-	public PApplet	p5			= null;
-	public Drawing	drawing	= null;
+	private PApplet	p5			= null;
+	private Drawing	drawing	= null;
 
-	public final int		connectIntervalMsec		= 1000;
-	public final String	addrPtrnSyn						= "Syn";
-	public final String	addrPtrnSynAck				= "SynAck";
-	public final String	addrPtrnAck						= "Ack";
-	public final String	addrPtrnDisconnect		= "Disconnect";
-	public final String	addrPtrnTabletInput		= "TabletInput";
-	public final String	addrPtrnStatusReport	= "StatusReport";
+	private final int			connectPeriodMsec			= 1000;
+	private final String	addrPtrnSyn						= "Syn";
+	private final String	addrPtrnSynAck				= "SynAck";
+	private final String	addrPtrnAck						= "Ack";
+	private final String	addrPtrnDisconnect		= "Disconnect";
+	private final String	addrPtrnTabletInput		= "TabletInput";
+	private final String	addrPtrnStatusReport	= "StatusReport";
 
-	public long			connectTrialTimeUsec	= 0;
-	public boolean	isConnected						= false;
-	public boolean	isRecievedSynMsg			= false;
-	public boolean	isTargetIdle					= true;
+	private long		connectTrialTimeUsec	= 0;
+	private boolean	isConnected						= false;
+	private boolean	isRecievedSynMsg			= false;
+	private boolean	isRecievedSynAckMsg		= false;
 
-	public OscP5			oscPort			= null;
-	public NetAddress	myAddr			= null;
-	public NetAddress	targetAddr	= null;
-	public OscMessage	msg					= null;
+	private boolean isTargetIdle = true;
+
+	private OscP5				oscPort			= null;
+	private NetAddress	targetAddr	= null;
+	private OscMessage	msg					= null;
 
 	public StringBuffer prtTxtBfr = null;
 
@@ -51,13 +52,13 @@ public class OscComm {
 	}
 
 	public void pre() {
-		tryConnect(connectIntervalMsec);
+		tryConnectPeriodically(connectPeriodMsec);
 	}
 
-	public void tryConnect(int _tryIntervalMsec) {
-		if (!isConnected && !isRecievedSynMsg) {
-			if (getWaitingTimeMsec() >= _tryIntervalMsec) {
-				disconnect(Setting.targetIp, Setting.targetPort);
+	public void tryConnectPeriodically(int _periodMsec) {
+		if (!isConnected && (!isRecievedSynMsg || !isRecievedSynAckMsg)) {
+			if (getTimePassedMsec() >= _periodMsec) {
+				setConnect(false, Setting.targetIp, Setting.targetPort);
 				sendConnectionMsg(addrPtrnSyn);
 				prtTxtBfr.append("<OSC>").append('\t').append("Send (Syn) Msg to ").append(Setting.targetIp).append(":")
 						.append(Setting.targetPort);
@@ -68,27 +69,31 @@ public class OscComm {
 		}
 	}
 
-	public long getWaitingTimeMsec() {
+	public long getTimePassedMsec() {
 		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - connectTrialTimeUsec);
 	}
 
-	public void disconnect(String _ip, int _port) {
-		if (isConnected) {
-			prtTxtBfr.append("<OSC>").append('\t').append("Disconnected");
-			System.out.println(prtTxtBfr);
-			prtTxtBfr.setLength(0);
-			isConnected = false;
-			isRecievedSynMsg = false;
-			sendConnectionMsg(addrPtrnDisconnect);
+	public void setConnect(boolean _isConnected, String _receivedIp, int _receivedPort) {
+		if (_isConnected != isConnected) {
+			isConnected = _isConnected;
+			if (isConnected) {
+				isConnected = true;
+				prtTxtBfr.append("<OSC>").append('\t').append("Connected with ")//
+						.append(_receivedIp)//
+						.append(":")//
+						.append(_receivedPort);
+				System.out.println(prtTxtBfr);
+				prtTxtBfr.setLength(0);
+			}
+			else {
+				prtTxtBfr.append("<OSC>").append('\t').append("Disconnected");
+				System.out.println(prtTxtBfr);
+				prtTxtBfr.setLength(0);
+				isRecievedSynMsg = false;
+				isRecievedSynAckMsg = false;
+				sendConnectionMsg(addrPtrnDisconnect);
+			}
 		}
-	}
-
-	public void sendConnectionMsg(String _addrPattern) {
-		msg.clear();
-		msg.setAddrPattern(_addrPattern);
-		msg.add(oscPort.ip())//
-				.add(Setting.myPort);
-		oscPort.send(msg, targetAddr);
 	}
 
 	public void dispose() {
@@ -97,7 +102,7 @@ public class OscComm {
 	}
 
 	public void closePort() {
-		disconnect(Setting.targetIp, Setting.targetPort);
+		setConnect(false, Setting.targetIp, Setting.targetPort);
 		oscPort.stop();
 		oscPort = null;
 	}
@@ -116,7 +121,15 @@ public class OscComm {
 		prtTxtBfr.setLength(0);
 	}
 
-	public void sendTabletInputMsg(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY,
+	public void sendConnectionMsg(String _addrPattern) {
+		msg.clear();
+		msg.setAddrPattern(_addrPattern);
+		msg.add(oscPort.ip())//
+				.add(Setting.myPort);
+		oscPort.send(msg, targetAddr);
+	}
+
+	public void sendStylusInputMsg(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY,
 			float _pressure, float _tiltX, float _tiltY, long _millis, int _kind) {
 		msg.clear();
 		msg.setAddrPattern(addrPtrnTabletInput);
@@ -133,55 +146,63 @@ public class OscComm {
 		oscPort.send(msg, targetAddr);
 	}
 
+	public void sendStatusMsg(boolean _isIdle) {
+		msg.clear();
+		msg.setAddrPattern(addrPtrnStatusReport);
+		msg.add(_isIdle ? 1 : 0);
+		oscPort.send(msg, targetAddr);
+	}
+
 	public void receive(OscMessage _oscMsg) {
 		if (_oscMsg.addrPattern().equals(addrPtrnSyn) || _oscMsg.addrPattern().equals(addrPtrnSynAck)
 				|| _oscMsg.addrPattern().equals(addrPtrnAck) || _oscMsg.addrPattern().equals(addrPtrnDisconnect)) {
-			String ip_ = _oscMsg.get(0).stringValue();
-			int port_ = _oscMsg.get(1).intValue();
-			if (ip_.equals(Setting.targetIp) && port_ == Setting.targetPort) {
+			String receivedIp_ = _oscMsg.get(0).stringValue();
+			int receivedPort_ = _oscMsg.get(1).intValue();
+			if (receivedIp_.equals(Setting.targetIp) && receivedPort_ == Setting.targetPort) {
 				if (!isConnected) {
 					if (_oscMsg.addrPattern().equals(addrPtrnSyn)) {
 						isRecievedSynMsg = true;
 						prtTxtBfr.append("<OSC>").append('\t').append("Got a (Syn) Msg from ")//
-								.append(ip_)//
+								.append(receivedIp_)//
 								.append(":")//
-								.append(port_)//
+								.append(receivedPort_)//
 								.append('\n');
 						prtTxtBfr.append("<OSC>").append('\t').append("Send back (Syn + Ack) Msg to ")//
-								.append(ip_)//
+								.append(receivedIp_)//
 								.append(":")//
-								.append(port_);
+								.append(receivedPort_);
 						System.out.println(prtTxtBfr);
 						prtTxtBfr.setLength(0);
 						sendConnectionMsg(addrPtrnSynAck);
 					}
 					else if (_oscMsg.addrPattern().equals(addrPtrnSynAck)) {
+						isRecievedSynAckMsg = true;
 						prtTxtBfr.append("<OSC>").append('\t').append("Got a (Syn + Ack) Msg from ")//
-								.append(ip_)//
+								.append(receivedIp_)//
 								.append(":")//
-								.append(port_)//
+								.append(receivedPort_)//
 								.append('\n');
 						prtTxtBfr.append("<OSC>").append('\t').append("Send back (Ack) Msg to ")//
-								.append(ip_)//
+								.append(receivedIp_)//
 								.append(":")//
-								.append(port_);
+								.append(receivedPort_);
 						System.out.println(prtTxtBfr);
 						prtTxtBfr.setLength(0);
 						sendConnectionMsg(addrPtrnAck);
-						setToConnect(ip_, port_);
+						setConnect(true, receivedIp_, receivedPort_);
 					}
 					else if (_oscMsg.addrPattern().equals(addrPtrnAck)) {
 						prtTxtBfr.append("<OSC>").append('\t').append("Got a (Ack) Msg from ")//
-								.append(ip_)//
+								.append(receivedIp_)//
 								.append(":")//
-								.append(port_);
+								.append(receivedPort_);
 						System.out.println(prtTxtBfr);
 						prtTxtBfr.setLength(0);
-						setToConnect(ip_, port_);
+						setConnect(true, receivedIp_, receivedPort_);
 					}
 				}
 				else if (_oscMsg.addrPattern().equals(addrPtrnDisconnect))
-					disconnect(ip_, port_);
+					setConnect(false, receivedIp_, receivedPort_);
 			}
 		}
 		else if (_oscMsg.addrPattern().equals(addrPtrnTabletInput)) {
@@ -207,27 +228,8 @@ public class OscComm {
 		}
 	}
 
-	public void setToConnect(String _ip, int _port) {
-		if (!isConnected) {
-			isConnected = true;
-			prtTxtBfr.append("<OSC>").append('\t').append("Connected with ")//
-					.append(_ip)//
-					.append(":")//
-					.append(_port);
-			System.out.println(prtTxtBfr);
-			prtTxtBfr.setLength(0);
-		}
-	}
-
 	public void activateAutoConnect() {
-		disconnect(Setting.targetIp, Setting.targetPort);
-		tryConnect(connectIntervalMsec);
-	}
-
-	public void sendStatusReport(boolean _isIdle) {
-		msg.clear();
-		msg.setAddrPattern(addrPtrnStatusReport);
-		msg.add(_isIdle ? 1 : 0);
-		oscPort.send(msg, targetAddr);
+		setConnect(false, Setting.targetIp, Setting.targetPort);
+		tryConnectPeriodically(connectPeriodMsec);
 	}
 }

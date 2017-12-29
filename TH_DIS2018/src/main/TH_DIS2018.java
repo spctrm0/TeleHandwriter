@@ -178,7 +178,7 @@ public class TH_DIS2018 extends PApplet {
 			for (int j = 0; j < stroke_.getPointsNum() - 1; j++) {
 				Point a_ = stroke_.getPoints().get(j);
 				Point b_ = stroke_.getPoints().get(j + 1);
-				line(a_.getPenX(), a_.getPenY(), b_.getPenX(), b_.getPenY());
+				line(a_.getX(), a_.getY(), b_.getX(), b_.getY());
 			}
 		}
 		// System.out.print(grbl.bfrSize);
