@@ -78,7 +78,7 @@ public class Grbl {
         if (!isBusy) {
           if (isMotionCmd(cmd_)) {
             isBusy = true;
-            oscComm.sendStatusMsg(!isBusy);
+            oscComm.sendGrblStatusMsg(!isBusy);
           }
         }
         serialComm.write(cmd_);
@@ -104,7 +104,7 @@ public class Grbl {
         isOnPaper = false;
         if (isBusy) {
           isBusy = false;
-          oscComm.sendStatusMsg(!isBusy);
+          oscComm.sendGrblStatusMsg(!isBusy);
         }
       } else if (isMotionCmd(cmd_))
         isOnPaper = true;
@@ -115,7 +115,7 @@ public class Grbl {
           strokeEndTimeUsec = System.nanoTime();
           if (isBusy) {
             isBusy = false;
-            oscComm.sendStatusMsg(!isBusy);
+            oscComm.sendGrblStatusMsg(!isBusy);
           }
         }
       }

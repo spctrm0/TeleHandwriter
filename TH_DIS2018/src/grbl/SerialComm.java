@@ -7,24 +7,24 @@ import processing.core.PApplet;
 import processing.serial.Serial;
 
 public class SerialComm {
-	public PApplet	p5		= null;
-	public Grbl			grbl	= null;
+	private PApplet	p5		= null;
+	private Grbl		grbl	= null;
 
-	public final int		connectPeriodMsec	= 2000;
-	public final int		baudRate					= 250000;
-	public final char		parity						= 'n';
-	public final int		dataBits					= 8;
-	public final float	stopBits					= 1.0f;
-	public final char		delimeter					= '\r';
+	private final int		connectPeriodMsec	= 2000;
+	private final int		baudRate					= 250000;
+	private final char	parity						= 'n';
+	private final int		dataBits					= 8;
+	private final float	stopBits					= 1.0f;
+	private final char	delimeter					= '\r';
 
-	public long			connectTrialTimeUsec	= 0;
-	public int			portIdx								= 0;
-	public boolean	isConnected						= false;
+	private long		connectTrialTimeUsec	= 0;
+	private int			portIdx								= 0;
+	private boolean	isConnected						= false;
 
-	public Serial srlPort = null;
+	private Serial srlPort = null;
 
-	public StringBuffer	charToStrBfr	= null;
-	public StringBuffer	prtTxtBfr			= null;
+	private StringBuffer	charToStrBfr	= null;
+	private StringBuffer	prtTxtBfr			= null;
 
 	public void setGrbl(Grbl _grbl) {
 		grbl = _grbl;
@@ -46,7 +46,7 @@ public class SerialComm {
 		tryConnectPeriodically(connectPeriodMsec);
 	}
 
-	public void tryConnectPeriodically(int _periodMsec) {
+	private void tryConnectPeriodically(int _periodMsec) {
 		if (!isConnected) {
 			if (getTimePassedMsec() >= _periodMsec) {
 				if (Serial.list().length > 0) {
@@ -59,11 +59,11 @@ public class SerialComm {
 		}
 	}
 
-	public long getTimePassedMsec() {
+	private long getTimePassedMsec() {
 		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - connectTrialTimeUsec);
 	}
 
-	public void connect(int _portIdx) {
+	private void connect(int _portIdx) {
 		if (Serial.list().length > 0 && _portIdx < Serial.list().length) {
 			String portName_ = Serial.list()[_portIdx];
 			if (srlPort != null)
@@ -81,7 +81,7 @@ public class SerialComm {
 			disconnect();
 	}
 
-	public void disconnect() {
+	private void disconnect() {
 		srlPort.stop();
 		srlPort = null;
 		if (isConnected) {
@@ -92,7 +92,7 @@ public class SerialComm {
 		}
 	}
 
-	public void printSerialList() {
+	private void printSerialList() {
 		prtTxtBfr.append("<SRL>").append('\t').append("PortList...").append('\n');
 		for (int i = 0; i < Serial.list().length; i++) {
 			String portName_ = Serial.list()[i];
@@ -136,5 +136,9 @@ public class SerialComm {
 	public void activateAutoConnect() {
 		disconnect();
 		tryConnectPeriodically(connectPeriodMsec);
+	}
+
+	public boolean isConnected() {
+		return isConnected;
 	}
 }

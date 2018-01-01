@@ -52,21 +52,25 @@ public class TabletInput {
 					pointArryTiltY[pointArryIdx] = tablet.getTiltY();
 					pointArryEvtTimeInMsec[pointArryIdx] = _mEvt.getMillis();
 					pointArryType[pointArryIdx] = pointType_;
-					if (pointArryIdx == 1) { // Event triggered more then a time aeswfaw vrqwerevwqwrrvwvrqavrvrwrvvrwqrwvqeavwqarvawvq3rva3w
+					if (pointArryIdx == 1) { // Event triggered more then a time aeswfaw
+																		// vrqwerevwqwrrvwvrqavrvrwrvvrwqrwvqeavwqarvawvq3rva3w
 						if (pointArryEvtTimeInMsec[0] - pointArryEvtTimeInMsec[1] != 0) {
 							if (pointArryType[0] == 0) { // MouseEvent.PRESS
 								nthStroke++;
 								nthPointInStroke = 0;
 							}
-							countPointAndSendFirstArryDataAsStylusInput();
-							pollArry();
+							countPoint();
+							SendFirstArryDataAsStylusInputMsg();
+							shiftArry();
 							if (pointArryType[0] == 2) { // MouseEvent.RELEASE
-								countPointAndSendFirstArryDataAsStylusInput();
+								countPoint();
+								SendFirstArryDataAsStylusInputMsg();
 							}
 						}
 						else if (pointArryType[1] == 2) { // MouseEvent.RELEASE
-							pollArry();
-							countPointAndSendFirstArryDataAsStylusInput();
+							shiftArry();
+							countPoint();
+							SendFirstArryDataAsStylusInputMsg();
 						}
 					}
 					if (pointArryType[0] == 0)
@@ -78,14 +82,17 @@ public class TabletInput {
 		}
 	}
 
-	private void countPointAndSendFirstArryDataAsStylusInput() {
+	private void countPoint() {
 		nthPointInStroke++;
 		nthPoint++;
+	}
+
+	private void SendFirstArryDataAsStylusInputMsg() {
 		oscComm.sendStylusInputMsg(nthPoint, nthStroke, nthPointInStroke, pointArryX[0], pointArryY[0],
 				pointArryPressure[0], pointArryTiltX[0], pointArryTiltY[0], pointArryEvtTimeInMsec[0], pointArryType[0]);
 	}
 
-	private void pollArry() {
+	private void shiftArry() {
 		pointArryX[0] = pointArryX[1];
 		pointArryY[0] = pointArryY[1];
 		pointArryPressure[0] = pointArryPressure[1];
