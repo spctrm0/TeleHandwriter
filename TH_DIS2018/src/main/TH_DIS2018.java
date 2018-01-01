@@ -18,12 +18,14 @@ import processing.serial.Serial;
 import tabletInput.TabletInput;
 
 public class TH_DIS2018 extends PApplet {
-	Drawing			drawing;
-	OscComm			oscComm;
-	TabletInput	tabletInput;
+	TabletInput tabletInput;
 
-	Grbl				grbl;
 	SerialComm	serialComm;
+	Grbl				grbl;
+
+	OscComm oscComm;
+
+	Drawing drawing;
 
 	Table				table;
 	Interpreter	interpreter;
@@ -109,9 +111,9 @@ public class TH_DIS2018 extends PApplet {
 				else if (parsed_[0].equals("servoDelay[3]"))
 					Setting.servoDelay[3] = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("targetCalibX"))
-					Setting.targetCalibX = Float.parseFloat(parsed_[1]);
+					Setting.targetCalibXInPx = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("targetCalibY"))
-					Setting.targetCalibY = Float.parseFloat(parsed_[1]);
+					Setting.targetCalibYInPx = Float.parseFloat(parsed_[1]);
 			}
 		}
 	}
@@ -119,12 +121,14 @@ public class TH_DIS2018 extends PApplet {
 	public void setup() {
 		loadSetting();
 
-		drawing = new Drawing();
-		oscComm = new OscComm(this);
 		tabletInput = new TabletInput(this);
 
-		grbl = new Grbl(this);
 		serialComm = new SerialComm(this);
+		grbl = new Grbl(this);
+
+		oscComm = new OscComm(this);
+
+		drawing = new Drawing();
 
 		table = new Table();
 		table.addColumn("totalPointIdx");
@@ -144,12 +148,14 @@ public class TH_DIS2018 extends PApplet {
 
 		strBfr = new StringBuffer();
 
-		oscComm.setDrawing(drawing);
 		tabletInput.setOscComm(oscComm);
 
+		serialComm.setGrbl(grbl);
+		serialComm.setOscComm(oscComm);
 		grbl.setSerialComm(serialComm);
 		grbl.setOscComm(oscComm);
-		serialComm.setGrbl(grbl);
+
+		oscComm.setDrawing(drawing);
 
 		interpreter.setDrawing(drawing);
 		interpreter.setGrbl(grbl);

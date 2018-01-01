@@ -46,18 +46,18 @@ public class Interpreter {
 			while (stroke_.getPointsNum() >= 2) {
 				Point a_ = stroke_.getFirstPoint();
 				Point b_ = stroke_.getSecondPoint();
-				float aCalibX_ = Math.min(Math.max((a_.getX() - Setting.targetCalibX), 0),
-						(Setting.targetScreentWidth - Setting.targetCalibX));
-				float aCalibY_ = Math.min(Math.max((a_.getY() - Setting.targetCalibY), 0),
-						(Setting.targetScreenHeight - Setting.targetCalibY));
-				float bCalibX_ = Math.min(Math.max((b_.getX() - Setting.targetCalibX), 0),
-						(Setting.targetScreentWidth - Setting.targetCalibX));
-				float bCalibY_ = Math.min(Math.max((b_.getY() - Setting.targetCalibY), 0),
-						(Setting.targetScreenHeight - Setting.targetCalibY));
-				float aX_ = Setting.targetTabletWidth * aCalibX_ / (float) Setting.targetScreentWidth;
-				float aY_ = Setting.targetTabletHeight * aCalibY_ / (float) Setting.targetScreenHeight;
-				float bX_ = Setting.targetTabletWidth * bCalibX_ / (float) Setting.targetScreentWidth;
-				float bY_ = Setting.targetTabletHeight * bCalibY_ / (float) Setting.targetScreenHeight;
+				float aCalibX_ = Math.min(Math.max((a_.getX() - Setting.targetCalibXInPx), 0),
+						(Setting.targetScreentWidthInPx - Setting.targetCalibXInPx));
+				float aCalibY_ = Math.min(Math.max((a_.getY() - Setting.targetCalibYInPx), 0),
+						(Setting.targetScreenHeightInPx - Setting.targetCalibYInPx));
+				float bCalibX_ = Math.min(Math.max((b_.getX() - Setting.targetCalibXInPx), 0),
+						(Setting.targetScreentWidthInPx - Setting.targetCalibXInPx));
+				float bCalibY_ = Math.min(Math.max((b_.getY() - Setting.targetCalibYInPx), 0),
+						(Setting.targetScreenHeightInPx - Setting.targetCalibYInPx));
+				float aX_ = Setting.targetTabletWidthInMm * aCalibX_ / (float) Setting.targetScreentWidthInPx;
+				float aY_ = Setting.targetTabletHeightInMm * aCalibY_ / (float) Setting.targetScreenHeightInPx;
+				float bX_ = Setting.targetTabletWidthInMm * bCalibX_ / (float) Setting.targetScreentWidthInPx;
+				float bY_ = Setting.targetTabletHeightInMm * bCalibY_ / (float) Setting.targetScreenHeightInPx;
 				long duration_ = b_.getEvtTimeInMsec() - a_.getEvtTimeInMsec();
 				float f_ = (float) (60000 / (double) duration_);
 				// Head

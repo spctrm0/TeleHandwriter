@@ -9,18 +9,18 @@ public class Drawing {
 		strokes = new ArrayList<Stroke>();
 	}
 
-	public void addStroke(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY, float _pressure,
-			float _tiltX, float _tiltY, long _millis, int _kind) {
+	public void addStroke(int _nthPoint, int _nthStroke, int _nthPointInStroke, float _x, float _y, float _pressure,
+			float _tiltX, float _tiltY, long _evtTimeInMsec, int _type) {
 		strokes.add(
-				new Stroke(_totalPointIdx, _strokeIdx, _pointIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis, _kind));
+				new Stroke(_nthPoint, _nthStroke, _nthPointInStroke, _x, _y, _pressure, _tiltX, _tiltY, _evtTimeInMsec, _type));
 	}
 
-	public void addPoint(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY, float _pressure,
-			float _tiltX, float _tiltY, long _millis, int _kind) {
+	public void addPoint(int _nthPoint, int _nthStroke, int _nthPointInStroke, float _x, float _y, float _pressure,
+			float _tiltX, float _tiltY, long _evtTimeInMsec, int _type) {
 		Stroke lastStroke_ = getLastStroke();
 		if (lastStroke_ != null)
-			lastStroke_.addPoint(_totalPointIdx, _strokeIdx, _pointIdx, _penX, _penY, _pressure, _tiltX, _tiltY, _millis,
-					_kind);
+			lastStroke_.addPoint(_nthPoint, _nthStroke, _nthPointInStroke, _x, _y, _pressure, _tiltX, _tiltY, _evtTimeInMsec,
+					_type);
 	}
 
 	public ArrayList<Stroke> getStrokes() {

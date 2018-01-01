@@ -3,12 +3,14 @@ package grbl;
 import java.util.concurrent.TimeUnit;
 
 import main.Setting;
+import oscComm.OscComm;
 import processing.core.PApplet;
 import processing.serial.Serial;
 
 public class SerialComm {
-	private PApplet	p5		= null;
-	private Grbl		grbl	= null;
+	private PApplet	p5			= null;
+	private Grbl		grbl		= null;
+	private OscComm	oscComm	= null;
 
 	private final int		connectPeriodMsec	= 2000;
 	private final int		baudRate					= 250000;
@@ -88,7 +90,7 @@ public class SerialComm {
 			prtTxtBfr.append("<SRL>").append('\t').append("Disconnected");
 			System.out.println(prtTxtBfr.toString());
 			prtTxtBfr.setLength(0);
-			isConnected = false;
+			setConnected(false);
 		}
 	}
 
@@ -115,7 +117,7 @@ public class SerialComm {
 				if (!isConnected) {
 					if (msg_.equals(Setting.connectionChkTxt)) {
 						boolean wasConnected_ = isConnected;
-						isConnected = true;
+						setConnected(false);
 						if (wasConnected_ != isConnected) {
 							prtTxtBfr.append("<SRL>").append('\t').append("Connected with ").append(srlPort.port.getPortName())
 									.append('\n');
@@ -140,5 +142,10 @@ public class SerialComm {
 
 	public boolean isConnected() {
 		return isConnected;
+	}
+
+	public void setConnected(boolean _isConnected) {
+		isConnected = _isConnected;
+		oscComm.updateSerialCommIsConnected(isConnected);
 	}
 }

@@ -52,8 +52,7 @@ public class TabletInput {
 					pointArryTiltY[pointArryIdx] = tablet.getTiltY();
 					pointArryEvtTimeInMsec[pointArryIdx] = _mEvt.getMillis();
 					pointArryType[pointArryIdx] = pointType_;
-					if (pointArryIdx == 1) { // Event triggered more then a time aeswfaw
-																		// vrqwerevwqwrrvwvrqavrvrwrvvrwqrwvqeavwqarvawvq3rva3w
+					if (pointArryIdx == 1) {
 						if (pointArryEvtTimeInMsec[0] - pointArryEvtTimeInMsec[1] != 0) {
 							if (pointArryType[0] == 0) { // MouseEvent.PRESS
 								nthStroke++;
@@ -108,5 +107,6 @@ public class TabletInput {
 
 	public void setWritable(boolean _isWritable) {
 		isWritable = _isWritable;
+		oscComm.updateTabletInputIsWritable(isWritable);
 	}
 }

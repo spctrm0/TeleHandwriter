@@ -3,31 +3,38 @@ package oscComm;
 import java.util.concurrent.TimeUnit;
 
 import drawing.Drawing;
+import grbl.Grbl;
+import grbl.SerialComm;
 import main.Setting;
 import netP5.NetAddress;
 import oscP5.OscMessage;
 import oscP5.OscP5;
 import processing.core.PApplet;
+import tabletInput.TabletInput;
 
 public class OscComm {
 
 	private PApplet	p5			= null;
 	private Drawing	drawing	= null;
 
-	private final int			connectPeriodMsec			= 1000;
-	private final String	addrPtrnSyn						= "Syn";
-	private final String	addrPtrnSynAck				= "SynAck";
-	private final String	addrPtrnAck						= "Ack";
-	private final String	addrPtrnDisconnect		= "Disconnect";
-	private final String	addrPtrnTabletInput		= "TabletInput";
-	private final String	addrPtrnStatusReport	= "StatusReport";
+	private final int			connectPeriodMsec								= 1000;
+	private final String	addrPtrnSyn											= "Syn";
+	private final String	addrPtrnSynAck									= "SynAck";
+	private final String	addrPtrnAck											= "Ack";
+	private final String	addrPtrnDisconnect							= "Disconnect";
+	private final String	addrPtrnTabletInputMsg					= "TabletInputMsg";
+	private final String	addrPtrnIsReadyToWriteStatusMsg	= "IsReadyToWriteStatusMsg";
 
 	private long		connectTrialTimeUsec	= 0;
 	private boolean	isConnected						= false;
 	private boolean	isRecievedSynMsg			= false;
 	private boolean	isRecievedSynAckMsg		= false;
 
-	private boolean isTargetIdle = true;
+	private boolean	serialCommIsConnected	= false;
+	private boolean	tabletInputIsWritable	= false;
+	private boolean	grblIsIdle						= false;
+
+	private boolean isTargetReadyToWrite = false;
 
 	private OscP5				oscPort			= null;
 	private NetAddress	targetAddr	= null;
@@ -130,28 +137,43 @@ public class OscComm {
 		oscPort.send(msg, targetAddr);
 	}
 
-	public void sendStylusInputMsg(int _totalPointIdx, int _strokeIdx, int _pointIdx, float _penX, float _penY,
-			float _pressure, float _tiltX, float _tiltY, long _millis, int _kind) {
+	public void sendStylusInputMsg(int _nthPoint, int _nthStroke, int _nthPointInStroke, float _x, float _y,
+			float _pressure, float _tiltX, float _tiltY, long _evtTimeInMsec, int _type) {
 		msg.clear();
-		msg.setAddrPattern(addrPtrnTabletInput);
-		msg.add(_totalPointIdx);
-		msg.add(_strokeIdx);
-		msg.add(_pointIdx);
-		msg.add(_penX);
-		msg.add(_penY);
+		msg.setAddrPattern(addrPtrnTabletInputMsg);
+		msg.add(_nthPoint);
+		msg.add(_nthStroke);
+		msg.add(_nthPointInStroke);
+		msg.add(_x);
+		msg.add(_y);
 		msg.add(_pressure);
 		msg.add(_tiltX);
 		msg.add(_tiltY);
-		msg.add(Long.toString(_millis));
-		msg.add(_kind);
+		msg.add(Long.toString(_evtTimeInMsec));
+		msg.add(_type);
 		oscPort.send(msg, targetAddr);
 	}
 
-	public void sendGrblStatusMsg(boolean _isIdle) {
+	public void sendReadyToWriteStatusMsg() {
 		msg.clear();
-		msg.setAddrPattern(addrPtrnStatusReport);
-		msg.add(_isIdle ? 1 : 0);
+		msg.setAddrPattern(addrPtrnIsReadyToWriteStatusMsg);
+		msg.add((serialCommIsConnected && tabletInputIsWritable && grblIsIdle) ? 1 : 0);
 		oscPort.send(msg, targetAddr);
+	}
+
+	public void updateSerialCommIsConnected(boolean _serialCommIsConnected) {
+		serialCommIsConnected = _serialCommIsConnected;
+		sendReadyToWriteStatusMsg();
+	}
+
+	public void updateTabletInputIsWritable(boolean _tabletInputIsWritable) {
+		tabletInputIsWritable = _tabletInputIsWritable;
+		sendReadyToWriteStatusMsg();
+	}
+
+	public void updateGrblIsIdle(boolean _grblIsIdle) {
+		grblIsIdle = _grblIsIdle;
+		sendReadyToWriteStatusMsg();
 	}
 
 	public void receive(OscMessage _oscMsg) {
@@ -206,26 +228,26 @@ public class OscComm {
 					setConnect(false, receivedIp_, receivedPort_);
 			}
 		}
-		else if (_oscMsg.addrPattern().equals(addrPtrnTabletInput)) {
-			int totalPointIdx_ = _oscMsg.get(0).intValue();
-			int strokeIdx_ = _oscMsg.get(1).intValue();
-			int pointIdx_ = _oscMsg.get(2).intValue();
-			float penX_ = _oscMsg.get(3).floatValue();
-			float penY_ = _oscMsg.get(4).floatValue();
+		else if (_oscMsg.addrPattern().equals(addrPtrnTabletInputMsg)) {
+			int nthPoint_ = _oscMsg.get(0).intValue();
+			int nthStroke_ = _oscMsg.get(1).intValue();
+			int nthPointInStroke_ = _oscMsg.get(2).intValue();
+			float x_ = _oscMsg.get(3).floatValue();
+			float y_ = _oscMsg.get(4).floatValue();
 			float pressure_ = _oscMsg.get(5).floatValue();
 			float tiltX_ = _oscMsg.get(6).floatValue();
 			float tiltY_ = _oscMsg.get(7).floatValue();
-			long millis_ = Long.parseLong(_oscMsg.get(8).stringValue());
-			int kind_ = _oscMsg.get(9).intValue();
-			if (kind_ == 0)
-				drawing.addStroke(totalPointIdx_, strokeIdx_, pointIdx_, penX_, penY_, pressure_, tiltX_, tiltY_, millis_,
-						kind_);
+			long evtTimeInMsec_ = Long.parseLong(_oscMsg.get(8).stringValue());
+			int type_ = _oscMsg.get(9).intValue();
+			if (type_ == 0)
+				drawing.addStroke(nthPoint_, nthStroke_, nthPointInStroke_, x_, y_, pressure_, tiltX_, tiltY_, evtTimeInMsec_,
+						type_);
 			else
-				drawing.addPoint(totalPointIdx_, strokeIdx_, pointIdx_, penX_, penY_, pressure_, tiltX_, tiltY_, millis_,
-						kind_);
+				drawing.addPoint(nthPoint_, nthStroke_, nthPointInStroke_, x_, y_, pressure_, tiltX_, tiltY_, evtTimeInMsec_,
+						type_);
 		}
-		else if (_oscMsg.addrPattern().equals(addrPtrnStatusReport)) {
-			isTargetIdle = _oscMsg.get(0).intValue() == 1;
+		else if (_oscMsg.addrPattern().equals(addrPtrnIsReadyToWriteStatusMsg)) {
+			isTargetReadyToWrite = _oscMsg.get(0).intValue() == 1;
 		}
 	}
 
@@ -236,5 +258,9 @@ public class OscComm {
 
 	public boolean isConnected() {
 		return isConnected;
+	}
+
+	public boolean isTargetReadyToWrite() {
+		return isTargetReadyToWrite;
 	}
 }
