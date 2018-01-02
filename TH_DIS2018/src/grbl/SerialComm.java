@@ -121,7 +121,7 @@ public class SerialComm {
 				if (!isConnected) {
 					if (msg_.equals(Setting.connectionChkTxt)) {
 						boolean wasConnected_ = isConnected;
-						setConnected(false);
+						setConnected(true);
 						if (wasConnected_ != isConnected) {
 							prtTxtBfr.append("<SRL>").append('\t').append("Connected with ").append(srlPort.port.getPortName())
 									.append('\n');

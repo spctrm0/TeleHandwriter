@@ -31,8 +31,8 @@ public class TH_DIS2018 extends PApplet {
 	StringBuffer strBfr = null;
 
 	public void settings() {
-		fullScreen();
-		// size(500, 500);
+		// fullScreen();
+		size(500, 500);
 	}
 
 	public void setWritable(boolean _isWritable) {
@@ -55,9 +55,9 @@ public class TH_DIS2018 extends PApplet {
 				else if (parsed_[0].equals("targetCalibYInPx"))
 					Setting.targetCalibYInPx = Float.parseFloat(parsed_[1]);
 				if (parsed_[0].equals("servoHover"))
-					Setting.servoHover = Integer.parseInt(parsed_[1]);
+					Setting.servoHover = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("servoZero"))
-					Setting.servoZero = Integer.parseInt(parsed_[1]);
+					Setting.servoZero = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("servoDelay[0]"))
 					Setting.servoDelay[0] = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("servoDelay[1]"))
@@ -67,7 +67,7 @@ public class TH_DIS2018 extends PApplet {
 				else if (parsed_[0].equals("servoDelay[3]"))
 					Setting.servoDelay[3] = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("feedrateStrokeToStoke"))
-					Setting.feedrateStrokeToStoke = Integer.parseInt(parsed_[1]);
+					Setting.feedrateStrokeToStoke = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("xBackOff"))
 					Setting.xBackOff = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("myPort"))
@@ -146,6 +146,17 @@ public class TH_DIS2018 extends PApplet {
 				line(a_.getX(), a_.getY(), b_.getX(), b_.getY());
 			}
 		}
+		noStroke();
+		fill(255);
+		String log_ = "";
+		log_ += "isHomeCmdExecuted\t= " + grbl.isHomeCmdExecuted;
+		log_ += "\nisNeedToReserveBackOffCmd\t= " + grbl.isNeedToReserveBackOffCmd;
+		log_ += "\nisBackOffed\t= " + grbl.isBackOffed;
+		log_ += "\nisHomed\t= " + grbl.isHomed;
+		log_ += "\nisPreDefinedHomed\t= " + grbl.isPreDefinedHomed;
+		log_ += "\nisOnPaper\t= " + grbl.isOnPaper;
+		log_ += "\nisIdle\t= " + grbl.isIdle;
+		text(log_, width / 2.0f, 32);
 	}
 
 	public void exit() {

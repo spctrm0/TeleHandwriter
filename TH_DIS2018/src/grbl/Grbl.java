@@ -16,13 +16,13 @@ public class Grbl {
 	private final int	toHomeCmdPeriodMSec		= 5000;
 	private final int	bfrSizeMx							= 128;
 
-	private boolean	isHomeCmdExecuted					= false;
-	private boolean	isNeedToReserveBackOffCmd	= false;
-	private boolean	isBackOffed								= false;
-	private boolean	isHomed										= false;
-	private boolean	isPreDefinedHomed					= false;
-	private boolean	isOnPaper									= false;
-	private boolean	isIdle										= true;
+	public boolean	isHomeCmdExecuted					= false;
+	public boolean	isNeedToReserveBackOffCmd	= false;
+	public boolean	isBackOffed								= false;
+	public boolean	isHomed										= false;
+	public boolean	isPreDefinedHomed					= false;
+	public boolean	isOnPaper									= false;
+	public boolean	isIdle										= true;
 	private long		strokeEndTimeUsec					= 0;
 	private long		backOffTimeUsec						= 0;
 	private int			bfrSize										= 0;
@@ -32,8 +32,8 @@ public class Grbl {
 	private ArrayList<String>	grblBfr			= null;
 	private ArrayList<String>	reservedCmd	= null;
 
-	private StringBuffer strBfr = null;
-	// private StringBuffer prtTxtBfr = null;
+	private StringBuffer	strBfr		= null;
+	private StringBuffer	prtTxtBfr	= null;
 
 	public void setSerialComm(SerialComm _serialComm) {
 		serialComm = _serialComm;
@@ -52,7 +52,7 @@ public class Grbl {
 		reservedCmd = new ArrayList<String>();
 
 		strBfr = new StringBuffer();
-		// prtTxtBfr = new StringBuffer();
+		prtTxtBfr = new StringBuffer();
 	}
 
 	public void init() {
@@ -162,6 +162,13 @@ public class Grbl {
 
 		// Set feedrate mode: inverse time
 		reserveCmd("G93\r");
+
+		// Delay: end of backOff
+		strBfr.append("G4")//
+				.append("P").append("0.0010")//
+				.append('\r');
+		reserveCmd(strBfr.toString());
+		strBfr.setLength(0);
 	}
 
 	private void writeReservedCmdAsPossible() {
@@ -233,10 +240,11 @@ public class Grbl {
 	}
 
 	private boolean isBackOffCmd(String _cmd) {
-		strBfr.append("G1")//
-				.append("X").append(String.format("%.3f", Setting.isXInverted ? -Setting.xBackOff : Setting.xBackOff));
-		String backOffCmd_ = strBfr.toString();
-		strBfr.setLength(0);
+		prtTxtBfr.append("G4")//
+				.append("P").append("0.0010")//
+				.append('\r');
+		String backOffCmd_ = prtTxtBfr.toString();
+		prtTxtBfr.setLength(0);
 		return _cmd.contains(backOffCmd_);
 	}
 
@@ -253,10 +261,10 @@ public class Grbl {
 	}
 
 	private boolean isStrokeEndCmd(String _cmd) {
-		strBfr.append("G4")//
+		prtTxtBfr.append("G4")//
 				.append("P").append(String.format("%.6f", Setting.servoDelay[3]))//
 				.append('\r');
-		String strokeEndCmd_ = strBfr.toString();
+		String strokeEndCmd_ = prtTxtBfr.toString();
 		return _cmd.equals(strokeEndCmd_);
 	}
 

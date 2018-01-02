@@ -7,11 +7,11 @@ public class Setting {
 	public static float	targetCalibXInPx	= 0;
 	public static float	targetCalibYInPx	= 0;
 
-	public static int			servoHover	= 255 - 32;
-	public static int			servoZero		= 127;
+	public static float		servoHover	= 255 - 32;
+	public static float		servoZero		= 127;
 	public static float[]	servoDelay	= { 0.025f, 0.150f, 0.025f, 0.150f };
 
-	public static int feedrateStrokeToStoke = 60 * 250; // 1min * (mm / sec)
+	public static float feedrateStrokeToStoke = 60 * 250; // 1min * (mm / sec)
 
 	public static float xBackOff = -20;
 
@@ -35,7 +35,7 @@ public class Setting {
 	// public static float xZero = 43;
 	// public static float yZero = 31;
 
-	public static String connectionChkTxt = "Grbl 1.1f ['$' for help]";
+	public static String connectionChkTxt = "[MSG:'$H'|'$X' to unlock]";
 
 	public static int	myTabletWidthInMm				= 224;
 	public static int	myTabletHeightInMm			= 140;
