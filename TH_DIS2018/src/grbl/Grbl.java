@@ -32,8 +32,8 @@ public class Grbl {
 	private ArrayList<String>	grblBfr			= null;
 	private ArrayList<String>	reservedCmd	= null;
 
-	private StringBuffer	strBfr		= null;
-	private StringBuffer	prtTxtBfr	= null;
+	private StringBuffer strBfr = null;
+	// private StringBuffer prtTxtBfr = null;
 
 	public void setSerialComm(SerialComm _serialComm) {
 		serialComm = _serialComm;
@@ -52,7 +52,7 @@ public class Grbl {
 		reservedCmd = new ArrayList<String>();
 
 		strBfr = new StringBuffer();
-		prtTxtBfr = new StringBuffer();
+		// prtTxtBfr = new StringBuffer();
 	}
 
 	public void init() {
