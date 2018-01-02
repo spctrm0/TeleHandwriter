@@ -146,7 +146,7 @@ public class Interpreter {
 					grbl.reserveCmd(strBfr.toString());
 					strBfr.setLength(0);
 
-					// Delay: end of stroke
+					// Delay - unique
 					if (Setting.servoDelay[3] != 0.0f) {
 						strBfr.append("G4")//
 								.append("P").append(String.format("%.6f", Setting.servoDelay[3]))//

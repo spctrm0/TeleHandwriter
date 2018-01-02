@@ -152,7 +152,6 @@ public class TH_DIS2018 extends PApplet {
 		log_ += "isHomeCmdExecuted\t= " + grbl.isHomeCmdExecuted;
 		log_ += "\nisNeedToReserveBackOffCmd\t= " + grbl.isNeedToReserveBackOffCmd;
 		log_ += "\nisBackOffed\t= " + grbl.isBackOffed;
-		log_ += "\nisHomed\t= " + grbl.isHomed;
 		log_ += "\nisPreDefinedHomed\t= " + grbl.isPreDefinedHomed;
 		log_ += "\nisOnPaper\t= " + grbl.isOnPaper;
 		log_ += "\nisIdle\t= " + grbl.isIdle;
