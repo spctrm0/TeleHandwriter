@@ -32,7 +32,7 @@ public class TH_DIS2018 extends PApplet {
 
 	public void settings() {
 		// fullScreen();
-		size(500, 500);
+		size(800, 800);
 	}
 
 	public void setWritable(boolean _isWritable) {

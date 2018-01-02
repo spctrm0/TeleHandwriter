@@ -18,6 +18,7 @@ public class Grbl {
 
 	public boolean	isHomeCmdExecuted					= false;
 	public boolean	isNeedToReserveBackOffCmd	= false;
+	public boolean	isNeedToReserveToHomeCmd	= false;
 	public boolean	isBackOffed								= false;
 	public boolean	isPreDefinedHomed					= false;
 	public boolean	isOnPaper									= false;
@@ -77,10 +78,14 @@ public class Grbl {
 					isNeedToReserveBackOffCmd = false;
 				}
 			}
-			else if (isBackOffed && !isPreDefinedHomed) {
-				if (getTimePassedSinceIsBackOffedMsec() >= _toHomeCmdPeriodMSec) {
-					reserveToHomeCmd();
-					isBackOffed = false;
+			else {
+				// System.out.println("isBackOffed = " + isBackOffed);
+				// System.out.println("isPreDefinedHomed = " + isPreDefinedHomed);
+				if (isBackOffed && isNeedToReserveToHomeCmd && !isPreDefinedHomed) {
+					if (getTimePassedSinceIsBackOffedMsec() >= _toHomeCmdPeriodMSec) {
+						reserveToHomeCmd();
+						isNeedToReserveToHomeCmd = false;
+					}
 				}
 			}
 		}
@@ -151,7 +156,8 @@ public class Grbl {
 
 		// Delay - unique
 		strBfr.append("G4")//
-				.append("P").append("0.0010")//
+				.append(' ')//
+				.append("P").append("0.001")//
 				.append('\r');
 		reserveCmd(strBfr.toString());
 		strBfr.setLength(0);
@@ -163,8 +169,16 @@ public class Grbl {
 			if (bfrSize + cmd_.length() <= bfrSizeMx) {
 				bfrSize += cmd_.length();
 				grblBfr.add(cmd_);
-				if (isIdle) {
-					if (isMotionCmd(cmd_)) {
+				if (isMotionCmd(cmd_)) {
+					if (isBackOffMotionCmd(cmd_))
+						isPreDefinedHomed = false;
+					else if (isToHomeMotionCmd(cmd_))
+						isBackOffed = false;
+					else {
+						isBackOffed = false;
+						isPreDefinedHomed = false;
+					}
+					if (isIdle) {
 						isIdle = false;
 						oscComm.updateGrblIsIdle(isIdle);
 					}
@@ -186,6 +200,7 @@ public class Grbl {
 			String cmd_ = grblBfr.get(0);
 			bfrSize -= cmd_.length();
 			grblBfr.remove(0);
+			System.out.println(cmd_ + "(" + isBackOffCmd(cmd_) + ")");
 			if (isBackOffCmd(cmd_) || isToPreDefiendHomeCmd(cmd_)) {
 				isOnPaper = false;
 				if (isBackOffCmd(cmd_)) { // isBackOffCmd(cmd_)
@@ -202,7 +217,7 @@ public class Grbl {
 					oscComm.updateGrblIsIdle(isIdle);
 				}
 			}
-			else if (isMotionCmd(cmd_)) {
+			else if (isOnPaperMotionCmd(cmd_)) {
 				isOnPaper = true;
 				isBackOffed = false;
 				isPreDefinedHomed = false;
@@ -226,11 +241,13 @@ public class Grbl {
 
 	private boolean isBackOffCmd(String _cmd) {
 		prtTxtBfr.append("G4")//
-				.append("P").append("0.0010")//
+				.append(' ')//
+				.append("P").append("0.001")//
 				.append('\r');
 		String backOffCmd_ = prtTxtBfr.toString();
 		prtTxtBfr.setLength(0);
-		return _cmd.contains(backOffCmd_);
+		// return _cmd.contains("G4P0.0010");
+		return _cmd.equals(backOffCmd_);
 	}
 
 	private boolean isToPreDefiendHomeCmd(String _cmd) {
@@ -238,6 +255,20 @@ public class Grbl {
 	}
 
 	private boolean isMotionCmd(String _cmd) {
+		boolean isMotionCmd_ = _cmd.contains("G1") && (_cmd.contains("X") || _cmd.contains("Y"));
+		boolean isHomeCmd_ = _cmd.equals("$H\r");
+		return isMotionCmd_ || isHomeCmd_;
+	}
+
+	private boolean isOnPaperMotionCmd(String _cmd) {
+		boolean isMotionCmd_ = _cmd.contains("G1") && (_cmd.contains("X") || _cmd.contains("Y"));
+		boolean isNotHomeCmd_ = !_cmd.equals("$H\r");
+		boolean isNotToHomeMotionCmd_ = !isToHomeMotionCmd(_cmd);
+		boolean isbackOffMotionCmd_ = !isBackOffMotionCmd(_cmd);
+		return isMotionCmd_ && isNotHomeCmd_ && isNotToHomeMotionCmd_ && isbackOffMotionCmd_;
+	}
+
+	private boolean isToHomeMotionCmd(String _cmd) {
 		prtTxtBfr.append("G1")//
 				.append("F").append(String.format("%.4f", Setting.feedrateStrokeToStoke))//
 				.append("X").append(String.format("%.3f", Setting.isXInverted ? -Setting.xZero : Setting.xZero))//
@@ -245,17 +276,17 @@ public class Grbl {
 				.append('\r');
 		String toHomeMotionCmd_ = prtTxtBfr.toString();
 		prtTxtBfr.setLength(0);
+		return _cmd.equals(toHomeMotionCmd_);
+	}
+
+	private boolean isBackOffMotionCmd(String _cmd) {
 		prtTxtBfr.append("G1")//
 				.append("X").append(String.format("%.3f", Setting.isXInverted ? -Setting.xBackOff : Setting.xBackOff))//
 				.append("F").append(String.format("%.4f", Setting.feedrateStrokeToStoke))//
 				.append('\r');
 		String backOffMotionCmd_ = prtTxtBfr.toString();
 		prtTxtBfr.setLength(0);
-		boolean isMotionCmd_ = _cmd.contains("G1") && (_cmd.contains("X") || _cmd.contains("Y"));
-		boolean isHomeCmd_ = _cmd.equals("$H\r");
-		boolean isNotToHomeMotionCmd_ = !_cmd.equals(toHomeMotionCmd_);
-		boolean isbackOffMotionCmd_ = !_cmd.equals(backOffMotionCmd_);
-		return (isMotionCmd_ || isHomeCmd_) && isNotToHomeMotionCmd_ && isbackOffMotionCmd_;
+		return _cmd.equals(backOffMotionCmd_);
 	}
 
 	private boolean isStrokeEndCmd(String _cmd) {
