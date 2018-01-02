@@ -3,14 +3,11 @@ package oscComm;
 import java.util.concurrent.TimeUnit;
 
 import drawing.Drawing;
-import grbl.Grbl;
-import grbl.SerialComm;
 import main.Setting;
 import netP5.NetAddress;
 import oscP5.OscMessage;
 import oscP5.OscP5;
 import processing.core.PApplet;
-import tabletInput.TabletInput;
 
 public class OscComm {
 

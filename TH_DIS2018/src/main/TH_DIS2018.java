@@ -6,8 +6,6 @@ import grbl.Interpreter;
 import grbl.SerialComm;
 
 import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
-
 import drawing.Drawing;
 import drawing.Point;
 import oscComm.OscComm;
@@ -32,45 +30,9 @@ public class TH_DIS2018 extends PApplet {
 
 	StringBuffer strBfr = null;
 
-	long		homeCmdTriggeredUsec	= 0;
-	int			waitingTimeMsec				= 5000;
-	int			waitingTimeMsecSet		= 5000;
-	boolean	isHomeCmdExecuted			= false;
-
 	public void settings() {
 		fullScreen();
 		// size(500, 500);
-	}
-
-	public void homeCmd() {
-		strBfr.append("M3")//
-				.append("S").append(Setting.servoHover)//
-				.append('\r');
-		grbl.reserve(strBfr.toString());
-		strBfr.setLength(0);
-
-		grbl.reserve("G92X0Y0\r");
-		grbl.reserve("G90\r");
-		grbl.reserve("G94\r");
-		strBfr.append("G1")//
-				.append("F").append(Setting.feedrateStrokeToStoke)//
-				.append("X").append(String.format("%.3f", Setting.isXInverted ? -Setting.xZero : Setting.xZero))//
-				.append("Y").append(String.format("%.3f", Setting.isYInverted ? -Setting.yZero : Setting.yZero))//
-				.append('\r');
-		grbl.reserve(strBfr.toString());
-		strBfr.setLength(0);
-		grbl.reserve("G93\r");
-		grbl.reserve("G92X0Y0\r");
-		isHomeCmdExecuted = true;
-	}
-
-	public void homeCmdTrigger() {
-		homeCmdTriggeredUsec = System.nanoTime();
-		isHomeCmdExecuted = false;
-	}
-
-	public long getWaitingTimeMsec() {
-		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - homeCmdTriggeredUsec);
 	}
 
 	public void setWritable(boolean _isWritable) {
@@ -131,19 +93,18 @@ public class TH_DIS2018 extends PApplet {
 		drawing = new Drawing();
 
 		table = new Table();
-		table.addColumn("totalPointIdx");
-		table.addColumn("strokeIdx");
-		table.addColumn("pointIdx");
+		table.addColumn("nthPoint");
+		table.addColumn("nthStroke");
+		table.addColumn("nthPointInStroke");
 		table.addColumn("penX");
 		table.addColumn("penY");
-		table.addColumn("x");
-		table.addColumn("y");
-		table.addColumn("f");
+		table.addColumn("cncX");
+		table.addColumn("cncY");
+		table.addColumn("feedrate");
 		table.addColumn("pressure");
 		table.addColumn("tiltX");
 		table.addColumn("tiltY");
-		table.addColumn("millis");
-		table.addColumn("kind");
+		table.addColumn("evtTimeInMsec");
 		interpreter = new Interpreter(this);
 
 		strBfr = new StringBuffer();
@@ -160,23 +121,13 @@ public class TH_DIS2018 extends PApplet {
 		interpreter.setDrawing(drawing);
 		interpreter.setGrbl(grbl);
 		interpreter.setTable(table);
-
-		homeCmdTrigger();
-		waitingTimeMsec = waitingTimeMsecSet;
 	}
 
 	public void draw() {
-		if (!isHomeCmdExecuted) {
-			if (getWaitingTimeMsec() >= waitingTimeMsec) {
-				homeCmd();
-				setWritable(true);
-				waitingTimeMsec = waitingTimeMsecSet;
-			}
-		}
-
-		background(serialComm.isConnected ? 0 : 255, oscComm.isConnected ? 0 : 255, (tabletInput.isWritable()) ? 0 : 255);
+		background(serialComm.isConnected() ? 0 : 255, oscComm.isConnected() ? 0 : 255,
+				(tabletInput.isWritable()) ? 0 : 255);
 		noStroke();
-		fill(oscComm.isTargetIdle ? 0 : 255, oscComm.isTargetIdle ? 255 : 0, 0);
+		fill(oscComm.isTargetReadyToWrite() ? 0 : 255, oscComm.isTargetReadyToWrite() ? 255 : 0, 0);
 		rect(0, 0, 32, 32);
 		noFill();
 		stroke(255);
@@ -187,11 +138,6 @@ public class TH_DIS2018 extends PApplet {
 				line(a_.getX(), a_.getY(), b_.getX(), b_.getY());
 			}
 		}
-		// System.out.print(grbl.bfrSize);
-		// System.out.print(", ");
-		// System.out.print(grbl.grblBfr.size());
-		// System.out.print(", ");
-		// System.out.print(grbl.reservedMsg.size());
 	}
 
 	public void exit() {
@@ -218,15 +164,14 @@ public class TH_DIS2018 extends PApplet {
 		}
 		else if (key == 'h' || key == 'H') // set home
 		{
-			homeCmdTrigger();
-			waitingTimeMsec = 500;
+			grbl.activateAutoHome();
 		}
 		else if (key == 'w' || key == 'W') // servo up
 		{
 			strBfr.append("M3")//
 					.append("S").append(Setting.servoHover)//
 					.append('\r');
-			grbl.reserve(strBfr.toString());
+			grbl.reserveCmd(strBfr.toString());
 			strBfr.setLength(0);
 		}
 		else if (key == 's' || key == 'S') // servo down
@@ -234,7 +179,7 @@ public class TH_DIS2018 extends PApplet {
 			strBfr.append("M3")//
 					.append("S").append(Setting.servoZero)//
 					.append('\r');
-			grbl.reserve(strBfr.toString());
+			grbl.reserveCmd(strBfr.toString());
 			strBfr.setLength(0);
 		}
 		else if (key == 'x' || key == 'X') // servo off
@@ -242,7 +187,7 @@ public class TH_DIS2018 extends PApplet {
 			strBfr.append("M3")//
 					.append("S0")//
 					.append('\r');
-			grbl.reserve(strBfr.toString());
+			grbl.reserveCmd(strBfr.toString());
 			strBfr.setLength(0);
 		}
 	}

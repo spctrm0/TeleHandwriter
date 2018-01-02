@@ -32,6 +32,10 @@ public class SerialComm {
 		grbl = _grbl;
 	}
 
+	public void setOscComm(OscComm _oscComm) {
+		oscComm = _oscComm;
+	}
+
 	public SerialComm(PApplet _p5) {
 		p5 = _p5;
 
