@@ -46,7 +46,31 @@ public class TH_DIS2018 extends PApplet {
 			if (parsed_.length >= 2) {
 				parsed_[0] = parsed_[0].trim();
 				parsed_[1] = parsed_[1].trim();
-				if (parsed_[0].equals("myPort"))
+				if (parsed_[0].equals("myCalibXInPx"))
+					Setting.myCalibXInPx = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("myCalibYInPx"))
+					Setting.myCalibYInPx = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("targetCalibXInPx"))
+					Setting.targetCalibXInPx = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("targetCalibYInPx"))
+					Setting.targetCalibYInPx = Float.parseFloat(parsed_[1]);
+				if (parsed_[0].equals("servoHover"))
+					Setting.servoHover = Integer.parseInt(parsed_[1]);
+				else if (parsed_[0].equals("servoZero"))
+					Setting.servoZero = Integer.parseInt(parsed_[1]);
+				else if (parsed_[0].equals("servoDelay[0]"))
+					Setting.servoDelay[0] = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("servoDelay[1]"))
+					Setting.servoDelay[1] = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("servoDelay[2]"))
+					Setting.servoDelay[2] = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("servoDelay[3]"))
+					Setting.servoDelay[3] = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("feedrateStrokeToStoke"))
+					Setting.feedrateStrokeToStoke = Integer.parseInt(parsed_[1]);
+				else if (parsed_[0].equals("xBackOff"))
+					Setting.xBackOff = Float.parseFloat(parsed_[1]);
+				else if (parsed_[0].equals("myPort"))
 					Setting.myPort = Integer.parseInt(parsed_[1]);
 				else if (parsed_[0].equals("targetPort"))
 					Setting.targetPort = Integer.parseInt(parsed_[1]);
@@ -60,22 +84,6 @@ public class TH_DIS2018 extends PApplet {
 					Setting.xZero = Float.parseFloat(parsed_[1]);
 				else if (parsed_[0].equals("yZero"))
 					Setting.yZero = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("servoHover"))
-					Setting.servoHover = Integer.parseInt(parsed_[1]);
-				else if (parsed_[0].equals("servoZero"))
-					Setting.servoZero = Integer.parseInt(parsed_[1]);
-				else if (parsed_[0].equals("servoDelay[0]"))
-					Setting.servoDelay[0] = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("servoDelay[1]"))
-					Setting.servoDelay[1] = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("servoDelay[2]"))
-					Setting.servoDelay[2] = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("servoDelay[3]"))
-					Setting.servoDelay[3] = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("targetCalibX"))
-					Setting.targetCalibXInPx = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("targetCalibY"))
-					Setting.targetCalibYInPx = Float.parseFloat(parsed_[1]);
 			}
 		}
 	}
