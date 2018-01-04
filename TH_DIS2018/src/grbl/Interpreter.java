@@ -11,17 +11,15 @@ import drawing.Point;
 public class Interpreter {
 	private PApplet p5 = null;
 
-	private Drawing	drawing	= null;
-	private Grbl		grbl		= null;
-	private Table		table		= null;
-
-	private StringBuffer strBfr = null;
+	private Drawing		drawing	= null;
+	private GrblComm	grbl		= null;
+	private Table			table		= null;
 
 	public void setDrawing(Drawing _drawing) {
 		drawing = _drawing;
 	}
 
-	public void setGrbl(Grbl _grbl) {
+	public void setGrblComm(GrblComm _grbl) {
 		grbl = _grbl;
 	}
 
@@ -32,8 +30,6 @@ public class Interpreter {
 	public Interpreter(PApplet _p5) {
 		p5 = _p5;
 		p5.registerMethod("pre", this);
-
-		strBfr = new StringBuffer();
 	}
 
 	public void pre() {
@@ -46,121 +42,106 @@ public class Interpreter {
 			while (stroke_.getPointsNum() >= 2) {
 				Point a_ = stroke_.getFirstPoint();
 				Point b_ = stroke_.getSecondPoint();
-				float aCalibedNConstrainedX_ = Math.min(Math.max((a_.getX() - Setting.targetCalibXInPx), 0),
+				float aCalibedAndConstrainedX_ = Math.min(Math.max((a_.getX() - Setting.targetCalibXInPx), 0),
 						(Setting.targetScreentWidthInPx - Setting.targetCalibXInPx));
-				float aCalibedNConstrainedY_ = Math.min(Math.max((a_.getY() - Setting.targetCalibYInPx), 0),
+				float aCalibedAndConstrainedY_ = Math.min(Math.max((a_.getY() - Setting.targetCalibYInPx), 0),
 						(Setting.targetScreenHeightInPx - Setting.targetCalibYInPx));
-				float bCalibedNConstrainedX_ = Math.min(Math.max((b_.getX() - Setting.targetCalibXInPx), 0),
+				float bCalibedAndConstrainedX_ = Math.min(Math.max((b_.getX() - Setting.targetCalibXInPx), 0),
 						(Setting.targetScreentWidthInPx - Setting.targetCalibXInPx));
-				float bCalibedNConstrainedY_ = Math.min(Math.max((b_.getY() - Setting.targetCalibYInPx), 0),
+				float bCalibedAndConstrainedY_ = Math.min(Math.max((b_.getY() - Setting.targetCalibYInPx), 0),
 						(Setting.targetScreenHeightInPx - Setting.targetCalibYInPx));
-				float aScaledX_ = Setting.targetTabletWidthInMm * aCalibedNConstrainedX_
+				float aScaledX_ = Setting.targetTabletWidthInMm * aCalibedAndConstrainedX_
 						/ (float) Setting.targetScreentWidthInPx;
-				float aScaledY_ = Setting.targetTabletHeightInMm * aCalibedNConstrainedY_
+				float aScaledY_ = Setting.targetTabletHeightInMm * aCalibedAndConstrainedY_
 						/ (float) Setting.targetScreenHeightInPx;
-				float bScaledX_ = Setting.targetTabletWidthInMm * bCalibedNConstrainedX_
+				float bScaledX_ = Setting.targetTabletWidthInMm * bCalibedAndConstrainedX_
 						/ (float) Setting.targetScreentWidthInPx;
-				float bScaledY_ = Setting.targetTabletHeightInMm * bCalibedNConstrainedY_
+				float bScaledY_ = Setting.targetTabletHeightInMm * bCalibedAndConstrainedY_
 						/ (float) Setting.targetScreenHeightInPx;
-				long duration_ = b_.getEvtTimeInMsec() - a_.getEvtTimeInMsec();
-				float feedrate_ = (float) (60000 / (double) duration_);
-
+				long durationInMsec_ = b_.getEvtTimeInMsec() - a_.getEvtTimeInMsec();
+				float feedrate_ = (float) (60000 / (double) durationInMsec_);
+				String cmd_;
 				if (a_.getType() == 0) { // Head
+					/*
+					 * UNIQUE
+					 */
 					// Pen up
-					strBfr.append("M3")//
-							.append("S").append(String.format("%.3f", Setting.servoHover))//
-							.append('\r');
-					grbl.reserveCmd(strBfr.toString());
-					strBfr.setLength(0);
-
+					cmd_ = "M3";
+					cmd_ += 'S' + String.format("%.9f", Setting.servoHover);
+					cmd_ += '\r';
+					grbl.reserveCmd(cmd_);
 					// Set feedrate mode: unit per min
 					grbl.reserveCmd("G94\r");
-
 					// To point a
-					strBfr.append("G1")//
-							.append("X").append(String.format("%.3f", Setting.isXInverted ? -aScaledX_ : aScaledX_))//
-							.append("Y").append(String.format("%.3f", Setting.isYInverted ? -aScaledY_ : aScaledY_))//
-							.append("F").append(Setting.feedrateStrokeToStoke)//
-							.append('\r');
-					grbl.reserveCmd(strBfr.toString());
-					strBfr.setLength(0);
-
+					cmd_ = "G1";
+					cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -aScaledX_ : aScaledX_);
+					cmd_ += 'Y' + String.format("%.3f", Setting.isYInverted ? -aScaledY_ : aScaledY_);
+					cmd_ += 'F' + Setting.feedrateStrokeToStoke;
+					cmd_ += '\r';
+					grbl.reserveCmd(cmd_);
 					// Set feedrate mode: inverse time
 					grbl.reserveCmd("G93\r");
-
 					// Delay
 					if (Setting.servoDelay[0] != 0.0f) {
-						strBfr.append("G4")//
-								.append("P").append(String.format("%.3f", Setting.servoDelay[0]))//
-								.append('\r');
-						grbl.reserveCmd(strBfr.toString());
-						strBfr.setLength(0);
+						cmd_ = "G4";
+						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay[0]);
+						cmd_ += '\r';
+						grbl.reserveCmd(cmd_);
 					}
-
 					// Pen down
-					strBfr.append("M3")//
-							.append("S").append(Setting.servoZero)//
-							.append('\r');
-					grbl.reserveCmd(strBfr.toString());
-					strBfr.setLength(0);
-
+					cmd_ = "M3";
+					cmd_ += 'S' + Setting.servoZero;
+					cmd_ += '\r';
+					grbl.reserveCmd(cmd_);
 					// Delay
 					if (Setting.servoDelay[1] != 0.0f) {
-						strBfr.append("G4")//
-								.append("P").append(String.format("%.3f", Setting.servoDelay[1]))//
-								.append('\r');
-						grbl.reserveCmd(strBfr.toString());
-						strBfr.setLength(0);
+						cmd_ = "G4";
+						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay[1]);
+						cmd_ += '\r';
+						grbl.reserveCmd(cmd_);
 					}
 				}
-
 				// To point b
-				strBfr.append("G1")//
-						.append("X").append(String.format("%.3f", Setting.isXInverted ? -bScaledX_ : bScaledX_))//
-						.append("Y").append(String.format("%.3f", Setting.isYInverted ? -bScaledY_ : bScaledY_))//
-						.append("F").append(String.format("%.3f", feedrate_))//
-						.append('\r');
-				grbl.reserveCmd(strBfr.toString());
-				strBfr.setLength(0);
-
-				// logging first point on table
-				logTable(a_.getNthPoint(), a_.getNthStroke(), a_.getNthPointInStoke(), a_.getX(), a_.getY(), aScaledX_,
+				cmd_ = "G1";
+				cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -bScaledX_ : bScaledX_);
+				cmd_ += 'Y' + String.format("%.3f", Setting.isYInverted ? -bScaledY_ : bScaledY_);
+				cmd_ += 'F' + String.format("%.3f", feedrate_);
+				cmd_ += '\r';
+				grbl.reserveCmd(cmd_);
+				// Write log of first point on table
+				writeLogOnTable(a_.getNthPoint(), a_.getNthStroke(), a_.getNthPointInStoke(), a_.getX(), a_.getY(), aScaledX_,
 						aScaledY_, feedrate_, a_.getPressure(), a_.getTiltX(), a_.getTiltY(), a_.getEvtTimeInMsec());
-				// remove first point
+				// Remove first point
 				stroke_.removeFirstPoint();
-
 				if (b_.getType() == 2) { // Tail
 					// Delay
 					if (Setting.servoDelay[2] != 0.0f) {
-						strBfr.append("G4")//
-								.append("P").append(String.format("%.3f", Setting.servoDelay[2]))//
-								.append('\r');
-						grbl.reserveCmd(strBfr.toString());
-						strBfr.setLength(0);
+						cmd_ = "G4";
+						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay[2]);
+						cmd_ += '\r';
+						grbl.reserveCmd(cmd_);
 					}
-
 					// Pen up
-					strBfr.append("M3")//
-							.append("S").append(Setting.servoHover)//
-							.append('\r');
-					grbl.reserveCmd(strBfr.toString());
-					strBfr.setLength(0);
-
-					// Delay - unique
+					cmd_ = "M3";
+					cmd_ += 'S' + Setting.servoHover;
+					cmd_ += '\r';
+					grbl.reserveCmd(cmd_);
+					/*
+					 * UNIQUE
+					 */
+					// Delay
 					if (Setting.servoDelay[3] != 0.0f) {
-						strBfr.append("G4")//
-								.append("P").append(String.format("%.6f", Setting.servoDelay[3]))//
-								.append('\r');
-						grbl.reserveCmd(strBfr.toString());
-						strBfr.setLength(0);
+						cmd_ = "G4";
+						cmd_ += 'P' + String.format("%.9f", Setting.servoDelay[3]);
+						cmd_ += '\r';
+						grbl.reserveCmd(cmd_);
 					}
-
-					// logging second (last) point on table
-					logTable(b_.getNthPoint(), b_.getNthStroke(), b_.getNthPointInStoke(), b_.getX(), b_.getY(), bScaledX_,
+					// Write log of last point on table
+					writeLogOnTable(b_.getNthPoint(), b_.getNthStroke(), b_.getNthPointInStoke(), b_.getX(), b_.getY(), bScaledX_,
 							bScaledY_, feedrate_, b_.getPressure(), b_.getTiltX(), b_.getTiltY(), b_.getEvtTimeInMsec());
-					// remove second (last) point
+					// Remove last point
 					stroke_.removeFirstPoint();
-					// remove first stroke which is empty
+					// Remove first stroke which has been emptied
 					drawing.removeFirstStroke();
 				}
 			}
@@ -169,8 +150,8 @@ public class Interpreter {
 		}
 	}
 
-	public void logTable(int _nthPoint, int _nthStroke, int _nthPointInStroke, float _penX, float _penY, float _cncX,
-			float _cncY, float _feedrate, float _pressure, float _tiltX, float _tiltY, long _evtTimeInMsec) {
+	public void writeLogOnTable(int _nthPoint, int _nthStroke, int _nthPointInStroke, float _penX, float _penY,
+			float _cncX, float _cncY, float _feedrate, float _pressure, float _tiltX, float _tiltY, long _evtTimeInMsec) {
 		TableRow newRow_ = table.addRow();
 		newRow_.setInt("nthPoint", _nthPoint);
 		newRow_.setInt("nthStroke", _nthStroke);

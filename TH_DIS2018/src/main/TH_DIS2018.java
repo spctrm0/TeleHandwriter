@@ -1,7 +1,7 @@
 package main;
 
 import drawing.Stroke;
-import grbl.Grbl;
+import grbl.GrblComm;
 import grbl.Interpreter;
 import grbl.SerialComm;
 
@@ -19,7 +19,7 @@ public class TH_DIS2018 extends PApplet {
 	TabletInput tabletInput;
 
 	SerialComm	serialComm;
-	Grbl				grbl;
+	GrblComm		grblComm;
 
 	OscComm oscComm;
 
@@ -27,8 +27,6 @@ public class TH_DIS2018 extends PApplet {
 
 	Table				table;
 	Interpreter	interpreter;
-
-	StringBuffer strBfr = null;
 
 	public void settings() {
 		// fullScreen();
@@ -94,7 +92,7 @@ public class TH_DIS2018 extends PApplet {
 		tabletInput = new TabletInput(this);
 
 		serialComm = new SerialComm(this);
-		grbl = new Grbl(this);
+		grblComm = new GrblComm(this);
 
 		oscComm = new OscComm(this);
 
@@ -115,19 +113,16 @@ public class TH_DIS2018 extends PApplet {
 		table.addColumn("evtTimeInMsec");
 		interpreter = new Interpreter(this);
 
-		strBfr = new StringBuffer();
-
 		tabletInput.setOscComm(oscComm);
 
-		serialComm.setGrbl(grbl);
+		serialComm.setGrblComm(grblComm);
 		serialComm.setOscComm(oscComm);
-		grbl.setSerialComm(serialComm);
-		grbl.setOscComm(oscComm);
+		grblComm.setSerialComm(serialComm);
 
 		oscComm.setDrawing(drawing);
 
 		interpreter.setDrawing(drawing);
-		interpreter.setGrbl(grbl);
+		interpreter.setGrblComm(grblComm);
 		interpreter.setTable(table);
 	}
 
@@ -135,7 +130,7 @@ public class TH_DIS2018 extends PApplet {
 		background(serialComm.isConnected() ? 0 : 255, oscComm.isConnected() ? 0 : 255,
 				(tabletInput.isWritable()) ? 0 : 255);
 		noStroke();
-		fill(oscComm.isTargetReadyToWrite() ? 0 : 255, oscComm.isTargetReadyToWrite() ? 255 : 0, 0);
+		fill(oscComm.isTargetWritable() ? 0 : 255, oscComm.isTargetWritable() ? 255 : 0, 0);
 		rect(0, 0, 32, 32);
 		noFill();
 		stroke(255);
@@ -148,14 +143,6 @@ public class TH_DIS2018 extends PApplet {
 		}
 		noStroke();
 		fill(255);
-		String log_ = "";
-		log_ += "isHomeCmdExecuted\t= " + grbl.isHomeCmdExecuted;
-		log_ += "\nisNeedToReserveBackOffCmd\t= " + grbl.isNeedToReserveBackOffCmd;
-		log_ += "\nisBackOffed\t= " + grbl.isBackOffed;
-		log_ += "\nisPreDefinedHomed\t= " + grbl.isPreDefinedHomed;
-		log_ += "\nisOnPaper\t= " + grbl.isOnPaper;
-		log_ += "\nisIdle\t= " + grbl.isIdle;
-		text(log_, width / 2.0f, 32);
 	}
 
 	public void exit() {
@@ -173,6 +160,7 @@ public class TH_DIS2018 extends PApplet {
 	}
 
 	public void keyPressed() {
+		String cmd_;
 		if (key == '~') {
 			oscComm.activateAutoConnect();
 		}
@@ -182,31 +170,28 @@ public class TH_DIS2018 extends PApplet {
 		}
 		else if (key == 'h' || key == 'H') // set home
 		{
-			grbl.activateAutoHome();
+			// grbl.activateAutoHome();
 		}
 		else if (key == 'w' || key == 'W') // servo up
 		{
-			strBfr.append("M3")//
-					.append("S").append(Setting.servoHover)//
-					.append('\r');
-			grbl.reserveCmd(strBfr.toString());
-			strBfr.setLength(0);
+			cmd_ = "M3";
+			cmd_ += 'S' + Setting.servoHover;
+			cmd_ += '\r';
+			grblComm.reserveCmd(cmd_);
 		}
 		else if (key == 's' || key == 'S') // servo down
 		{
-			strBfr.append("M3")//
-					.append("S").append(Setting.servoZero)//
-					.append('\r');
-			grbl.reserveCmd(strBfr.toString());
-			strBfr.setLength(0);
+			cmd_ = "M3";
+			cmd_ += 'S' + Setting.servoZero;
+			cmd_ += '\r';
+			grblComm.reserveCmd(cmd_);
 		}
 		else if (key == 'x' || key == 'X') // servo off
 		{
-			strBfr.append("M3")//
-					.append("S0")//
-					.append('\r');
-			grbl.reserveCmd(strBfr.toString());
-			strBfr.setLength(0);
+			cmd_ = "M3";
+			cmd_ += "S0";
+			cmd_ += '\r';
+			grblComm.reserveCmd(cmd_);
 		}
 	}
 
