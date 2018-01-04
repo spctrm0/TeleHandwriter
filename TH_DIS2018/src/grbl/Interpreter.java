@@ -67,7 +67,7 @@ public class Interpreter {
 					 */
 					// Pen up
 					cmd_ = "M3";
-					cmd_ += 'S' + String.format("%.9f", Setting.servoHover);
+					cmd_ += 'S' + String.format("%.5f", Setting.servoHover);
 					cmd_ += '\r';
 					grbl.reserveCmd(cmd_);
 					// Set feedrate mode: unit per min
@@ -132,7 +132,7 @@ public class Interpreter {
 					// Delay
 					if (Setting.servoDelay[3] != 0.0f) {
 						cmd_ = "G4";
-						cmd_ += 'P' + String.format("%.9f", Setting.servoDelay[3]);
+						cmd_ += 'P' + String.format("%.5f", Setting.servoDelay[3]);
 						cmd_ += '\r';
 						grbl.reserveCmd(cmd_);
 					}
