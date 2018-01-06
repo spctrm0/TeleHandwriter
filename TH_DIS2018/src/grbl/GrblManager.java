@@ -1,5 +1,7 @@
 package grbl;
 
+import java.util.concurrent.TimeUnit;
+
 import main.Setting;
 import oscComm.OscComm;
 
@@ -11,10 +13,21 @@ public class GrblManager {
 	boolean	isNeedToBeBackOffed;
 	boolean	isAtBackOff;
 	boolean	isMoving;
-	
-	private final int			connectionTryPeriodInMsec	= 1000;
-	private long		lastStopTimeInUsec	= 0;
 
+	private final int	moveToBackPeriodInMsec		= 500;
+	private long			lastStopAtPaperTimeInUsec	= 0;
+	
+	private final int	moveToHomePeriodInMsec		= 1000;
+	private long			lastStopAtBackTimeInUsec	= 0;
+
+	private long timeSinceLastStopAtPaperInMsec() {
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastStopAtPaperTimeInUsec);
+	}
+	
+	private long timeSinceLastStopAtBackInMsec() {
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastStopAtBackTimeInUsec);
+	}
+	
 	public void checkOnWriting(String _cmd) {
 		int moveType_ = moveType(_cmd);
 		if (moveType_ != 0) {
@@ -23,11 +36,11 @@ public class GrblManager {
 				oscComm.updateGrblIsMoving(isMoving);
 			}
 			switch (moveType_) {
-				case 1:
+				case 1: // Home
 					break;
-				case 2:
+				case 2: // Paper
 					break;
-				case 3:
+				case 3: // Back
 					break;
 			}
 		}
@@ -41,11 +54,11 @@ public class GrblManager {
 				oscComm.updateGrblIsMoving(isMoving);
 			}
 			switch (stopType_) {
-				case 1:
+				case 1: // Home
 					break;
-				case 2:
+				case 2: // Paper
 					break;
-				case 3:
+				case 3: // Back
 					break;
 			}
 		}
