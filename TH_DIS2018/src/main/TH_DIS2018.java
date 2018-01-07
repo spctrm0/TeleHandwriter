@@ -118,6 +118,7 @@ public class TH_DIS2018 extends PApplet {
 		serialComm.setGrblComm(grblComm);
 		serialComm.setOscComm(oscComm);
 		grblComm.setSerialComm(serialComm);
+		grblComm.setOscComm(oscComm);
 
 		oscComm.setDrawing(drawing);
 
