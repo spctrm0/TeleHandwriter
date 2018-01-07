@@ -41,9 +41,13 @@ public class GrblComm {
 	}
 
 	public void init() {
+		reservedPreDefinedCmd.clear();
 		reservedCmd.clear();
 		grblBfr.clear();
 		bfrSize = 0;
+		isAtHome = false;
+		isNeedToMoveHome = true;
+		lastStopAtBackTimeInUsec = System.nanoTime();
 	}
 
 	public void pre() {
@@ -139,7 +143,6 @@ public class GrblComm {
 			bfrSize -= cmd_.length();
 			grblBfr.remove(0);
 			receivedMsg.clear();
-
 			int stopType_ = stopType(cmd_);
 			if (stopType_ != 0) {
 				if (isMoving) {
@@ -148,11 +151,11 @@ public class GrblComm {
 				}
 				switch (stopType_) {
 					case 1: // Home
+						isAtHome = true;
 						break;
 					case 2: // Paper
 						if (reservedCmd.size() == 0 && bfrSize == 0)
 							isNeedToMoveBack = true;
-						isAtHome = true;
 						lastStopAtPaperTimeInUsec = System.nanoTime();
 						break;
 					case 3: // Back
@@ -168,11 +171,11 @@ public class GrblComm {
 			receivedMsg.add(_msg);
 	}
 
-	private boolean	isNeedToMoveBack;
-	private boolean	isAtBack;
-	private boolean	isNeedToMoveHome;
-	private boolean	isAtHome;
-	private boolean	isMoving;
+	private boolean	isNeedToMoveBack	= false;
+	private boolean	isAtBack					= false;
+	private boolean	isNeedToMoveHome	= false;
+	private boolean	isAtHome					= false;
+	private boolean	isMoving					= false;
 
 	private final int	moveToBackPeriodInMsec		= 500;
 	private long			lastStopAtPaperTimeInUsec	= 0;
