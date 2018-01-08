@@ -8,11 +8,12 @@ import netP5.NetAddress;
 import oscP5.OscMessage;
 import oscP5.OscP5;
 import processing.core.PApplet;
+import tabletInput.TabletInput;
 
 public class OscComm {
-
-	private PApplet	p5			= null;
-	private Drawing	drawing	= null;
+	private PApplet			p5					= null;
+	private TabletInput	tabletInput	= null;
+	private Drawing			drawing			= null;
 
 	private final int			connectionTryPeriodInMsec	= 1000;
 	private final String	msgPrefixConnectSyn				= "Syn";
@@ -35,6 +36,10 @@ public class OscComm {
 
 	private OscP5				oscP5				= null;
 	private NetAddress	targetAddr	= null;
+
+	public void setTabletInput(TabletInput _tabletInput) {
+		tabletInput = _tabletInput;
+	}
 
 	public void setDrawing(Drawing _drawing) {
 		drawing = _drawing;
@@ -142,7 +147,15 @@ public class OscComm {
 
 	public void sendReadyToWriteStatusMsg() {
 		OscMessage msg_ = new OscMessage(msgPrefixIsWritableMsg);
-		msg_.add((serialCommIsConnected && tabletInputIsWritable && grblIsMoving) ? 1 : 0);
+		// msg_.add((serialCommIsConnected && tabletInputIsWritable &&
+		// !grblIsMoving) ? 1 : 0);
+		if (serialCommIsConnected && !grblIsMoving) {
+			if (!tabletInput.isWritable())
+				tabletInput.setWritable(true);
+			msg_.add(1);
+		}
+		else
+			msg_.add(0);
 		oscP5.send(msg_, targetAddr);
 	}
 

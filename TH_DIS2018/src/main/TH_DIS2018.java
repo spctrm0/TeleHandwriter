@@ -9,8 +9,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Iterator;
-
 import drawing.Drawing;
 import drawing.Point;
 import oscComm.OscComm;
@@ -96,6 +94,7 @@ public class TH_DIS2018 extends PApplet {
 		grblComm.setSerialComm(serialComm);
 		grblComm.setOscComm(oscComm);
 
+		oscComm.setTabletInput(tabletInput);
 		oscComm.setDrawing(drawing);
 
 		interpreter.setDrawing(drawing);
@@ -106,9 +105,11 @@ public class TH_DIS2018 extends PApplet {
 	public void draw() {
 		background(serialComm.isConnected() ? 0 : 255, oscComm.isConnected() ? 0 : 255,
 				(tabletInput.isWritable()) ? 0 : 255);
+
 		noStroke();
 		fill(oscComm.isTargetWritable() ? 0 : 255, oscComm.isTargetWritable() ? 255 : 0, 0);
 		rect(0, 0, 32, 32);
+
 		noFill();
 		stroke(255);
 		for (Stroke stroke_ : drawing.getStrokes()) {
@@ -118,6 +119,7 @@ public class TH_DIS2018 extends PApplet {
 				line(a_.getX(), a_.getY(), b_.getX(), b_.getY());
 			}
 		}
+
 		noStroke();
 		fill(255);
 	}
@@ -175,7 +177,7 @@ public class TH_DIS2018 extends PApplet {
 		else if (key == 'x' || key == 'X') // servo off
 		{
 			cmd_ = "M3";
-			cmd_ += "S0";
+			cmd_ += "S" + String.format("%03d", 0);
 			cmd_ += "\r";
 			grblComm.reserveCmd(cmd_);
 		}
