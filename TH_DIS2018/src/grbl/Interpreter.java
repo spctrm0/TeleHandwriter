@@ -25,6 +25,18 @@ public class Interpreter {
 
 	public void setTable(Table _table) {
 		table = _table;
+		table.addColumn("nthPoint");
+		table.addColumn("nthStroke");
+		table.addColumn("nthPointInStroke");
+		table.addColumn("penX");
+		table.addColumn("penY");
+		table.addColumn("cncX");
+		table.addColumn("cncY");
+		table.addColumn("feedrate");
+		table.addColumn("pressure");
+		table.addColumn("tiltX");
+		table.addColumn("tiltY");
+		table.addColumn("evtTimeInMsec");
 	}
 
 	public Interpreter(PApplet _p5) {
@@ -82,9 +94,9 @@ public class Interpreter {
 					// Set feedrate mode: inverse time
 					grbl.reserveCmd("G93\r");
 					// Delay
-					if (Setting.servoDelay[0] != 0.0f) {
+					if (Setting.servoDelay0 != 0.0f) {
 						cmd_ = "G4";
-						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay[0]);
+						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay0);
 						cmd_ += '\r';
 						grbl.reserveCmd(cmd_);
 					}
@@ -94,9 +106,9 @@ public class Interpreter {
 					cmd_ += '\r';
 					grbl.reserveCmd(cmd_);
 					// Delay
-					if (Setting.servoDelay[1] != 0.0f) {
+					if (Setting.servoDelay1 != 0.0f) {
 						cmd_ = "G4";
-						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay[1]);
+						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay1);
 						cmd_ += '\r';
 						grbl.reserveCmd(cmd_);
 					}
@@ -115,9 +127,9 @@ public class Interpreter {
 				stroke_.removeFirstPoint();
 				if (b_.getType() == 2) { // Tail
 					// Delay
-					if (Setting.servoDelay[2] != 0.0f) {
+					if (Setting.servoDelay2 != 0.0f) {
 						cmd_ = "G4";
-						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay[2]);
+						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay2);
 						cmd_ += '\r';
 						grbl.reserveCmd(cmd_);
 					}
@@ -130,9 +142,9 @@ public class Interpreter {
 					 * UNIQUE
 					 */
 					// Delay
-					if (Setting.servoDelay[3] != 0.0f) {
+					if (Setting.servoDelay3 != 0.0f) {
 						cmd_ = "G4";
-						cmd_ += 'P' + String.format("%.5f", Setting.servoDelay[3]);
+						cmd_ += 'P' + String.format("%.5f", Setting.servoDelay3);
 						cmd_ += '\r';
 						grbl.reserveCmd(cmd_);
 					}

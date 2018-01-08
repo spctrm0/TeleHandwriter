@@ -43,6 +43,8 @@ public class SerialComm {
 		charToStrBfr = new StringBuilder();
 
 		printSerialList();
+
+		activateAutoConnect();
 	}
 
 	public void pre() {
@@ -68,13 +70,32 @@ public class SerialComm {
 
 	private void tryConnect(int _portIdx) {
 		if (Serial.list().length > 0 && _portIdx < Serial.list().length) {
+			String print_;
 			String portName_ = Serial.list()[_portIdx];
 			setConnect(false, false);
-			serial = new Serial(p5, portName_, baudRate, parity, dataBits, stopBits);
+			try {
+				serial = new Serial(p5, portName_, baudRate, parity, dataBits, stopBits);
+				print_ = "<SRL>\tTry to connect with ";
+				print_ += '[';
+				print_ += _portIdx;
+				print_ += "] ";
+				print_ += portName_;
+				System.out.println(print_);
+			}
+			catch (RuntimeException e) {
+				print_ = "<SRL>\t";
+				print_ += e.toString();
+				System.out.println(print_);
+				// print_ = "<SRL>\tRuntimeException: ";
+				// print_ += '[';
+				// print_ += _portIdx;
+				// print_ += "] ";
+				// print_ += portName_;
+				// print_ += " is busy";
+				// System.out.println(print_);
+				setConnect(false, true);
+			}
 			lastConnectionTryTimeInUsec = System.nanoTime();
-			String print_ = "<SRL>\tTry to connect with ";
-			print_ += portName_;
-			System.out.println(print_);
 		}
 	}
 
@@ -93,9 +114,10 @@ public class SerialComm {
 				if (serial != null) {
 					serial.clear();
 					serial.stop();
+					serial = null;
+					print_ = "<SRL>\tDisconnected";
+					System.out.println(print_);
 				}
-				print_ = "<SRL>\tDisconnected";
-				System.out.println(print_);
 			}
 		}
 	}
@@ -116,7 +138,7 @@ public class SerialComm {
 		String print_ = "<SRL>\tPortList...\n";
 		for (int i = 0; i < Serial.list().length; i++) {
 			String portName_ = Serial.list()[i];
-			print_ += "\t[";
+			print_ += "\t:[";
 			print_ += i;
 			print_ += "] ";
 			print_ += portName_;
@@ -150,7 +172,7 @@ public class SerialComm {
 
 	public void activateAutoConnect() {
 		setConnect(false, false);
-		tryConnectPeriodically();
+		lastConnectionTryTimeInUsec = 0;
 	}
 
 	public boolean isConnected() {

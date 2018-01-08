@@ -47,6 +47,8 @@ public class OscComm {
 
 		oscP5Init();
 		setTargetAddr();
+		
+		activateAutoConnect();
 	}
 
 	public void pre() {
@@ -110,8 +112,8 @@ public class OscComm {
 
 	private void setTargetAddr() {
 		targetAddr = new NetAddress(Setting.targetIp, Setting.targetPort);
-		String print_ = "<OSC>\tTarget address...\n";
-		print_ += '\t' + Setting.targetIp + ':' + Setting.targetPort;
+		String print_ = "<OSC>\tTarget address is ";
+		print_ += Setting.targetIp + ':' + Setting.targetPort;
 		System.out.println(print_);
 	}
 
@@ -223,7 +225,7 @@ public class OscComm {
 
 	public void activateAutoConnect() {
 		setConnect(false, Setting.targetIp, Setting.targetPort);
-		tryConnectPeriodically();
+		lastConnectionTryTimeInUsec = 0;
 	}
 
 	public boolean isConnected() {

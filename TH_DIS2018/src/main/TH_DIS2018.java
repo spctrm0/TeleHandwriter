@@ -5,7 +5,12 @@ import grbl.GrblComm;
 import grbl.Interpreter;
 import grbl.SerialComm;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Iterator;
+
 import drawing.Drawing;
 import drawing.Point;
 import oscComm.OscComm;
@@ -33,55 +38,38 @@ public class TH_DIS2018 extends PApplet {
 		size(800, 800);
 	}
 
-	public void setWritable(boolean _isWritable) {
-		tabletInput.setWritable(_isWritable);
-	}
-
 	public void loadSetting() {
+		ArrayList<Field> fields_ = new ArrayList<Field>(Arrays.asList(Setting.class.getDeclaredFields()));
 		String[] lines_ = loadStrings("Setting.txt");
+		System.out.println("<SYS>\tLoad setting...");
 		for (String line_ : lines_) {
 			String[] parsed_ = line_.split("=");
 			if (parsed_.length >= 2) {
 				parsed_[0] = parsed_[0].trim();
 				parsed_[1] = parsed_[1].trim();
-				if (parsed_[0].equals("myCalibXInPx"))
-					Setting.myCalibXInPx = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("myCalibYInPx"))
-					Setting.myCalibYInPx = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("targetCalibXInPx"))
-					Setting.targetCalibXInPx = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("targetCalibYInPx"))
-					Setting.targetCalibYInPx = Float.parseFloat(parsed_[1]);
-				if (parsed_[0].equals("servoHover"))
-					Setting.servoHover = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("servoZero"))
-					Setting.servoZero = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("servoDelay[0]"))
-					Setting.servoDelay[0] = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("servoDelay[1]"))
-					Setting.servoDelay[1] = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("servoDelay[2]"))
-					Setting.servoDelay[2] = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("servoDelay[3]"))
-					Setting.servoDelay[3] = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("feedrateStrokeToStoke"))
-					Setting.feedrateStrokeToStoke = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("xBackOff"))
-					Setting.xBackOff = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("myPort"))
-					Setting.myPort = Integer.parseInt(parsed_[1]);
-				else if (parsed_[0].equals("targetPort"))
-					Setting.targetPort = Integer.parseInt(parsed_[1]);
-				else if (parsed_[0].equals("targetIp"))
-					Setting.targetIp = parsed_[1].toString();
-				else if (parsed_[0].equals("isXInverted"))
-					Setting.isXInverted = Boolean.parseBoolean(parsed_[1]);
-				else if (parsed_[0].equals("isYInverted"))
-					Setting.isYInverted = Boolean.parseBoolean(parsed_[1]);
-				else if (parsed_[0].equals("xZero"))
-					Setting.xZero = Float.parseFloat(parsed_[1]);
-				else if (parsed_[0].equals("yZero"))
-					Setting.yZero = Float.parseFloat(parsed_[1]);
+				for (int i = fields_.size() - 1; i >= 0; i--) {
+					Field field_ = fields_.get(i);
+					String fieldName_ = field_.getName();
+					String fieldType_ = field_.getType().getTypeName();
+					if (parsed_[0].equals(fieldName_)) {
+						try {
+							if (fieldType_.equals("boolean"))
+								field_.set(null, Boolean.parseBoolean(parsed_[1]));
+							else if (fieldType_.equals("int"))
+								field_.set(null, Integer.parseInt(parsed_[1]));
+							else if (fieldType_.equals("float"))
+								field_.set(null, Float.parseFloat(parsed_[1]));
+							else if (fieldType_.equals("java.lang.String"))
+								field_.set(null, parsed_[1]);
+							System.out.println("\t:" + fieldName_ + " = " + Setting.class.getDeclaredField(fieldName_).get(null));
+							fields_.remove(i);
+						}
+						catch (Exception e) {
+							System.out.println("\t" + e.toString());
+						}
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -99,18 +87,6 @@ public class TH_DIS2018 extends PApplet {
 		drawing = new Drawing();
 
 		table = new Table();
-		table.addColumn("nthPoint");
-		table.addColumn("nthStroke");
-		table.addColumn("nthPointInStroke");
-		table.addColumn("penX");
-		table.addColumn("penY");
-		table.addColumn("cncX");
-		table.addColumn("cncY");
-		table.addColumn("feedrate");
-		table.addColumn("pressure");
-		table.addColumn("tiltX");
-		table.addColumn("tiltY");
-		table.addColumn("evtTimeInMsec");
 		interpreter = new Interpreter(this);
 
 		tabletInput.setOscComm(oscComm);
@@ -167,11 +143,11 @@ public class TH_DIS2018 extends PApplet {
 		}
 		else if (key == 'i' || key == 'I') // toggle writable
 		{
-			setWritable(!tabletInput.isWritable());
+			tabletInput.setWritable(!tabletInput.isWritable());
 		}
 		else if (key == 'h' || key == 'H') // set home
 		{
-			// grbl.activateAutoHome();
+			grblComm.activateAutoHome();
 		}
 		else if (key == 'w' || key == 'W') // servo up
 		{

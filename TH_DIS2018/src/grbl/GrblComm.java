@@ -45,9 +45,7 @@ public class GrblComm {
 		reservedCmd.clear();
 		grblBfr.clear();
 		bfrSize = 0;
-		isAtHome = false;
-		isNeedToMoveHome = true;
-		lastStopAtBackTimeInUsec = System.nanoTime();
+		activateAutoHome();
 	}
 
 	public void pre() {
@@ -212,8 +210,8 @@ public class GrblComm {
 			return 1;
 		}
 		else if (_cmd.contains("G4P")) {
-			String paper_ = String.format("%.5f", Setting.servoDelay[3]);
-			String back_ = String.format("%.6f", Setting.servoDelay[3]);
+			String paper_ = String.format("%.5f", Setting.servoDelay3);
+			String back_ = String.format("%.6f", Setting.servoDelay3);
 			if (_cmd.contains(back_))
 				return 3;
 			else if (_cmd.contains(paper_))
@@ -238,7 +236,7 @@ public class GrblComm {
 		reservePreDefinedCmd(cmd_);
 		// To point backOff
 		cmd_ = "G1";
-		cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -Setting.xBackOff : Setting.xBackOff);
+		cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -Setting.xBack : Setting.xBack);
 		cmd_ += 'F' + String.format("%.3f", Setting.feedrateStrokeToStoke);
 		cmd_ += '\r';
 		reservePreDefinedCmd(cmd_);
@@ -251,7 +249,7 @@ public class GrblComm {
 		 */
 		// Delay
 		cmd_ = "G4";
-		cmd_ += 'P' + String.format("%.6f", Setting.servoDelay[3]);
+		cmd_ += 'P' + String.format("%.6f", Setting.servoDelay3);
 		cmd_ += '\r';
 		reservePreDefinedCmd(cmd_);
 	}
@@ -272,7 +270,7 @@ public class GrblComm {
 		reservePreDefinedCmd(cmd_);
 		// To point backOff
 		cmd_ = "G1";
-		cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -Setting.xBackOff : Setting.xBackOff);
+		cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -Setting.xBack : Setting.xBack);
 		cmd_ += 'F' + String.format("%.3f", Setting.feedrateStrokeToStoke);
 		cmd_ += '\r';
 		reservePreDefinedCmd(cmd_);
@@ -306,6 +304,12 @@ public class GrblComm {
 		cmd_ = "G92X0000Y0000";
 		cmd_ += '\r';
 		reservePreDefinedCmd(cmd_);
+	}
+
+	public void activateAutoHome() {
+		isAtHome = false;
+		isNeedToMoveHome = true;
+		lastStopAtBackTimeInUsec = 0;
 	}
 
 	public boolean isAtBack() {
