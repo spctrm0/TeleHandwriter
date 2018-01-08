@@ -76,7 +76,7 @@ public class SerialComm {
 			try {
 				serial = new Serial(p5, portName_, baudRate, parity, dataBits, stopBits);
 				print_ = "<SRL>\tTry to connect with ";
-				print_ += '[';
+				print_ += "[";
 				print_ += _portIdx;
 				print_ += "] ";
 				print_ += portName_;
@@ -86,13 +86,6 @@ public class SerialComm {
 				print_ = "<SRL>\t";
 				print_ += e.toString();
 				System.out.println(print_);
-				// print_ = "<SRL>\tRuntimeException: ";
-				// print_ += '[';
-				// print_ += _portIdx;
-				// print_ += "] ";
-				// print_ += portName_;
-				// print_ += " is busy";
-				// System.out.println(print_);
 				setConnect(false, true);
 			}
 			lastConnectionTryTimeInUsec = System.nanoTime();
@@ -142,7 +135,7 @@ public class SerialComm {
 			print_ += i;
 			print_ += "] ";
 			print_ += portName_;
-			print_ += '\n';
+			print_ += "\n";
 		}
 		System.out.print(print_);
 	}

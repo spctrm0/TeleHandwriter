@@ -7,8 +7,8 @@ public class Setting {
 	public static float	targetCalibXInPx	= 0;
 	public static float	targetCalibYInPx	= 0;
 
-	public static float	servoHover	= 255 - 32;
-	public static float	servoZero		= 127;
+	public static int		servoHover	= 255 - 32;
+	public static int		servoZero		= 127;
 	public static float	servoDelay0	= 0.025f;
 	public static float	servoDelay1	= 0.150f;
 	public static float	servoDelay2	= 0.025f;

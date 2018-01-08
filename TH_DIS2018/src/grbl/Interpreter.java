@@ -79,46 +79,46 @@ public class Interpreter {
 					 */
 					// Pen up
 					cmd_ = "M3";
-					cmd_ += 'S' + String.format("%.5f", Setting.servoHover);
-					cmd_ += '\r';
+					cmd_ += "S" + String.format("%05d", Setting.servoHover);
+					cmd_ += "\r";
 					grbl.reserveCmd(cmd_);
 					// Set feedrate mode: unit per min
 					grbl.reserveCmd("G94\r");
 					// To point a
 					cmd_ = "G1";
-					cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -aScaledX_ : aScaledX_);
-					cmd_ += 'Y' + String.format("%.3f", Setting.isYInverted ? -aScaledY_ : aScaledY_);
-					cmd_ += 'F' + Setting.feedrateStrokeToStoke;
-					cmd_ += '\r';
+					cmd_ += "X" + String.format("%.3f", Setting.isXInverted ? -aScaledX_ : aScaledX_);
+					cmd_ += "Y" + String.format("%.3f", Setting.isYInverted ? -aScaledY_ : aScaledY_);
+					cmd_ += "F" + String.format("%.3f", Setting.feedrateStrokeToStoke);
+					cmd_ += "\r";
 					grbl.reserveCmd(cmd_);
 					// Set feedrate mode: inverse time
 					grbl.reserveCmd("G93\r");
 					// Delay
 					if (Setting.servoDelay0 != 0.0f) {
 						cmd_ = "G4";
-						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay0);
-						cmd_ += '\r';
+						cmd_ += "P" + String.format("%.3f", Setting.servoDelay0);
+						cmd_ += "\r";
 						grbl.reserveCmd(cmd_);
 					}
 					// Pen down
 					cmd_ = "M3";
-					cmd_ += 'S' + Setting.servoZero;
-					cmd_ += '\r';
+					cmd_ += "S" + String.format("%03d", Setting.servoZero);
+					cmd_ += "\r";
 					grbl.reserveCmd(cmd_);
 					// Delay
 					if (Setting.servoDelay1 != 0.0f) {
 						cmd_ = "G4";
-						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay1);
-						cmd_ += '\r';
+						cmd_ += "P" + String.format("%.3f", Setting.servoDelay1);
+						cmd_ += "\r";
 						grbl.reserveCmd(cmd_);
 					}
 				}
 				// To point b
 				cmd_ = "G1";
-				cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -bScaledX_ : bScaledX_);
-				cmd_ += 'Y' + String.format("%.3f", Setting.isYInverted ? -bScaledY_ : bScaledY_);
-				cmd_ += 'F' + String.format("%.3f", feedrate_);
-				cmd_ += '\r';
+				cmd_ += "X" + String.format("%.3f", Setting.isXInverted ? -bScaledX_ : bScaledX_);
+				cmd_ += "Y" + String.format("%.3f", Setting.isYInverted ? -bScaledY_ : bScaledY_);
+				cmd_ += "F" + String.format("%.3f", feedrate_);
+				cmd_ += "\r";
 				grbl.reserveCmd(cmd_);
 				// Write log of first point on table
 				writeLogOnTable(a_.getNthPoint(), a_.getNthStroke(), a_.getNthPointInStoke(), a_.getX(), a_.getY(), aScaledX_,
@@ -129,14 +129,14 @@ public class Interpreter {
 					// Delay
 					if (Setting.servoDelay2 != 0.0f) {
 						cmd_ = "G4";
-						cmd_ += 'P' + String.format("%.3f", Setting.servoDelay2);
-						cmd_ += '\r';
+						cmd_ += "P" + String.format("%.3f", Setting.servoDelay2);
+						cmd_ += "\r";
 						grbl.reserveCmd(cmd_);
 					}
 					// Pen up
 					cmd_ = "M3";
-					cmd_ += 'S' + Setting.servoHover;
-					cmd_ += '\r';
+					cmd_ += "S" + String.format("%03d", Setting.servoHover);
+					cmd_ += "\r";
 					grbl.reserveCmd(cmd_);
 					/*
 					 * UNIQUE
@@ -144,8 +144,8 @@ public class Interpreter {
 					// Delay
 					if (Setting.servoDelay3 != 0.0f) {
 						cmd_ = "G4";
-						cmd_ += 'P' + String.format("%.5f", Setting.servoDelay3);
-						cmd_ += '\r';
+						cmd_ += "P" + String.format("%.5f", Setting.servoDelay3);
+						cmd_ += "\r";
 						grbl.reserveCmd(cmd_);
 					}
 					// Write log of last point on table

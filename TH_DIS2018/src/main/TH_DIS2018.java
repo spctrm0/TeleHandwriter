@@ -138,7 +138,16 @@ public class TH_DIS2018 extends PApplet {
 
 	public void keyPressed() {
 		String cmd_;
-		if (key == '~') {
+		if (key == ']') {
+			System.out.println("brfSize = " + grblComm.getBfrSize());
+			System.out.println("grblBfrCmdNum = " + grblComm.getGrblBfrCmdNum());
+			System.out.println("reservedPreDefinedCmdNum = " + grblComm.getReservedPreDefinedCmdNum());
+			System.out.println("reservedCmdNum = " + grblComm.getReservedCmdNum());
+			System.out.println("atBack = " + grblComm.isAtBack());
+			System.out.println("atHome = " + grblComm.isAtHome());
+			System.out.println("moving = " + grblComm.isMoving());
+		}
+		else if (key == '~') {
 			oscComm.activateAutoConnect();
 		}
 		else if (key == 'i' || key == 'I') // toggle writable
@@ -152,22 +161,22 @@ public class TH_DIS2018 extends PApplet {
 		else if (key == 'w' || key == 'W') // servo up
 		{
 			cmd_ = "M3";
-			cmd_ += 'S' + Setting.servoHover;
-			cmd_ += '\r';
+			cmd_ += "S" + String.format("%03d", Setting.servoHover);
+			cmd_ += "\r";
 			grblComm.reserveCmd(cmd_);
 		}
 		else if (key == 's' || key == 'S') // servo down
 		{
 			cmd_ = "M3";
-			cmd_ += 'S' + Setting.servoZero;
-			cmd_ += '\r';
+			cmd_ += "S" + String.format("%03d", Setting.servoZero);
+			cmd_ += "\r";
 			grblComm.reserveCmd(cmd_);
 		}
 		else if (key == 'x' || key == 'X') // servo off
 		{
 			cmd_ = "M3";
 			cmd_ += "S0";
-			cmd_ += '\r';
+			cmd_ += "\r";
 			grblComm.reserveCmd(cmd_);
 		}
 	}

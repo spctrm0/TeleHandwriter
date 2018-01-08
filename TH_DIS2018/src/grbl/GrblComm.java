@@ -37,7 +37,6 @@ public class GrblComm {
 		reservedCmd = new ArrayList<String>();
 		grblBfr = new ArrayList<String>();
 		receivedMsg = new ArrayList<String>();
-
 	}
 
 	public void init() {
@@ -80,10 +79,13 @@ public class GrblComm {
 					isAtHome = false;
 					switch (moveType_) {
 						case 1: // Home
+							System.out.println("MOVE" + ": " + "Home");
 							break;
 						case 2: // Paper
+							System.out.println("MOVE" + ": " + "Paper");
 							break;
 						case 3: // Back
+							System.out.println("MOVE" + ": " + "Back");
 							break;
 					}
 				}
@@ -110,10 +112,13 @@ public class GrblComm {
 					isAtHome = false;
 					switch (moveType_) {
 						case 1: // Home
+							System.out.println("MOVE" + ": " + "Home");
 							break;
 						case 2: // Paper
+							System.out.println("MOVE" + ": " + "Paper");
 							break;
 						case 3: // Back
+							System.out.println("MOVE" + ": " + "Back");
 							break;
 					}
 				}
@@ -140,6 +145,11 @@ public class GrblComm {
 			String cmd_ = grblBfr.get(0);
 			bfrSize -= cmd_.length();
 			grblBfr.remove(0);
+			String print_ = "<GRBL>\t\"" + _msg + "\" with " + receivedMsg.size() + " message(s)... " + cmd_ + "\n";
+			for (int i = 0; i < receivedMsg.size(); i++) {
+				print_ += "\t:(" + i + "): " + receivedMsg.get(i) + "\n";
+			}
+			System.out.print(print_);
 			receivedMsg.clear();
 			int stopType_ = stopType(cmd_);
 			if (stopType_ != 0) {
@@ -149,14 +159,17 @@ public class GrblComm {
 				}
 				switch (stopType_) {
 					case 1: // Home
+						System.out.println("STOP" + ": " + "Home");
 						isAtHome = true;
 						break;
 					case 2: // Paper
+						System.out.println("STOP" + ": " + "Paper");
 						if (reservedCmd.size() == 0 && bfrSize == 0)
 							isNeedToMoveBack = true;
 						lastStopAtPaperTimeInUsec = System.nanoTime();
 						break;
 					case 3: // Back
+						System.out.println("STOP" + ": " + "Back");
 						if (reservedCmd.size() == 0 && bfrSize == 0)
 							isNeedToMoveHome = true;
 						isAtBack = true;
@@ -178,7 +191,7 @@ public class GrblComm {
 	private final int	moveToBackPeriodInMsec		= 500;
 	private long			lastStopAtPaperTimeInUsec	= 0;
 
-	private final int	moveToHomePeriodInMsec		= 1000;
+	private final int	moveToHomePeriodInMsec		= 15000;
 	private long			lastStopAtBackTimeInUsec	= 0;
 
 	private long timeSinceLastStopAtPaperInMsec() {
@@ -192,9 +205,9 @@ public class GrblComm {
 	public int moveType(String _cmd) {
 		String penUpCmd_ = "M3S";
 		if (_cmd.contains(penUpCmd_)) {
-			String home_ = String.format("%.4f", Setting.servoHover);
-			String paper_ = String.format("%.5f", Setting.servoHover);
-			String back_ = String.format("%.6f", Setting.servoHover);
+			String home_ = String.format("%04d", Setting.servoHover);
+			String paper_ = String.format("%05d", Setting.servoHover);
+			String back_ = String.format("%06d", Setting.servoHover);
 			if (_cmd.contains(back_))
 				return 3;
 			else if (_cmd.contains(paper_))
@@ -227,82 +240,76 @@ public class GrblComm {
 		 */
 		// Pen up
 		cmd_ = "M3";
-		cmd_ += 'S' + String.format("%.6f", Setting.servoHover);
-		cmd_ += '\r';
+		cmd_ += "S" + String.format("%06d", Setting.servoHover);
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		// Set feedrate mode: unit per min
 		cmd_ = "G94";
-		cmd_ += '\r';
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		// To point backOff
 		cmd_ = "G1";
-		cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -Setting.xBack : Setting.xBack);
-		cmd_ += 'F' + String.format("%.3f", Setting.feedrateStrokeToStoke);
-		cmd_ += '\r';
+		cmd_ += "X" + String.format("%.3f", Setting.isXInverted ? -Setting.xBack : Setting.xBack);
+		cmd_ += "F" + String.format("%.3f", Setting.feedrateStrokeToStoke);
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		// Set feedrate mode: inverse time
 		cmd_ = "G93";
-		cmd_ += '\r';
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		/*
 		 * UNIQUE
 		 */
 		// Delay
 		cmd_ = "G4";
-		cmd_ += 'P' + String.format("%.6f", Setting.servoDelay3);
-		cmd_ += '\r';
+		cmd_ += "P" + String.format("%.6f", Setting.servoDelay3);
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 	}
 
 	public void reserveHomeCmd() {
 		String cmd_;
+		// Lock off
+		cmd_ = "$X";
+		cmd_ += "\r";
+		reservePreDefinedCmd(cmd_);
 		/*
 		 * UNIQUE
 		 */
 		// Pen up
 		cmd_ = "M3";
-		cmd_ += 'S' + String.format("%.4f", Setting.servoHover);
-		cmd_ += '\r';
+		cmd_ += "S" + String.format("%04d", Setting.servoHover);
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		// Home
 		cmd_ = "$H";
-		cmd_ += '\r';
-		reservePreDefinedCmd(cmd_);
-		// To point backOff
-		cmd_ = "G1";
-		cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -Setting.xBack : Setting.xBack);
-		cmd_ += 'F' + String.format("%.3f", Setting.feedrateStrokeToStoke);
-		cmd_ += '\r';
-		reservePreDefinedCmd(cmd_);
-		// Set feedrate mode: inverse time
-		cmd_ = "G93";
-		cmd_ += '\r';
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		// Set current position as 0
 		cmd_ = "G92X0Y0";
-		cmd_ += '\r';
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		// Set feedrate mode: unit per min
 		cmd_ = "G94";
-		cmd_ += '\r';
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		// Pre-defined home - unique
 		cmd_ = "G1";
-		cmd_ += 'F' + String.format("%.3f", Setting.feedrateStrokeToStoke);
-		cmd_ += 'X' + String.format("%.3f", Setting.isXInverted ? -Setting.xZero : Setting.xZero);
-		cmd_ += 'Y' + String.format("%.3f", Setting.isYInverted ? -Setting.yZero : Setting.yZero);
-		cmd_ += '\r';
+		cmd_ += "F" + String.format("%.3f", Setting.feedrateStrokeToStoke);
+		cmd_ += "X" + String.format("%.3f", Setting.isXInverted ? -Setting.xZero : Setting.xZero);
+		cmd_ += "Y" + String.format("%.3f", Setting.isYInverted ? -Setting.yZero : Setting.yZero);
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		// Set feedrate mode: inverse time
 		cmd_ = "G93";
-		cmd_ += '\r';
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 		/*
 		 * UNIQUE
 		 */
 		// Set current position as 0
 		cmd_ = "G92X0000Y0000";
-		cmd_ += '\r';
+		cmd_ += "\r";
 		reservePreDefinedCmd(cmd_);
 	}
 
@@ -310,6 +317,22 @@ public class GrblComm {
 		isAtHome = false;
 		isNeedToMoveHome = true;
 		lastStopAtBackTimeInUsec = 0;
+	}
+
+	public int getBfrSize() {
+		return bfrSize;
+	}
+
+	public int getGrblBfrCmdNum() {
+		return grblBfr.size();
+	}
+
+	public int getReservedPreDefinedCmdNum() {
+		return reservedPreDefinedCmd.size();
+	}
+
+	public int getReservedCmdNum() {
+		return reservedCmd.size();
 	}
 
 	public boolean isAtBack() {
