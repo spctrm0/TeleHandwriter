@@ -75,16 +75,11 @@ public class SerialComm {
 			setConnect(false, false);
 			try {
 				serial = new Serial(p5, portName_, baudRate, parity, dataBits, stopBits);
-				print_ = "<SRL>\tTry to connect with ";
-				print_ += "[";
-				print_ += _portIdx;
-				print_ += "] ";
-				print_ += portName_;
+				print_ = "<SRL>\tTry to connect with " + "[" + _portIdx + "] " + portName_;
 				System.out.println(print_);
 			}
 			catch (RuntimeException e) {
-				print_ = "<SRL>\t";
-				print_ += e.toString();
+				print_ = "<SRL>\t" + e.toString();
 				System.out.println(print_);
 				setConnect(false, true);
 			}
@@ -99,8 +94,7 @@ public class SerialComm {
 			isConnected = _isConnected;
 			String print_;
 			if (isConnected) {
-				print_ = "<SRL>\tConnected with ";
-				print_ += serial.port.getPortName();
+				print_ = "<SRL>\tConnected with " + serial.port.getPortName();
 				System.out.println(print_);
 			}
 			else {
@@ -131,11 +125,7 @@ public class SerialComm {
 		String print_ = "<SRL>\tPortList...\n";
 		for (int i = 0; i < Serial.list().length; i++) {
 			String portName_ = Serial.list()[i];
-			print_ += "\t:[";
-			print_ += i;
-			print_ += "] ";
-			print_ += portName_;
-			print_ += "\n";
+			print_ += "\t:[" + i + "] " + portName_ + "\n";
 		}
 		System.out.print(print_);
 	}

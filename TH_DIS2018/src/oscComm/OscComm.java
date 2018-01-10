@@ -65,8 +65,7 @@ public class OscComm {
 			if (timeSinceLastConnectionTryInMsec() >= connectionTryPeriodInMsec) {
 				setConnect(false, Setting.targetIp, Setting.targetPort);
 				sendOscConnectionMsg(msgPrefixConnectSyn);
-				String print_ = "<OSC>\tSend (Syn) Msg to ";
-				print_ += Setting.targetIp + ":" + Setting.targetPort;
+				String print_ = "<OSC>\tSend (Syn) Msg to " + Setting.targetIp + ":" + Setting.targetPort;
 				System.out.println(print_);
 				lastConnectionTryTimeInUsec = System.nanoTime();
 			}
@@ -82,8 +81,7 @@ public class OscComm {
 			isConnected = _isConnected;
 			String print_;
 			if (isConnected) {
-				print_ = "<OSC>\tConnected with ";
-				print_ += _connectedIp + ":" + _connectedPort;
+				print_ = "<OSC>\tConnected with " + _connectedIp + ":" + _connectedPort;
 				System.out.println(print_);
 			}
 			else {
@@ -117,8 +115,7 @@ public class OscComm {
 
 	private void setTargetAddr() {
 		targetAddr = new NetAddress(Setting.targetIp, Setting.targetPort);
-		String print_ = "<OSC>\tTarget address is ";
-		print_ += Setting.targetIp + ":" + Setting.targetPort;
+		String print_ = "<OSC>\tTarget address is " + Setting.targetIp + ":" + Setting.targetPort;
 		System.out.println(print_);
 	}
 
@@ -184,26 +181,21 @@ public class OscComm {
 					String print_;
 					if (_oscMsg.addrPattern().equals(msgPrefixConnectSyn)) {
 						isRecievedSynMsg = true;
-						print_ = "<OSC>\tGot a (Syn) Msg from ";
-						print_ += receivedIp_ + ":" + receivedPort_ + "\n";
-						print_ += "<OSC>\tSend back (Syn + Ack) Msg to ";
-						print_ += receivedIp_ + ":" + receivedPort_;
+						print_ = "<OSC>\tGot a (Syn) Msg from " + receivedIp_ + ":" + receivedPort_ + "\n";
+						print_ += "<OSC>\tSend back (Syn + Ack) Msg to " + receivedIp_ + ":" + receivedPort_;
 						System.out.println(print_);
 						sendOscConnectionMsg(msgPrefixConnectSynAck);
 					}
 					else if (_oscMsg.addrPattern().equals(msgPrefixConnectSynAck)) {
 						isRecievedSynAckMsg = true;
-						print_ = "<OSC>\tGot a (Syn + Ack) Msg from ";
-						print_ += receivedIp_ + ":" + receivedPort_ + "\n";
-						print_ += "<OSC>\tSend back (Ack) Msg to ";
-						print_ += receivedIp_ + ":" + receivedPort_;
+						print_ = "<OSC>\tGot a (Syn + Ack) Msg from " + receivedIp_ + ":" + receivedPort_ + "\n";
+						print_ += "<OSC>\tSend back (Ack) Msg to " + receivedIp_ + ":" + receivedPort_;
 						System.out.println(print_);
 						sendOscConnectionMsg(msgPrefixConnectAck);
 						setConnect(true, receivedIp_, receivedPort_);
 					}
 					else if (_oscMsg.addrPattern().equals(msgPrefixConnectAck)) {
-						print_ = "<OSC>\tGot a (Ack) Msg from ";
-						print_ += receivedIp_ + ":" + receivedPort_;
+						print_ = "<OSC>\tGot a (Ack) Msg from " + receivedIp_ + ":" + receivedPort_;
 						System.out.println(print_);
 						setConnect(true, receivedIp_, receivedPort_);
 					}

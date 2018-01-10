@@ -134,9 +134,8 @@ public class GrblComm {
       bfrSize -= cmd_.length();
       grblBfr.remove(0);
       String print_ = "<GRBL>\t\"" + _msg + "\" with " + receivedMsg.size() + " message(s)... " + cmd_ + "\n";
-      for (int i = 0; i < receivedMsg.size(); i++) {
+      for (int i = 0; i < receivedMsg.size(); i++)
         print_ += "\t:(" + i + "): " + receivedMsg.get(i) + "\n";
-      }
       System.out.print(print_);
       receivedMsg.clear();
       int stopType_ = stopType(cmd_);

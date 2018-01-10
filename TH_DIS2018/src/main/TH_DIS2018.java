@@ -37,38 +37,45 @@ public class TH_DIS2018 extends PApplet {
 	}
 
 	public void loadSetting() {
-		ArrayList<Field> fields_ = new ArrayList<Field>(Arrays.asList(Setting.class.getDeclaredFields()));
-		String[] lines_ = loadStrings("Setting.txt");
-		System.out.println("<SYS>\tLoad setting...");
-		for (String line_ : lines_) {
-			String[] parsed_ = line_.split("=");
-			if (parsed_.length >= 2) {
-				parsed_[0] = parsed_[0].trim();
-				parsed_[1] = parsed_[1].trim();
-				for (int i = fields_.size() - 1; i >= 0; i--) {
-					Field field_ = fields_.get(i);
-					String fieldName_ = field_.getName();
-					String fieldType_ = field_.getType().getTypeName();
-					if (parsed_[0].equals(fieldName_)) {
-						try {
-							if (fieldType_.equals("boolean"))
-								field_.set(null, Boolean.parseBoolean(parsed_[1]));
-							else if (fieldType_.equals("int"))
-								field_.set(null, Integer.parseInt(parsed_[1]));
-							else if (fieldType_.equals("float"))
-								field_.set(null, Float.parseFloat(parsed_[1]));
-							else if (fieldType_.equals("java.lang.String"))
-								field_.set(null, parsed_[1]);
-							System.out.println("\t:" + fieldName_ + " = " + Setting.class.getDeclaredField(fieldName_).get(null));
-							fields_.remove(i);
+		String print_ = "<SYS>\tLoad setting...\n";
+		try {
+			ArrayList<Field> fields_ = new ArrayList<Field>(Arrays.asList(Setting.class.getDeclaredFields()));
+			String[] lines_ = loadStrings("Setting.txt");
+			for (String line_ : lines_) {
+				String[] parsed_ = line_.split("=");
+				if (parsed_.length >= 2) {
+					parsed_[0] = parsed_[0].trim();
+					parsed_[1] = parsed_[1].trim();
+					for (int i = fields_.size() - 1; i >= 0; i--) {
+						Field field_ = fields_.get(i);
+						String fieldName_ = field_.getName();
+						String fieldType_ = field_.getType().getTypeName();
+						if (parsed_[0].equals(fieldName_)) {
+							try {
+								if (fieldType_.equals("boolean"))
+									field_.set(null, Boolean.parseBoolean(parsed_[1]));
+								else if (fieldType_.equals("int"))
+									field_.set(null, Integer.parseInt(parsed_[1]));
+								else if (fieldType_.equals("float"))
+									field_.set(null, Float.parseFloat(parsed_[1]));
+								else if (fieldType_.equals("java.lang.String"))
+									field_.set(null, parsed_[1]);
+								print_ += "\t:" + fieldName_ + " = " + Setting.class.getDeclaredField(fieldName_).get(null) + "\n";
+								fields_.remove(i);
+							}
+							catch (Exception e) {
+								print_ += "\t" + e.toString() + "\n";
+							}
+							break;
 						}
-						catch (Exception e) {
-							System.out.println("\t" + e.toString());
-						}
-						break;
 					}
 				}
 			}
+			System.out.print(print_);
+		}
+		catch (NullPointerException e) {
+			print_ += "\t" + e.toString();
+			System.out.println(print_);
 		}
 	}
 
