@@ -1,3 +1,24 @@
+//setting.txt
+//myCalibXInPx = 0
+//myCalibYInPx = 0
+//targetCalibXInPx = 0
+//targetCalibYInPx = 0
+//servoHover = 223
+//servoZero = 127
+//servoDelay0 = .025
+//servoDelay1 = .150
+//servoDelay2 = .025
+//servoDelay3 = .150
+//feedrateStrokeToStoke = 15000
+//isXInverted = false
+//isYInverted = true
+//xZero = 43.5
+//yZero = 26
+//xBack = -20
+//myPort = 8765
+//targetPort = 4321
+//targetIp = 192.168.0.4
+
 import processing.serial.*;
 
 import codeanticode.tablet.*;
