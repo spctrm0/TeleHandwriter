@@ -108,12 +108,6 @@ public class TH_DIS2018 extends PApplet {
 		interpreter.setDrawing(drawing);
 		interpreter.setGrblComm(grblComm);
 		interpreter.setTable(table);
-
-		if (!focused) {
-			frame.requestFocus();
-			if (!focused)
-				frame.requestFocusInWindow();
-		}
 	}
 
 	public void draw() {
@@ -140,6 +134,11 @@ public class TH_DIS2018 extends PApplet {
 
 	public void exit() {
 		saveTable(table, "tabletInputLogs\\" + timestamp() + ".csv");
+		String cmd_;
+		cmd_ = "M3";
+		cmd_ += "S" + String.format("%03d", 0);
+		cmd_ += "\r";
+		grblComm.terminateCmd(cmd_);
 		super.exit();
 	}
 

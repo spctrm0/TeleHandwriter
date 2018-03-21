@@ -140,6 +140,23 @@ public class GrblComm {
 		reservedCmd.add(_cmd);
 	}
 
+	public void terminateCmd(String _cmd) {
+		if (serialComm.isConnected()) {
+			reservedPreDefinedCmd.clear();
+			reservedCmd.clear();
+			reservedCmd.add(_cmd);
+			while (reservedCmd.size() > 0) {
+				if (bfrSize <= bfrSizeMx) {
+					String cmd_ = reservedCmd.get(0).toString();
+					bfrSize += cmd_.length();
+					grblBfr.add(cmd_);
+					serialComm.write(cmd_);
+					reservedCmd.remove(0);
+				}
+			}
+		}
+	}
+
 	public void read(String _msg) {
 		if (_msg.equals("ok") || _msg.contains("error:")) {
 			String cmd_ = grblBfr.get(0);
