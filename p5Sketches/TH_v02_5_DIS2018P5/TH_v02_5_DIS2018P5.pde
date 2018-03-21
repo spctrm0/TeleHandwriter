@@ -127,6 +127,9 @@ public void draw() {
   noStroke();
   fill(oscComm.isTargetWritable() ? 0 : 255, oscComm.isTargetWritable() ? 255 : 0, 0);
   rect(0, 0, 32, 32);
+  
+  fill(grblComm.gate() ? 0 : 255, grblComm.gate() ? 255 : 0, 0);
+  rect(width - 32, 0, 32, 32);
 
   noFill();
   stroke(255);
@@ -197,6 +200,9 @@ public void keyPressed() {
     cmd_ += "S" + String.format("%03d", 0);
     cmd_ += "\r";
     grblComm.reserveCmd(cmd_);
+  } else if (key == ' ') // toggle gate
+  {
+    grblComm.setGate(!grblComm.gate());
   }
 }
 

@@ -12,6 +12,16 @@ public class GrblComm {
   private ArrayList<String> grblBfr = null;
   private ArrayList<String> receivedMsg = null;
 
+  private boolean gate = true;
+
+  public boolean gate() {
+    return gate;
+  }
+
+  public void setGate(boolean _gate) {
+    gate = _gate;
+  }
+
   public void setSerialComm(SerialComm _serialComm) {
     serialComm = _serialComm;
   }
@@ -86,37 +96,39 @@ public class GrblComm {
       } else
         break;
     }
-    while (bfrSize <= bfrSizeMx && reservedCmd.size() > 0 && reservedPreDefinedCmd.size() == 0) {
-      String cmd_ = reservedCmd.get(0).toString();
-      if (bfrSize + cmd_.length() <= bfrSizeMx) {
-        int moveType_ = moveType(cmd_);
-        if (moveType_ != 0) {
-          if (!isMoving) {
-            isMoving = true;
-            oscComm.updateGrblIsMoving(isMoving);
+    if (gate) {
+      while (bfrSize <= bfrSizeMx && reservedCmd.size() > 0 && reservedPreDefinedCmd.size() == 0) {
+        String cmd_ = reservedCmd.get(0).toString();
+        if (bfrSize + cmd_.length() <= bfrSizeMx) {
+          int moveType_ = moveType(cmd_);
+          if (moveType_ != 0) {
+            if (!isMoving) {
+              isMoving = true;
+              oscComm.updateGrblIsMoving(isMoving);
+            }
+            isNeedToMoveBack = false;
+            isNeedToMoveHome = false;
+            isAtBack = false;
+            isAtHome = false;
+            switch (moveType_) {
+            case 1: // Home
+              System.out.println("MOVE" + ": " + "Home");
+              break;
+            case 2: // Paper
+              System.out.println("MOVE" + ": " + "Paper");
+              break;
+            case 3: // Back
+              System.out.println("MOVE" + ": " + "Back");
+              break;
+            }
           }
-          isNeedToMoveBack = false;
-          isNeedToMoveHome = false;
-          isAtBack = false;
-          isAtHome = false;
-          switch (moveType_) {
-          case 1: // Home
-            System.out.println("MOVE" + ": " + "Home");
-            break;
-          case 2: // Paper
-            System.out.println("MOVE" + ": " + "Paper");
-            break;
-          case 3: // Back
-            System.out.println("MOVE" + ": " + "Back");
-            break;
-          }
-        }
-        bfrSize += cmd_.length();
-        grblBfr.add(cmd_);
-        serialComm.write(cmd_);
-        reservedCmd.remove(0);
-      } else
-        break;
+          bfrSize += cmd_.length();
+          grblBfr.add(cmd_);
+          serialComm.write(cmd_);
+          reservedCmd.remove(0);
+        } else
+          break;
+      }
     }
   }
 
