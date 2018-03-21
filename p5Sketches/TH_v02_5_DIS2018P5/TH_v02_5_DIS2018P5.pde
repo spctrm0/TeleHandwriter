@@ -26,6 +26,9 @@ import codeanticode.tablet.*;
 import netP5.*;
 import oscP5.*;
 
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.event.InputEvent;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -118,6 +121,17 @@ public void setup() {
   interpreter.setDrawing(drawing);
   interpreter.setGrblComm(grblComm);
   interpreter.setTable(table);
+
+  Robot _robot;
+  try {
+    _robot = new Robot();
+    _robot.mouseMove(64, 64);
+    _robot.mousePress(InputEvent.BUTTON1_MASK);
+    _robot.mouseRelease(InputEvent.BUTTON1_MASK);
+  }
+  catch (AWTException e) {
+    e.printStackTrace();
+  }
 }
 
 public void draw() {

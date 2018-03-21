@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+
 import drawing.Drawing;
 import drawing.Point;
 import oscComm.OscComm;
@@ -107,6 +108,12 @@ public class TH_DIS2018 extends PApplet {
 		interpreter.setDrawing(drawing);
 		interpreter.setGrblComm(grblComm);
 		interpreter.setTable(table);
+
+		if (!focused) {
+			frame.requestFocus();
+			if (!focused)
+				frame.requestFocusInWindow();
+		}
 	}
 
 	public void draw() {
