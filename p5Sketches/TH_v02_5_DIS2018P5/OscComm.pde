@@ -9,7 +9,8 @@ public class OscComm {
   private final String msgPrefixConnectAck = "Ack";
   private final String msgPrefixDisconnect = "Disconnect";
   private final String msgPrefixTabletInputMsg = "TabletInputMsg";
-  private final String msgPrefixIsWritableMsg = "WritableMsg";
+  private final String msgPrefixIsWritableMsg = "IsWritableMsg";
+  private final String msgPrefixRequestForIsWritable = "RequestForIsWritable";
 
   private long lastConnectionTryTimeInUsec = 0;
   private boolean isConnected = false;
@@ -129,7 +130,12 @@ public class OscComm {
     oscP5.send(msg_, targetAddr);
   }
 
-  public void sendReadyToWriteStatusMsg() {
+  public void sendRequestForIsWritable() {
+    OscMessage msg_ = new OscMessage(msgPrefixRequestForIsWritable);
+    oscP5.send(msg_, targetAddr);
+  }
+
+  public void sendIsWritableMsg() {
     OscMessage msg_ = new OscMessage(msgPrefixIsWritableMsg);
     // msg_.add((serialCommIsConnected && tabletInputIsWritable &&
     // !grblIsMoving) ? 1 : 0);
@@ -144,17 +150,17 @@ public class OscComm {
 
   public void updateSerialCommIsConnected(boolean _serialCommIsConnected) {
     serialCommIsConnected = _serialCommIsConnected;
-    sendReadyToWriteStatusMsg();
+    sendIsWritableMsg();
   }
 
   public void updateTabletInputIsWritable(boolean _tabletInputIsWritable) {
     tabletInputIsWritable = _tabletInputIsWritable;
-    sendReadyToWriteStatusMsg();
+    sendIsWritableMsg();
   }
 
   public void updateGrblIsMoving(boolean _grblIsMoving) {
     grblIsMoving = _grblIsMoving;
-    sendReadyToWriteStatusMsg();
+    sendIsWritableMsg();
   }
 
   public void receive(OscMessage _oscMsg) {
@@ -178,10 +184,12 @@ public class OscComm {
             System.out.println(print_);
             sendOscConnectionMsg(msgPrefixConnectAck);
             setConnect(true, receivedIp_, receivedPort_);
+            sendRequestForIsWritable();
           } else if (_oscMsg.addrPattern().equals(msgPrefixConnectAck)) {
             print_ = "<OSC>\tGot a (Ack) Msg from " + receivedIp_ + ":" + receivedPort_;
             System.out.println(print_);
             setConnect(true, receivedIp_, receivedPort_);
+            sendRequestForIsWritable();
           }
         } else if (_oscMsg.addrPattern().equals(msgPrefixDisconnect))
           setConnect(false, receivedIp_, receivedPort_);
@@ -205,6 +213,8 @@ public class OscComm {
           type_);
     } else if (_oscMsg.addrPattern().equals(msgPrefixIsWritableMsg)) {
       isTargetWritable = _oscMsg.get(0).intValue() == 1;
+    } else if (_oscMsg.addrPattern().equals(msgPrefixRequestForIsWritable)) {
+      sendIsWritableMsg();
     }
   }
 
