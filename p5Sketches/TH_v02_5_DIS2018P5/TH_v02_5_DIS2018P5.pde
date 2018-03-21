@@ -144,11 +144,11 @@ public void draw() {
 
 public void exit() {
   saveTable(table, "tabletInputLogs\\" + timestamp() + ".csv");
-    String cmd_;
-    cmd_ = "M3";
-    cmd_ += "S" + String.format("%03d", 0);
-    cmd_ += "\r";
-    grblComm.terminateCmd(cmd_);
+  String cmd_;
+  cmd_ = "M3";
+  cmd_ += "S" + String.format("%03d", 0);
+  cmd_ += "\r";
+  grblComm.terminateCmd(cmd_);
   super.exit();
 }
 
