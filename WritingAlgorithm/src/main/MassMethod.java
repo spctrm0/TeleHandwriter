@@ -34,7 +34,7 @@ public class MassMethod extends Drawing implements ReceivingPoint {
 	@Override
 	public void receivePoint(int _nthPoint, int _nthStroke, int _nthPointInStroke, float _x, float _y, float _pressure,
 			float _tiltX, float _tiltY, long _evtTimeInMsec, int _type) {
-		if (_nthPointInStroke == 0) {
+		if (_nthPointInStroke == 1) {
 			pmouse.set(_x, _y);
 			pos.set(_x, _y);
 			acc.set(0, 0);
@@ -43,13 +43,22 @@ public class MassMethod extends Drawing implements ReceivingPoint {
 		else {
 			mouse.set(_x, _y);
 			update(force());
-			pmouse.set(mouse.x, mouse.y);
+			pmouse.set(mouse);
+			drawing(ppos.x, ppos.y, pos.x, pos.y);
 		}
 	}
 
 	@Override
 	public void drawing(float _px, float _py, float _x, float _y) {
-		// TODO Auto-generated method stub
-
+		pg.beginDraw();
+		//		pg.noStroke();
+		//		pg.fill(255, 0, 0);
+		//		pg.ellipse(_px, _py, 3, 3);
+		//		pg.ellipse(_x, _y, 3, 3);
+		pg.noFill();
+		pg.strokeWeight(1);
+		pg.stroke(0, 0, 255);
+		pg.line(_px, _py, _x, _y);
+		pg.endDraw();
 	}
 }
