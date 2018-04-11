@@ -13,8 +13,8 @@ public class TabletInput extends Drawing {
 	private boolean isWritable = true;
 
 	private int			arryIdx							= 0;
-	public float[]	pointX							= { 0, 0 };
-	public float[]	pointY							= { 0, 0 };
+	private float[]	pointX							= { 0, 0 };
+	private float[]	pointY							= { 0, 0 };
 	private float[]	pointPressure				= { 0, 0 };
 	private float[]	pointTiltX					= { 0, 0 };
 	private float[]	pointTiltY					= { 0, 0 };
@@ -29,7 +29,7 @@ public class TabletInput extends Drawing {
 				float _tiltX, float _tiltY, long _evtTimeInMsec, int _type);
 	}
 
-	private ArrayList<ReceivingPoint>	receivingPointObjs		= new ArrayList<ReceivingPoint>();
+	private ArrayList<ReceivingPoint> receivingPointObjs = new ArrayList<ReceivingPoint>();
 
 	public ArrayList<ReceivingPoint> getReceivingPointObjs() {
 		return receivingPointObjs;
@@ -40,8 +40,8 @@ public class TabletInput extends Drawing {
 			receivingPointObjs.add(_receivingPointObj);
 	}
 
-	public TabletInput(PApplet _p5) {
-		super(_p5);
+	public TabletInput(PApplet _p5, int w, int h) {
+		super(_p5, w, h);
 		p5 = _p5;
 		p5.registerMethod("mouseEvent", this);
 		tablet = new Tablet(p5);
@@ -96,7 +96,7 @@ public class TabletInput extends Drawing {
 	}
 
 	private void sendPoint() {
-		for (ReceivingPoint receivingPointObj_ : receivingPointObjs) 
+		for (ReceivingPoint receivingPointObj_ : receivingPointObjs)
 			receivingPointObj_.receivePoint(nthPoint, nthStroke, nthPointInStroke, pointX[0], pointY[0], pointPressure[0],
 					pointTiltX[0], pointTiltY[0], pointEvtTimeInMsec[0], pointType[0]);
 	}

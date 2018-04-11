@@ -11,11 +11,11 @@ public class MassMethod extends Drawing implements ReceivingPoint {
 	private PVector	ppos		= new PVector();
 	private PVector	vel			= new PVector();
 	private PVector	acc			= new PVector();
-	private float		mass		= 2;
+	private float		mass		= 1;
 	private float		damping	= 0.5f;
 
-	public MassMethod(PApplet _p5) {
-		super(_p5);
+	public MassMethod(PApplet _p5, int w, int h) {
+		super(_p5, w, h);
 	}
 
 	private PVector force() {
@@ -29,6 +29,22 @@ public class MassMethod extends Drawing implements ReceivingPoint {
 		vel.add(acc);
 		pos.add(vel);
 		vel.mult(damping);
+	}
+
+	public float getMass() {
+		return mass;
+	}
+
+	public void setMass(float mass) {
+		this.mass = mass;
+	}
+
+	public float getDamping() {
+		return damping;
+	}
+
+	public void setDamping(float damping) {
+		this.damping = damping;
 	}
 
 	@Override

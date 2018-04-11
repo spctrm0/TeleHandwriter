@@ -14,8 +14,8 @@ public class MovingAverageMethod extends Drawing implements ReceivingPoint {
 	private ArrayList<PVector>	mouseList		= new ArrayList<PVector>();
 	private int									sampleSize	= 8;
 
-	public MovingAverageMethod(PApplet _p5) {
-		super(_p5);
+	public MovingAverageMethod(PApplet _p5, int w, int h) {
+		super(_p5, w, h);
 	}
 
 	private void addMouse(PVector _mouse) {
@@ -35,6 +35,14 @@ public class MovingAverageMethod extends Drawing implements ReceivingPoint {
 	private void update(PVector _movingAverage) {
 		ppos.set(pos.x, pos.y);
 		pos.set(movingAverage());
+	}
+
+	public int getSampleSize() {
+		return sampleSize;
+	}
+
+	public void setSampleSize(int sampleSize) {
+		this.sampleSize = sampleSize;
 	}
 
 	@Override
