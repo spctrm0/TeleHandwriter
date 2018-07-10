@@ -27,6 +27,8 @@ public class SerialPortManager implements SerialCallback {
 
 	public void pre() {
 		tryConnectPeriodically();
+		if (serialPorts.size() >= targetSerialPortsNum)
+			p5.unregisterMethod("pre", this);
 	}
 
 	private void tryConnectPeriodically() {
@@ -35,7 +37,7 @@ public class SerialPortManager implements SerialCallback {
 				tempSerialPort = new SerialPort(p5, G.grblConnectionChkMsg);
 				tempSerialPort.addListener(this);
 			}
-			if (!tempSerialPort.isConnected())
+			else if (!tempSerialPort.isConnected())
 				if (tempSerialPort.getElapsedTimeSinceLastConnectionAttemptInMsec() >= connectionAttemptIntervalInMSec)
 					tempSerialPort.tryConnectWithPort((tempSerialPort.getPortIdx() + 1) % Serial.list().length);
 		}
@@ -44,7 +46,7 @@ public class SerialPortManager implements SerialCallback {
 				tempSerialPort = new SerialPort(p5, G.arduinoConnectionChkMsg);
 				tempSerialPort.addListener(this);
 			}
-			if (!tempSerialPort.isConnected())
+			else if (!tempSerialPort.isConnected())
 				if (tempSerialPort.getElapsedTimeSinceLastConnectionAttemptInMsec() >= connectionAttemptIntervalInMSec) {
 					int portIdx_ = (tempSerialPort.getPortIdx() + 1) % Serial.list().length;
 					if (portIdx_ != serialPorts.get(0).getPortIdx())
@@ -80,6 +82,7 @@ public class SerialPortManager implements SerialCallback {
 		if (serialPorts.size() < targetSerialPortsNum)
 			if (_serialPort.isConnected())
 				if (!serialPorts.contains(_serialPort)) {
+					_serialPort.removeListener(this);
 					serialPorts.add(_serialPort);
 					tempSerialPort = null;
 				}

@@ -19,6 +19,11 @@ public class SerialPort {
 			listeners.add(_listener);
 	}
 
+	public void removeListener(SerialCallback _listener) {
+		if (listeners.contains(_listener))
+			listeners.remove(_listener);
+	}
+
 	private PApplet	p5			= null;
 	private Serial	serial	= null;
 	private int			portIdx	= -1;
@@ -51,10 +56,6 @@ public class SerialPort {
 
 	public void dispose() {
 		setConnected(false);
-		if (serial != null) {
-			serial.dispose();
-			serial = null;
-		}
 	}
 
 	public Serial getSerial() {
@@ -69,7 +70,7 @@ public class SerialPort {
 		portIdx = _portIdx;
 	}
 
-	public void setLastConnectionAttemptInUsec() {
+	private void setLastConnectionAttemptInUsec() {
 		lastConnectionAttemptInUsec = System.nanoTime();
 	}
 
@@ -81,11 +82,15 @@ public class SerialPort {
 		return isConnected;
 	}
 
-	public void setConnected(boolean _isConnected) {
-		boolean printLog_ = false;
-		if (!_isConnected && isConnected)
-			printLog_ = true;
+	private void setConnected(boolean _isConnected) {
+		boolean printLog_ = _isConnected && isConnected;
 		isConnected = _isConnected;
+		if (!isConnected)
+			if (serial != null) {
+				serial.clear();
+				serial.stop();
+				serial = null;
+			}
 		if (printLog_) {
 			String log_ = "<SerialPort>\tDisconnected with " + "[" + portIdx + "] " + Serial.list()[portIdx];
 			System.out.println(log_);
@@ -121,6 +126,10 @@ public class SerialPort {
 		}
 		System.out.println(log_);
 		setLastConnectionAttemptInUsec();
+	}
+
+	public void disconnect() {
+		setConnected(false);
 	}
 
 	public void concatenateCharAndCallback(char _char) {
