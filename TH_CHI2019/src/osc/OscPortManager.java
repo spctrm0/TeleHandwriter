@@ -12,16 +12,16 @@ import serial.SerialPort;
 public class OscPortManager implements OscCallback {
 	private PApplet p5 = null;
 
-	private LinkedList<OscPort>	oscPorts			= null;
-	private LinkedList<OscPort>	tempOscPorts	= null;
+	private LinkedList<OscComm>	oscPorts			= null;
+	private LinkedList<OscComm>	tempOscPorts	= null;
 
 	private final int targetOscPortsNum = 1;
 
 	public OscPortManager(PApplet _p5) {
 		p5 = _p5;
 
-		oscPorts = new LinkedList<OscPort>();
-		tempOscPorts = new LinkedList<OscPort>();
+		oscPorts = new LinkedList<OscComm>();
+		tempOscPorts = new LinkedList<OscComm>();
 
 		p5.registerMethod("dispose", this);
 	}
@@ -31,22 +31,22 @@ public class OscPortManager implements OscCallback {
 	}
 
 	public void disconnectAll() {
-		Iterator<OscPort> tempDescendingIter_ = tempOscPorts.descendingIterator();
+		Iterator<OscComm> tempDescendingIter_ = tempOscPorts.descendingIterator();
 		while (tempDescendingIter_.hasNext()) {
-			OscPort tempOscPort_ = tempDescendingIter_.next();
+			OscComm tempOscPort_ = tempDescendingIter_.next();
 			if (tempOscPort_.containsListener(this))
 				tempOscPort_.removeListener(this);
 			tempOscPort_.disconnect();
 			tempOscPorts.remove(tempOscPort_);
 		}
-		Iterator<OscPort> descendingIter_ = oscPorts.descendingIterator();
+		Iterator<OscComm> descendingIter_ = oscPorts.descendingIterator();
 		while (descendingIter_.hasNext())
 			removeAndDisconnectSerialPort(descendingIter_.next());
 		String log_ = "<OscPortManager>\tDisconnect all.";
 		System.out.println(log_);
 	}
 
-	private void removeAndDisconnectSerialPort(OscPort _oscPort) {
+	private void removeAndDisconnectSerialPort(OscComm _oscPort) {
 		if (_oscPort.containsListener(this))
 			_oscPort.removeListener(this);
 		_oscPort.disconnect();
@@ -56,23 +56,23 @@ public class OscPortManager implements OscCallback {
 		System.out.println(log_);
 	}
 
-	public LinkedList<OscPort> getOscPorts() {
+	public LinkedList<OscComm> getOscPorts() {
 		return oscPorts;
 	}
 
-	public LinkedList<OscPort> getTempOscPorts() {
+	public LinkedList<OscComm> getTempOscPorts() {
 		return tempOscPorts;
 	}
 
 	@Override
-	public void oscConnectionCallBack(OscPort _oscPort, boolean _isConnected) {
+	public void oscConnectionCallBack(OscComm _oscPort, boolean _isConnected) {
 		if (_isConnected)
 			addConnectedSerialPort(_oscPort);
 		else
 			removeAndDisconnectSerialPort(_oscPort);
 	}
 
-	private void addConnectedSerialPort(OscPort _oscPort) {
+	private void addConnectedSerialPort(OscComm _oscPort) {
 		String log_;
 		if (oscPorts.size() < targetOscPortsNum && _oscPort.isConnected() && !oscPorts.contains(_oscPort)) {
 			if (_oscPort.containsListener(this))
