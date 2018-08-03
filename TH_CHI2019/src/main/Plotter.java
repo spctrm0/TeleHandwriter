@@ -74,7 +74,7 @@ public class Plotter {
 	}
 
 	// -1:irrelevant, 0:home, 1:back, 2:paper
-	public static int getMovingToward(String _cmd) {
+	public static int movingToward(String _cmd) {
 		String penUpCmd_ = "M3S";
 		if (_cmd.contains(penUpCmd_)) {
 			String home_ = String.format("%04d", G.servoHover);

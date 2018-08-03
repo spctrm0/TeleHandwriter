@@ -1,8 +1,9 @@
-package main;
+package serial;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import main.G;
 import processing.core.PApplet;
 import processing.serial.Serial;
 

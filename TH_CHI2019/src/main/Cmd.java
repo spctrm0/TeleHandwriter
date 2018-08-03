@@ -3,9 +3,9 @@ package main;
 public class Cmd {
 
 	public void a() {
-		
+
 	}
-	
+
 	// M3S000000
 	// G4P000000
 	public String cmdBack() {

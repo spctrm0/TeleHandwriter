@@ -1,7 +1,10 @@
 package main;
 
+import oscP5.OscMessage;
 import processing.core.PApplet;
 import processing.serial.Serial;
+import serial.SerialPort;
+import serial.SerialPortManager;
 
 public class TH_CHI2019 extends PApplet {
 	SerialPortManager serialPortManager;
@@ -31,5 +34,9 @@ public class TH_CHI2019 extends PApplet {
 			PApplet.main(concat(appletArgs, passedArgs));
 		else
 			PApplet.main(appletArgs);
+	}
+	
+	public void oscEvent(OscMessage _oscMsg) {
+		_oscMsg.netAddress().address()
 	}
 }

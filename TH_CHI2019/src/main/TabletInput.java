@@ -13,7 +13,7 @@ public class TabletInput {
 	 * TODO
 	 * log function
 	 */
-	
+
 	public LinkedList<TabletCallback> listeners = null;
 
 	public void addListener(TabletCallback _listener) {
@@ -43,16 +43,20 @@ public class TabletInput {
 	private long[]	evtTimeInMsec	= { 0, 0 };
 	private int[]		type					= { 0, 0 };
 
+	private LinkedList<Point> points = null;
+
 	private int	numPoints					= 0;
 	private int	numStrokes				= 0;
 	private int	numPointsInStroke	= 0;
 
-	private boolean isActive = false;
+	private boolean	isActive		= false;
+	private boolean	isRealtime	= false;
 
 	public TabletInput(PApplet _p5) {
 		p5 = _p5;
 
 		tablet = new Tablet(p5);
+		points = new LinkedList<Point>();
 
 		activateTablet();
 	}
@@ -72,13 +76,17 @@ public class TabletInput {
 		numPoints = 0;
 		numStrokes = 0;
 		numPointsInStroke = 0;
+
+		points.clear();
 	}
 
 	public void activateTablet() {
 		boolean isChanged_ = !isActive;
 		isActive = true;
-		if (isChanged_)
+		if (isChanged_) {
+			init();
 			p5.registerMethod("mouseEvent", this);
+		}
 	}
 
 	public void deactivateTablet() {
@@ -92,11 +100,14 @@ public class TabletInput {
 		if (tablet.getPenKind() == Tablet.STYLUS) {
 			if (_mEvt.getAction() == MouseEvent.PRESS || _mEvt.getAction() == MouseEvent.DRAG
 					|| _mEvt.getAction() == MouseEvent.RELEASE) {
-				int pointType_ = 1; // Body
+				// Body
+				int pointType_ = 1;
+				// Head
 				if (_mEvt.getAction() == MouseEvent.PRESS)
-					pointType_ = 0; // Head
+					pointType_ = 0;
+				// Tail
 				else if (_mEvt.getAction() == MouseEvent.RELEASE)
-					pointType_ = 2; // Tail
+					pointType_ = 2;
 
 				x[bufferIdx] = tablet.getPenX();
 				y[bufferIdx] = tablet.getPenY();
@@ -108,18 +119,38 @@ public class TabletInput {
 
 				if (bufferIdx == 1) {
 					if (evtTimeInMsec[0] - evtTimeInMsec[1] != 0) {
-						if (type[0] == 0) { // MouseEvent.PRESS
+						// MouseEvent.PRESS
+						if (type[0] == 0) {
 							numStrokes++;
 							numPointsInStroke = 0;
 						}
-						countPointAndCallback();
+						countPoint();
+						if (isRealtime)
+							callback(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]);
+						else
+							points.add(new Point(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]));
 						shiftArry();
-						if (type[0] == 2) // MouseEvent.RELEASE
-							countPointAndCallback();
+						// MouseEvent.RELEASE
+						if (type[0] == 2) {
+							countPoint();
+							if (isRealtime)
+								callback(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]);
+							else {
+								points.add(new Point(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]));
+								a();
+							}
+						}
 					}
-					else if (type[1] == 2) { // MouseEvent.RELEASE
+					// MouseEvent.RELEASE
+					else if (type[1] == 2) {
 						shiftArry();
-						countPointAndCallback();
+						countPoint();
+						if (isRealtime)
+							callback(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]);
+						else {
+							points.add(new Point(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]));
+							a();
+						}
 					}
 				}
 
@@ -131,11 +162,29 @@ public class TabletInput {
 		}
 	}
 
-	private void countPointAndCallback() {
+	private void a() {
+		while (!points.isEmpty()) {
+			Point point_ = points.poll();
+			float x_ = point_.x;
+			float y_ = point_.y;
+			float pressure_ = point_.pressure;
+			float tiltX_ = point_.tiltX;
+			float tiltY_ = point_.tiltY;
+			long evtTimeInMsec_ = point_.evtTimeInMsec;
+			int type_ = point_.type;
+			callback(x_, y_, pressure_, tiltX_, tiltY_, evtTimeInMsec_, type_);
+		}
+	}
+
+	private void countPoint() {
 		numPointsInStroke++;
 		numPoints++;
+	}
+
+	private void callback(float _x, float _y, float _pressure, float _tiltX, float _tiltY, long _evtTimeInMsec,
+			int _type) {
 		for (TabletCallback listener_ : listeners)
-			listener_.tabletInputCallBack(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]);
+			listener_.tabletInputCallBack(_x, _y, _pressure, _tiltX, _tiltY, _evtTimeInMsec, _type);
 	}
 
 	private void shiftArry() {

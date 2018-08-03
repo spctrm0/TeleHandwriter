@@ -1,4 +1,4 @@
-package main;
+package serial;
 
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
@@ -53,32 +53,7 @@ public class SerialPort {
 	}
 
 	public void dispose() {
-		setConnected(false);
-	}
-
-	private void setConnected(boolean _isConnected) {
-		boolean isChanged_ = _isConnected != isConnected;
-		isConnected = _isConnected;
-		String log_;
-		if (isConnected && isChanged_) {
-			for (SerialCallback listener_ : listeners)
-				listener_.serialConnectionCallBack(this, true);
-			log_ = "<SerialPort>\tConnected with " + "[" + portIdx + "] " + portName + ".";
-			System.out.println(log_);
-		}
-		else if (!isConnected) {
-			if (serial != null) {
-				serial.clear();
-				serial.stop();
-				serial = null;
-			}
-			if (isChanged_) {
-				for (SerialCallback listener_ : listeners)
-					listener_.serialConnectionCallBack(this, false);
-				log_ = "<SerialPort>\tDisconnected with " + "[" + portIdx + "] " + portName + ".";
-				System.out.println(log_);
-			}
-		}
+		disconnect();
 	}
 
 	public Serial getSerial() {
@@ -93,12 +68,10 @@ public class SerialPort {
 		return portName;
 	}
 
-	private void setLastConnectionAttemptInUsec() {
-		lastConnectionAttemptInUsec = System.nanoTime();
-	}
-
-	public long getElapsedTimeSinceLastConnectionAttemptInMsec() {
-		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastConnectionAttemptInUsec);
+	public void setPortIdx(int _portIdx) {
+		portIdx = _portIdx;
+		portName = Serial.list()[portIdx];
+		disconnect();
 	}
 
 	public boolean isConnected() {
@@ -114,6 +87,7 @@ public class SerialPort {
 		parity = _parity;
 		dataBits = _dataBits;
 		stopBits = _stopBits;
+		disconnect();
 	}
 
 	public void setDelimeter(char _delimeter) {
@@ -121,11 +95,13 @@ public class SerialPort {
 	}
 
 	public void tryConnectWithPort(int _portIdx) {
-		setConnected(false);
+		setPortIdx(_portIdx);
+		tryConnect();
+	}
+
+	public void tryConnect() {
 		String log_;
 		try {
-			portIdx = _portIdx;
-			portName = Serial.list()[portIdx];
 			serial = new Serial(p5, portName, baudRate, parity, dataBits, stopBits);
 			log_ = "<SerialPort>\tTry to connect with " + "[" + portIdx + "] " + portName + ".";
 		}
@@ -136,17 +112,21 @@ public class SerialPort {
 		System.out.println(log_);
 	}
 
-	public void disconnect() {
-		setConnected(false);
+	public long getElapsedTimeSinceLastConnectionAttemptInMsec() {
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastConnectionAttemptInUsec);
 	}
 
-	public void charToStringAndCallback(char _char) {
+	public void disconnect() {
+		setConnected(false, false);
+	}
+
+	public void readAndCallback(char _char) {
 		if (_char != delimeter)
 			charToStrBfr.append(_char);
 		else {
 			String msg_ = charToStrBfr.toString().trim();
 			if (!isConnected && msg_.equals(connectionChkMsg))
-				setConnected(true);
+				setConnected(true, false);
 			for (SerialCallback listener_ : listeners)
 				listener_.serialMsgCallBack(msg_);
 			charToStrBfr.setLength(0);
@@ -155,5 +135,32 @@ public class SerialPort {
 
 	public void write(String _msg) {
 		serial.write(_msg);
+	}
+
+	private void setConnected(boolean _isConnected, boolean _forced) {
+		boolean isChanged_ = _isConnected != isConnected;
+		isConnected = _isConnected;
+		String log_;
+		if (isConnected && isChanged_) {
+			for (SerialCallback listener_ : listeners)
+				listener_.serialConnectionCallBack(this, true);
+			log_ = "<SerialPort>\tConnected with " + "[" + portIdx + "] " + portName + ".";
+			System.out.println(log_);
+		}
+		else if (!isConnected && (isChanged_ || _forced)) {
+			if (serial != null) {
+				serial.clear();
+				serial.stop();
+				serial = null;
+			}
+			for (SerialCallback listener_ : listeners)
+				listener_.serialConnectionCallBack(this, false);
+			log_ = "<SerialPort>\tDisconnected with " + "[" + portIdx + "] " + portName + ".";
+			System.out.println(log_);
+		}
+	}
+
+	private void setLastConnectionAttemptInUsec() {
+		lastConnectionAttemptInUsec = System.nanoTime();
 	}
 }
