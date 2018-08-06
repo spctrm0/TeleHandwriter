@@ -48,8 +48,6 @@ public class SerialPort {
 
 		listeners = new LinkedList<SerialCallback>();
 		charToStrBfr = new StringBuilder();
-
-		p5.registerMethod("dispose", this);
 	}
 
 	public void dispose() {
@@ -78,20 +76,21 @@ public class SerialPort {
 		return isConnected;
 	}
 
-	public String getSerialPortProperties() {
-		return baudRate + "\t" + parity + "\t" + dataBits + "\t" + stopBits;
-	}
-
 	public void setSerialPortProperties(int _baudRate, char _parity, int _dataBits, float _stopBits) {
 		baudRate = _baudRate;
 		parity = _parity;
 		dataBits = _dataBits;
 		stopBits = _stopBits;
 		disconnect();
+		String log_ = "<" + getClass().getName() + ">\tSet serial port properties to " + baudRate + ", " + parity + ", "
+				+ dataBits + ", " + stopBits + ".";
+		System.out.println(log_);
 	}
 
 	public void setDelimeter(char _delimeter) {
 		delimeter = _delimeter;
+		String log_ = "<" + getClass().getName() + ">\tSet delimeter to \"" + delimeter + "\".";
+		System.out.println(log_);
 	}
 
 	public void tryConnectWithPort(int _portIdx) {
@@ -103,17 +102,21 @@ public class SerialPort {
 		String log_;
 		try {
 			serial = new Serial(p5, portName, baudRate, parity, dataBits, stopBits);
-			log_ = "<SerialPort>\tTry to connect with " + "[" + portIdx + "] " + portName + ".";
+			log_ = "<" + getClass().getName() + ">\tTry to connect with " + "[" + portIdx + "] " + portName + ".";
 		}
 		catch (Exception e) {
-			log_ = "<SerialPort>\t" + e.toString() + ".";
+			log_ = "<" + getClass().getName() + ">\t" + e.toString() + ".";
 		}
 		setLastConnectionAttemptInUsec();
 		System.out.println(log_);
 	}
 
 	public void disconnect() {
-		setConnected(false, false);
+		setConnected(false);
+	}
+
+	public void write(String _msg) {
+		serial.write(_msg);
 	}
 
 	public void readAndCallback(char _char) {
@@ -122,28 +125,32 @@ public class SerialPort {
 		else {
 			String msg_ = charToStrBfr.toString().trim();
 			if (!isConnected && msg_.equals(connectionChkMsg))
-				setConnected(true, false);
+				setConnected(true);
 			for (SerialCallback listener_ : listeners)
 				listener_.serialMsgCallBack(msg_);
 			charToStrBfr.setLength(0);
 		}
 	}
 
-	public void write(String _msg) {
-		serial.write(_msg);
+	public long getElapsedTimeSinceLastConnectionAttemptInMsec() {
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastConnectionAttemptInUsec);
 	}
 
-	private void setConnected(boolean _isConnected, boolean _forced) {
+	private void setLastConnectionAttemptInUsec() {
+		lastConnectionAttemptInUsec = System.nanoTime();
+	}
+
+	private void setConnected(boolean _isConnected) {
 		boolean isChanged_ = _isConnected != isConnected;
 		isConnected = _isConnected;
 		String log_;
 		if (isConnected && isChanged_) {
+			log_ = "<" + getClass().getName() + ">\tConnected with " + "[" + portIdx + "] " + portName + ".";
+			System.out.println(log_);
 			for (SerialCallback listener_ : listeners)
 				listener_.serialConnectionCallBack(this, true);
-			log_ = "<SerialPort>\tConnected with " + "[" + portIdx + "] " + portName + ".";
-			System.out.println(log_);
 		}
-		else if (!isConnected && (isChanged_ || _forced)) {
+		else if (!isConnected && isChanged_) {
 			if (serial != null) {
 				serial.clear();
 				serial.stop();
@@ -151,16 +158,8 @@ public class SerialPort {
 			}
 			for (SerialCallback listener_ : listeners)
 				listener_.serialConnectionCallBack(this, false);
-			log_ = "<SerialPort>\tDisconnected with " + "[" + portIdx + "] " + portName + ".";
+			log_ = "<" + getClass().getName() + ">\tDisconnected with " + "[" + portIdx + "] " + portName + ".";
 			System.out.println(log_);
 		}
-	}
-
-	private void setLastConnectionAttemptInUsec() {
-		lastConnectionAttemptInUsec = System.nanoTime();
-	}
-
-	public long getElapsedTimeSinceLastConnectionAttemptInMsec() {
-		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastConnectionAttemptInUsec);
 	}
 }

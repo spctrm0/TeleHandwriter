@@ -1,5 +1,7 @@
 package main;
 
+import cnc.GrblComm;
+import osc.OscComm;
 import oscP5.OscMessage;
 import processing.core.PApplet;
 import processing.serial.Serial;
@@ -7,8 +9,9 @@ import serial.SerialPort;
 import serial.SerialPortManager;
 
 public class TH_CHI2019 extends PApplet {
-	SerialPortManager serialPortManager;
-	GrblComm grbl;
+	SerialPortManager	serialPortManager;
+	GrblComm					grbl;
+	OscComm						oscComm;
 
 	public void settings() {
 		// fullScreen();
@@ -21,11 +24,11 @@ public class TH_CHI2019 extends PApplet {
 
 	public void serialEvent(Serial _serial) {
 		if (serialPortManager.getTempSerialPort() != null)
-			serialPortManager.getTempSerialPort().charToStringAndCallback(_serial.readChar());
+			serialPortManager.getTempSerialPort().readAndCallback(_serial.readChar());
 		else
 			for (SerialPort serialPort_ : serialPortManager.getSerialPorts())
 				if (_serial == serialPort_.getSerial())
-					serialPort_.charToStringAndCallback(_serial.readChar());
+					serialPort_.readAndCallback(_serial.readChar());
 	}
 
 	static public void main(String[] passedArgs) {
@@ -35,8 +38,8 @@ public class TH_CHI2019 extends PApplet {
 		else
 			PApplet.main(appletArgs);
 	}
-	
+
 	public void oscEvent(OscMessage _oscMsg) {
-		_oscMsg.netAddress().address()
+		oscComm.distributeToEachOscTarget(_oscMsg);
 	}
 }

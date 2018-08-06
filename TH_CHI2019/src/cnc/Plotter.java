@@ -1,6 +1,8 @@
-package main;
+package cnc;
 
 import java.util.concurrent.TimeUnit;
+
+import main.G;
 
 public class Plotter {
 

@@ -1,7 +1,7 @@
-package main;
+package tablet;
 
 public class Point {
-	
+
 	public float	x;
 	public float	y;
 	public float	pressure;

@@ -7,6 +7,11 @@ import oscP5.OscP5;
 import oscP5.OscProperties;
 import processing.core.PApplet;
 
+// Code below is required to work.
+// public void oscEvent(OscMessage _oscMsg) {
+// <OscComm>.distributeToEachOscTarget(_oscMsg);
+// }
+
 public class OscComm {
 
 	private PApplet p5 = null;
@@ -38,6 +43,7 @@ public class OscComm {
 
 	public void dispose() {
 		disconnectAll();
+		oscP5.stop();
 	}
 
 	public OscP5 getOscP5() {
@@ -53,14 +59,18 @@ public class OscComm {
 	}
 
 	public void setAddr(int _port) {
+		String log_;
 		disconnectAll();
+		oscP5.stop();
+		log_ = "<" + getClass().getName() + ">\tSet to" + ip + ":" + port + " is closed.";
+		System.out.println(log_);
 		port = _port;
 		OscProperties op_ = new OscProperties();
 		op_.setListeningPort(port);
 		op_.setDatagramSize(datagramSize);
 		oscP5 = new OscP5(p5, op_);
 		ip = oscP5.ip();
-		String log_ = "<" + getClass().getName() + ">\tSet to" + ip + ":" + port + ".";
+		log_ = "<" + getClass().getName() + ">\tSet to" + ip + ":" + port + " is opened.";
 		System.out.println(log_);
 	}
 

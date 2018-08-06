@@ -54,14 +54,12 @@ public class OscTarget {
 		ip = _ip;
 		port = _port;
 		addr = new NetAddress(ip, port);
-		String log_ = "<" + getClass().getName() + ">\t" + ip + ":" + port + " is created.";
-		System.out.println(log_);
 	}
 
 	public void pre() {
 		if (getElapsedTimeSinceLastConnectionAttemptInMsec() >= connectionAttemptIntervalInMSec) {
 			sendOscConnectionMsg(prefixConnectionSyn);
-			String log_ = "<" + getClass().getName() + ">\tSend (Syn) Msg to " + ip + ":" + port + ".";
+			String log_ = "<" + getClass().getName() + ">\tSend \"Syn\" msg to " + ip + ":" + port + ".";
 			System.out.println(log_);
 			setLastConnectionAttemptInUsec();
 		}
@@ -84,8 +82,6 @@ public class OscTarget {
 		port = _port;
 		disconnect();
 		addr = new NetAddress(ip, port);
-		String log_ = "<" + getClass().getName() + ">\tSet to" + ip + ":" + port + ".";
-		System.out.println(log_);
 	}
 
 	public boolean isConnected() {
@@ -119,21 +115,21 @@ public class OscTarget {
 				|| _oscMsg.addrPattern().equals(prefixConnectionAck) || _oscMsg.addrPattern().equals(prefixDisconnect)) {
 			String log_;
 			if (_oscMsg.addrPattern().equals(prefixDisconnect)) {
-				log_ = "<" + getClass().getName() + ">\tGot a disconnect msg from " + ip + ":" + port + ".\n";
+				log_ = "<" + getClass().getName() + ">\tGot a disconnect msg from " + ip + ":" + port + ".";
 				System.out.println(log_);
 				setConnected(false);
 			}
 			else if (!isConnected) {
 				if (_oscMsg.addrPattern().equals(prefixConnectionSyn)) {
-					log_ = "<" + getClass().getName() + ">\tGot a \"Syn\" msg from " + ip + ":" + port + ".\n";
+					log_ = "<" + getClass().getName() + ">\tGot a \"Syn\" msg from " + ip + ":" + port + ".";
 					System.out.println(log_);
 					deactivateSendSynMsgPeriodically();
 					sendOscConnectionMsg(prefixConnectionSynAck);
-					log_ = "<" + getClass().getName() + ">\tSend back \"Syn + Ack\" msg to " + ip + ":" + port + ".";
+					log_ = "<" + getClass().getName() + ">\tSend back \"Syn+Ack\" msg to " + ip + ":" + port + ".";
 					System.out.println(log_);
 				}
 				else if (_oscMsg.addrPattern().equals(prefixConnectionSynAck)) {
-					log_ = "<" + getClass().getName() + ">\tGot a \"Syn + Ack\" msg from " + ip + ":" + port + ".\n";
+					log_ = "<" + getClass().getName() + ">\tGot a \"Syn+Ack\" msg from " + ip + ":" + port + ".";
 					System.out.println(log_);
 					deactivateSendSynMsgPeriodically();
 					sendOscConnectionMsg(prefixConnectionAck);
@@ -142,7 +138,7 @@ public class OscTarget {
 					setConnected(true);
 				}
 				else if (!isConnected && _oscMsg.addrPattern().equals(prefixConnectionAck)) {
-					log_ = "<" + getClass().getName() + ">\tGot a \"Ack\" msg from " + ip + ":" + port + ".\n";
+					log_ = "<" + getClass().getName() + ">\tGot a \"Ack\" msg from " + ip + ":" + port + ".";
 					System.out.println(log_);
 					setConnected(true);
 				}

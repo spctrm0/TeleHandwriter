@@ -1,4 +1,4 @@
-package main;
+package tablet;
 
 import java.util.LinkedList;
 
@@ -61,25 +61,6 @@ public class TabletInput {
 		activateTablet();
 	}
 
-	public void init() {
-		bufferIdx = 0;
-		x[1] = 0;
-		y[1] = 0;
-		pressure[1] = 0;
-		tiltX[1] = 0;
-		tiltY[1] = 0;
-		evtTimeInMsec[1] = 0;
-		type[1] = 0;
-
-		shiftArry();
-
-		numPoints = 0;
-		numStrokes = 0;
-		numPointsInStroke = 0;
-
-		points.clear();
-	}
-
 	public void activateTablet() {
 		boolean isChanged_ = !isActive;
 		isActive = true;
@@ -137,7 +118,7 @@ public class TabletInput {
 								callback(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]);
 							else {
 								points.add(new Point(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]));
-								a();
+								callbackAll();
 							}
 						}
 					}
@@ -149,11 +130,10 @@ public class TabletInput {
 							callback(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]);
 						else {
 							points.add(new Point(x[0], y[0], pressure[0], tiltX[0], tiltY[0], evtTimeInMsec[0], type[0]));
-							a();
+							callbackAll();
 						}
 					}
 				}
-
 				if (type[0] == 0)
 					bufferIdx = 1;
 				else if (type[0] == 2)
@@ -162,18 +142,33 @@ public class TabletInput {
 		}
 	}
 
-	private void a() {
-		while (!points.isEmpty()) {
-			Point point_ = points.poll();
-			float x_ = point_.x;
-			float y_ = point_.y;
-			float pressure_ = point_.pressure;
-			float tiltX_ = point_.tiltX;
-			float tiltY_ = point_.tiltY;
-			long evtTimeInMsec_ = point_.evtTimeInMsec;
-			int type_ = point_.type;
-			callback(x_, y_, pressure_, tiltX_, tiltY_, evtTimeInMsec_, type_);
-		}
+	private void init() {
+		bufferIdx = 0;
+		x[1] = 0;
+		y[1] = 0;
+		pressure[1] = 0;
+		tiltX[1] = 0;
+		tiltY[1] = 0;
+		evtTimeInMsec[1] = 0;
+		type[1] = 0;
+
+		shiftArry();
+
+		numPoints = 0;
+		numStrokes = 0;
+		numPointsInStroke = 0;
+
+		points.clear();
+	}
+
+	private void shiftArry() {
+		x[0] = x[1];
+		y[0] = y[1];
+		pressure[0] = pressure[1];
+		tiltX[0] = tiltX[1];
+		tiltY[0] = tiltY[1];
+		evtTimeInMsec[0] = evtTimeInMsec[1];
+		type[0] = type[1];
 	}
 
 	private void countPoint() {
@@ -187,13 +182,17 @@ public class TabletInput {
 			listener_.tabletInputCallBack(_x, _y, _pressure, _tiltX, _tiltY, _evtTimeInMsec, _type);
 	}
 
-	private void shiftArry() {
-		x[0] = x[1];
-		y[0] = y[1];
-		pressure[0] = pressure[1];
-		tiltX[0] = tiltX[1];
-		tiltY[0] = tiltY[1];
-		evtTimeInMsec[0] = evtTimeInMsec[1];
-		type[0] = type[1];
+	private void callbackAll() {
+		while (!points.isEmpty()) {
+			Point point_ = points.poll();
+			float x_ = point_.x;
+			float y_ = point_.y;
+			float pressure_ = point_.pressure;
+			float tiltX_ = point_.tiltX;
+			float tiltY_ = point_.tiltY;
+			long evtTimeInMsec_ = point_.evtTimeInMsec;
+			int type_ = point_.type;
+			callback(x_, y_, pressure_, tiltX_, tiltY_, evtTimeInMsec_, type_);
+		}
 	}
 }

@@ -1,4 +1,6 @@
-package main;
+package cnc;
+
+import main.G;
 
 public class Cmd {
 
