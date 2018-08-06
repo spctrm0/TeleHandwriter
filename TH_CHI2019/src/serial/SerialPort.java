@@ -112,10 +112,6 @@ public class SerialPort {
 		System.out.println(log_);
 	}
 
-	public long getElapsedTimeSinceLastConnectionAttemptInMsec() {
-		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastConnectionAttemptInUsec);
-	}
-
 	public void disconnect() {
 		setConnected(false, false);
 	}
@@ -162,5 +158,9 @@ public class SerialPort {
 
 	private void setLastConnectionAttemptInUsec() {
 		lastConnectionAttemptInUsec = System.nanoTime();
+	}
+
+	public long getElapsedTimeSinceLastConnectionAttemptInMsec() {
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastConnectionAttemptInUsec);
 	}
 }

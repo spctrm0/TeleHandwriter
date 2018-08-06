@@ -7,6 +7,18 @@ import main.G;
 import processing.core.PApplet;
 import processing.serial.Serial;
 
+/*
+ * Codes below are needed to be work
+ * public void serialEvent(Serial _serial) {
+ * if (serialPortManager.getTempSerialPort() != null)
+ * serialPortManager.getTempSerialPort().readAndCallback(_serial.readChar());
+ * else
+ * for (SerialPort serialPort_ : serialPortManager.getSerialPorts())
+ * if (_serial == serialPort_.getSerial())
+ * serialPort_.readAndCallback(_serial.readChar());
+ * }
+ */
+
 public class SerialPortManager implements SerialCallback {
 
 	private PApplet p5 = null;
